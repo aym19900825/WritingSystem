@@ -8,8 +8,12 @@ import App from './App'
 import router from './router'
 import store from './vuex'
 
+import tinymce from 'vue-tinymce-editor'
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+
+Vue.component('tinymce', tinymce)
 
 
 /* eslint-disable no-new */

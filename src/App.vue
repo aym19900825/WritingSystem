@@ -1,10 +1,6 @@
 <template>
   <div id="app">
     <el-container>
-      <el-header class="header" height="100px">
-        <h3>writing system</h3>
-        <p>login module</p>
-      </el-header>
       <el-main>
         <router-view/>
       </el-main>
