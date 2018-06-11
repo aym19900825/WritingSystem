@@ -3,12 +3,17 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import $ from 'jquery'
 
 import App from './App'
 import router from './router'
 import store from './vuex'
 
 import tinymce from 'vue-tinymce-editor'
+import './axios'
+
+import './assets/reset.css'
+
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)

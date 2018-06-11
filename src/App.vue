@@ -10,7 +10,10 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  created() {
+    this.$router.push('/login');
+  }
 }
 </script>
 
@@ -21,6 +24,15 @@ export default {
   }
   .header h3,p{
     text-align:center;
+  }
+  #app{
+    background: url(./assets/bg-pattern.png) repeat;
+    height: 630px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .el-main{
+    padding-top: 10px;
   }
 </style>
     

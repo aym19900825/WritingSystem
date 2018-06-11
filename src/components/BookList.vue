@@ -66,7 +66,7 @@
                 })
             },
             edit () {
-                this.$router.replace('/edit')
+                this.$router.replace('/')
             }
         },
         computed: {
