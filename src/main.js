@@ -4,6 +4,7 @@ import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import $ from 'jquery'
+import * as d3 from 'd3';
 
 import App from './App'
 import router from './router'
@@ -13,6 +14,8 @@ import tinymce from 'vue-tinymce-editor'
 import './axios'
 
 import './assets/reset.css'
+
+
 
 
 Vue.config.productionTip = false

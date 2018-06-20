@@ -9,11 +9,13 @@
 </template>
 
 <script>
+import topNav from '@/components/common/TopNav'
 export default {
   name: 'App',
-  created() {
-    this.$router.push('/login');
-  }
+  components:{
+    topNav
+  },
+ 
 }
 </script>
 
@@ -27,12 +29,11 @@ export default {
   }
   #app{
     background: url(./assets/bg-pattern.png) repeat;
-    height: 630px;
     width: 100%;
-    overflow: hidden;
   }
   .el-main{
     padding-top: 10px;
+    min-height: 650px;
   }
 </style>
     

@@ -5,7 +5,7 @@
              <el-input type="text" v-model="newUser.name"></el-input>
         </el-form-item>
         <el-form-item label="电话" prop="phoneNum">
-             <el-input type="text" v-model="newUser.phoneNum"></el-input>
+            <el-input type="text" v-model="newUser.phoneNum"></el-input>
         </el-form-item>
         <el-form-item label="性别" prop="sex">
             <el-radio-group v-model="newUser.sex">
@@ -30,7 +30,42 @@
     export default {
         name: 'Register',
         methods: {
-            
+            register() {
+                this.$refs.registerForm.validate((valid) => {
+                    if (valid) {
+                        this.$axios.post('/api/api/register',{
+                            username: this.newUser.name,
+                            password: this.newUser.pass
+                        }).then((res) => {
+                            if (res.data.code==1) {
+                                this.$confirm('您已经注册成功！', '提示', {
+                                        confirmButtonText: '确定',
+                                    }).then(({ value }) => {
+                                        this.$router.replace('/login');
+                                    }).catch(() => {
+                                
+                                });
+                    
+                            }else {
+                                this.$message({
+                                    type: 'error',
+                                    message: '用户名已经存在',
+                                    showClose: true
+                                })
+                            }
+                        }).catch((err) => {
+                            this.$message({
+                                type: 'error',
+                                message: '网络错误，请重试',
+                                showClose: true
+                            })
+                        })
+                    }
+                    else {
+                        return false
+                    }
+                })
+            }
         },
         data () {
             var checkPhone = (rule, value, callback) => {

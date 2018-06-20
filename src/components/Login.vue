@@ -15,7 +15,6 @@
 </template>
 
 <script>
-    import qs from 'qs'
     export default {
         name: 'Login',
         methods: {
@@ -28,11 +27,6 @@
                         } ).then((res) => {
                             if (res.data.code==1) {
                                 this.$store.dispatch('login', res.data).then(() => {
-                                    this.$notify({
-                                        type: 'success',
-                                        message: '欢迎你,' + res.data.name + '!',
-                                        duration: 3000
-                                    })
                                     this.$router.replace('/edit');
                                 })
                             }else {
