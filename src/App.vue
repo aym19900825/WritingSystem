@@ -15,7 +15,9 @@ export default {
   components:{
     topNav
   },
- 
+  created () {
+    this.$router.push('/login'); // 页面加载时跳转
+  }
 }
 </script>
 

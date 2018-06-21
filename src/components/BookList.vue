@@ -1,6 +1,7 @@
 <template>
     <div class="bookList">
         <template>
+            <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
             <h4 class="bookTit">我的作品</h4>
             <el-row class="bookFront">    
                 <span>当前作品共</span><span>{{books.length}}</span><span>个</span>
@@ -14,6 +15,7 @@
                  <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button size="mini" @click="addChapter(scope.$index, scope.row)">增加新的章节</el-button>
+                        <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
                         <el-button size="mini" type="danger" @click="readBook(scope.$index, scope.row)">编辑图书信息</el-button>
                         <el-button size="mini" type="danger" @click="bookDirect(scope.$index, scope.row)">查看目录</el-button>
                     </template>
@@ -104,12 +106,30 @@
             }
         },
         methods: {
+            returnPre(){
+                sessionStorage.setItem('url','login');
+                this.$router.push({
+                    path: '/edit', 
+                    name: 'Edit',
+                })
+            },
+            readStory(index,row){
+                this.$router.push({
+                    path: '/story', 
+                    name: 'Story',
+                    query: { 
+                        bookid: row.bookid,
+                    }
+                })
+            },
             edit(item) {
+                sessionStorage.setItem('url','booklist');
                 this.$router.push({
                     path: '/edit', 
                     name: 'Edit',
                     query: { 
                         bookid: item.bookid,
+                        bookname: item.bookname,
                         isNew: true
                     }
                 })
@@ -164,6 +184,7 @@
                 })
             },
             addChapter(index,row){
+                sessionStorage.setItem('url','booklist');
                 this.$router.push({
                     path: '/edit', 
                     name: 'Edit',
@@ -208,8 +229,13 @@
                     if (res.data) {
                         this.doingWorks  = res.data.books["0"];
                         this.doneWorks  = res.data.books["1"];
-                        this.books = res.data.books["0"].concat(res.data.books["1"]);
-                        console.log(books);
+                        if(this.doneWorks ==undefined){
+                            this.books = res.data.books["0"];
+                        }else if(this.doingWorks ==undefined){
+                            this.books = res.data.books["1"];
+                        }else{
+                            this.books = res.data.books["1"].concat(res.data.books["0"]);
+                        }
                     }else {
                         this.$message({
                             type: 'error',
@@ -303,6 +329,9 @@
   }
   table.el-table__body tbody tr td:nth-child(1){
     cursor: pointer;
+  }
+  .returnPre{
+    float: left;
   }
 </style>
 

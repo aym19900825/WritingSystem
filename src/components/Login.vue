@@ -21,12 +21,13 @@
             login() {
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
-                        this.$axios.post('/api/api/login',{
+                        this.$axios.post('http://192.168.1.168:8888/api/login',{
                             username: this.user.name,
                             password: this.user.pass
                         } ).then((res) => {
                             if (res.data.code==1) {
                                 this.$store.dispatch('login', res.data).then(() => {
+                                    sessionStorage.setItem('url','login');
                                     this.$router.replace('/edit');
                                 })
                             }else {

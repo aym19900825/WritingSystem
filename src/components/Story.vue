@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div class="main">
+        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回图书列表</el-button>
         <el-steps :active="active" finish-status="success">
             <el-step title="故事大纲"></el-step>
             <el-step title="人物设定"></el-step>
@@ -66,7 +67,7 @@
         <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible"  append-to-body>
             <P class="congratulation" v-show="!updateBook">恭喜您！创建成功！</P>
             <P class="congratulation" v-show="updateBook">恭喜您！更新成功！</P>
-            <el-button type="primary" @click="returnEdit" style="margin-left: 130px;margin-top: 20px;">上传章节</el-button>
+            <el-button type="primary" @click="returnEdit" style="margin-left: 130px;margin-top: 20px;">返回编辑章节</el-button>
         </el-dialog>
     </div>
 </template>
@@ -76,6 +77,9 @@
     export default {
         name: 'Story',
         methods: {
+            returnPre(){
+                this.$router.replace('/booklist');
+            },
             getParams () {
                 let bookid = this.$route.query.bookid;
                 this.bookid = bookid;
@@ -251,5 +255,9 @@
     padding-bottom: 10px;
     padding-left: 5px;
     padding-right: 5px;
+}
+.main{
+    width: 85%;
+    margin: 0 auto;
 }
 </style>

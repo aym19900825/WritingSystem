@@ -1,5 +1,6 @@
 <template>
     <div>
+        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
         <h2>{{bookname}}</h2>
         <h3>目录</h3>
         <el-table :data="tableData" border style="width: 100%">
@@ -34,6 +35,14 @@
         name: 'BookDirectory',
         methods: {
 
+            returnPre(){
+                sessionStorage.setItem('url','login');
+                this.$router.push({
+                    path: '/edit', 
+                    name: 'Edit',
+                })
+            },
+
             //加载数据
             loadData(pageNum, pageSize){                    
                 alert("数据加载中...");       
@@ -53,12 +62,14 @@
 
             //编辑
             handleEdit(index,row){
+                sessionStorage.setItem('url','bookdirectory');
                 this.$router.push({
                     path: '/edit', 
                     name: 'Edit',
                     query: { 
                         eid: row.eid,
                         bookid: row.bookid,
+                        bookname: row.bookname,
                         isNew: false
                     }
                 })
@@ -146,5 +157,8 @@ h3{
     height: 32px;
     line-height: 32px;
     color: #666;
+}
+.returnPre{
+    float: left;
 }
 </style>

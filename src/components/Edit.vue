@@ -1,35 +1,45 @@
 <template>
     <div class="app-container">
         <el-row :gutter="20">
-          <el-col :span="8">
-            <label v-model="chapterOrder">{{chapterOrder}}</label>
-            <input type="text" class="titInput" v-model="chaptername" readOnly @click="editTit" v-on:blur.lazy="titSave"/>
-          </el-col>
-          <el-col :span="16">
+          <el-col :span="16" :offset="8">
+            <el-button type="primary" plain class="left" size="small" @click="logout">退出</el-button>
             <el-button type="primary" plain class="left" size="small">人物图谱</el-button>
             <el-button type="primary" plain class="left" size="small">事件图谱</el-button>
             <el-button type="primary" plain class="left" size="small" @click="d3show">小说人物图谱</el-button>
             <el-button type="primary" plain class="left" size="small">小说事件图谱</el-button>
             <el-button type="primary" plain class="left" size="small" @click="bookDirectory">查看目录</el-button>
             <el-button type="primary" plain class="left" size="small" @click="changeBook">切换图书</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="readStory">故事大纲</el-button>
+            <el-button type="primary" plain class="left" size="small" @click="setTimeSave">zidongbaocun</el-button>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-col :span="4">
-            <span class="tip">内容摘要：</span>
-            <textarea name="content" rows="35" class="input_textarea" id="contentTip" readonly v-on:dblclick="editContent" v-on:blur.lazy="tipSave" v-model="chapterabstract"></textarea>
-          </el-col>
-          <el-col :span="20">
-            <el-button size="medium" class="bigBtn" @click="newContent">+</el-button>
-            <tinymce id="d2" :other_options="options1" class="tinyBtm">
-            </tinymce>
-            <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
-            <el-button size="medium" class="newChBtn" @click="finishSave">完成</el-button>
-            <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
-            <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
-          </el-col>
-        </el-row>
+        <div class="main">
+          <h4 class="bookname">{{bookname}}</h4>
+          <el-row :gutter="20" class="chaptetit">
+            <el-col :span="24">
+              <label>章节名称:</label>
+              <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
+            </el-col>
+          </el-row> 
+          <el-row :gutter="20">
+            <el-col :span="24">
+              <label>章节大纲:</label>
+              <textarea name="content" :autosize="{minRows:1}" class="input_textarea" id="contentTip" v-model="chapterabstract" placeholder="请输入章节大纲"></textarea>
+            </el-col>
+          </el-row> 
+          <el-row :gutter="20">
+            <el-col :span="24">
+              <!--
+              <el-button size="medium" class="bigBtn" @click="newContent">+</el-button>
+              -->
+              <tinymce id="d2" :other_options="options1" class="tinyBtm">
+              </tinymce>
+              <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
+              <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
+              <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
+              <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
+            </el-col>
+          </el-row>
+        </div>  
     </div>
 </template>
 
@@ -46,7 +56,7 @@ export default{
             eid:'',            
             options1: {
               language_url: '../../static/tinymce/zh_CN.js',
-              height: 400,
+              height: 500,
               menubar: false
             },
 
@@ -54,7 +64,8 @@ export default{
 
             isNewChapter: false,
 
-            autoContent: "<p>夕阳西下，彩霞满天。</p><p>何以琛站在十楼办公室的落地窗前，奇怪自己怎么会有了欣赏夕阳的心情。</p><p>也许，因为她回来了。</p><p>美婷推开门，就看到何律师背对着她站在窗前，手里夹着烟，一身落寞的样子……落寞？美婷简直怀疑自己的眼睛了，这个词能用在从来都是自信沉着的何律师身上吗？</p><p>以琛听到开门声，转过身问：“什么事？”</p><p>“哦。”美婷这才从自己的迷思中惊醒，快速地说，“何律师，红远公司的张副总来了。”</p><p>“请他进来。”以琛收起杂乱的思绪，全身心地投入到工作中去。瞥了一眼壁上的钟——五点，她还没来。</p><p>好不容易送走了张副总，以琛疲惫地靠在椅子上闭目养神，猛的一只巨掌拍下来，以琛无奈地睁开眼：“老袁。”</p>",
+            autoContent: "<p>夕阳西下，彩霞满天。何以琛站在十楼办公室的落地窗前，奇怪自己怎么会有了欣赏夕阳的心情。也许，因为她回来了。美婷推开门，就看到何律师背对着她站在窗前，手里夹着烟，一身落寞的样子……落寞？美婷简直怀疑自己的眼睛了，这个词能用在从来都是自信沉着的何律师身上吗？以琛听到开门声，转过身问：“什么事？”“哦。”美婷这才从自己的迷思中惊醒，快速地说，“何律师，红远公司的张副总来了。“请他进来。”以琛收起杂乱的思绪，全身心地投入到工作中去。瞥了一眼壁上的钟——五点，她还没来。好不容易送走了张副总，以琛疲惫地靠在椅子上闭目养神，猛的一只巨掌拍下来，以琛无奈地睁开眼：“老袁。”</p>",
+
             chapterOrder: '',
             chaptername: '',
             chapterabstract: '',
@@ -63,54 +74,28 @@ export default{
         }
     },
     methods: {
+      logout () {
+          this.$store.dispatch('logout').then(() => {
+              this.$router.replace('/login')
+          })
+      },
       setTimeSave(){
         var data = {};
         var self = this;
-        if(this.eid==" "){
-          data = self.addChapter();
-          alert(data.eid);
-          this.eid = data.eid;
+        console.log(this.eid);
+        if(this.eid==""||this.eid==undefined){
+          data = self.addChapter("自动保存成功","自动保存失败");
         }else{
-          data = self.updateChapter();
+          self.updateChapter("自动保存成功","自动保存失败");
         }
-        alert(data);
-        if(data.code==1) {
-            this.$message({
-              type: 'success',
-              message: '自动保存成功',
-              showClose: true
-            })                
-        }else{
-            this.$message({
-              type: 'error',
-              message: '自动保存失败',
-              showClose: true
-            })  
-        }
+       
       },
-      finishSave(){
+      currentEidSave(){
         this.$axios.post('/api/api/work/save',{
-            "chaptername": this.chaptername,
-            "chapterabstract": this.chapterabstract,
-            "chaptercontent": this.chaptercontent,
-            "chapterversion": "{}",
-            "bookid": this.bookid,
             "eid": this.eid,
-            "chapterfinish": 1
+            "userid": this.user.userid
           }).then((res) => {
-            if(res.data.code==1) {
-                this.$message({
-                  type: 'success',
-                  message: '新增成功',
-                  showClose: true
-                })                
-            }else{
-                this.$message({
-                  type: 'success',
-                  message: '新增失败',
-                  showClose: true
-                })  
-            }
+            console.log("save sussess");
         }).catch((err) => {
             this.$message({
                 type: 'error',
@@ -119,16 +104,8 @@ export default{
             })
         })
       },
-      readStory(){
-        this.$router.push({
-            path: '/story', 
-            name: 'Story',
-            query: { 
-                bookid: this.bookid,
-            }
-        })
-      },
-      addChapter(){
+      
+      addChapter(successMsg,erroMsg){
           var chapterversion = {};
           var versionName = "";
           this.chaptercontent = tinyMCE.editors[0].getContent();
@@ -144,39 +121,35 @@ export default{
               "chapterOrder": this.chapterOrder,
               "bookid": this.bookid
             }).then((res) => {
-              return res.data;
-          }).catch((err) => {
-              this.$message({
-                  type: 'error',
-                  message: '网络错误，请重试',
+               if(res.data.code==1) {
+                this.$message({
+                  type: 'success',
+                  message: successMsg,
                   showClose: true
-              })
+                })
+                this.eid = res.data.eid;
+                this.currentEidSave();
+              }else{
+                  this.$message({
+                    type: 'error',
+                    message: erroMsg,
+                    showClose: true
+                  })  
+              }
+          }).catch((err) => {
+              
           })
       },
       newChapter(){
-        var data = this.addChapter();
-        if(data.code==1) {
-            this.$message({
-              type: 'success',
-              message: '新增成功',
-              showClose: true
-            })                
-        }else{
-            this.$message({
-              type: 'success',
-              message: '新增失败',
-              showClose: true
-            })  
-        }
+        this.addChapter("新增成功","新增失败");
       },
-      updateChapter(){
+      updateChapter(successMsg,erroMsg){
         var chapterversion = {};
         var versionName = "";
         this.chaptercontent = tinyMCE.editors[0].getContent();
         for(var i=0;i<this.conntentVer.length;i++){
           versionName = "v"+eval(i+1);
           chapterversion[versionName] = this.conntentVer[i];
-          console.log(i);
         }
         var parma = {
             "bookid": this.bookid,
@@ -188,44 +161,25 @@ export default{
             "chapterOrder": this.chapterOrder
         }
         this.$axios.post('/api/api/chapter/edit',parma).then((res) => {
-            return res.data;
-        }).catch((err) => {
-            this.$message({
-                type: 'error',
-                message: '网络错误，请重试',
+            if(res.data.code==1) {
+              this.$message({
+                type: 'success',
+                message: successMsg,
                 showClose: true
-            })
+              })                
+            }else{
+                this.$message({
+                  type: 'error',
+                  message: erroMsg,
+                  showClose: true
+                })  
+            }
+        }).catch((err) => {
+            
         })
       },
       updateSave(){
-        var data = this.updateChapter();
-        if(data.code==1) {
-            this.$message({
-              type: 'success',
-              message: '更新成功',
-              showClose: true
-            })                
-        }else{
-            this.$message({
-              type: 'success',
-              message: '更新失败',
-              showClose: true
-            })  
-        }
-      },
-      currentChapterSave(){
-        this.$axios.post('/api/api/work/save',{
-          userid: this.user.userid,
-          eid: this.eid
-        }).then((res) => {
-            alert(res.data);
-        }).catch((err) => {
-            this.$message({
-                type: 'error',
-                message: '网络错误，请重试',
-                showClose: true
-            })
-        })
+        this.updateChapter("更新成功","更新失败");
       },
       getParams () {
         let isNew = this.$route.query.isNew;
@@ -234,6 +188,7 @@ export default{
         let bookname = this.$route.query.bookname;
         this.isNew = isNew;
         this.bookid = bookid;
+        this.bookname = bookname;
         this.eid = eid;
       },
       bookDirectory(){
@@ -273,13 +228,53 @@ export default{
       }
     },
     computed: {
-        user(){
-            return sessionStorage.getItem("user");
-        }
+         user () {
+            return this.$store.state.user;
+          }
     },
     mounted(){
       this.getParams();
-      if(!this.isNew){
+      var preUrl = sessionStorage.getItem('url');
+      if(preUrl=='login'){
+        this.$axios.post('/api/api/work/detail',{
+          "userid": this.user.userid,
+        } ).then((res) => {
+          if(res.data.code==1){
+            var data = res.data.chapter;
+            this.bookid = data.bookid;
+            this.eid = res.data.eid;
+            this.chaptername = data.chaptername;
+            this.chapterabstract = data.chapterabstract;
+            this.chaptercontent = data.chaptercontent;
+            tinyMCE.editors[0].setContent(this.chaptercontent);
+            var jsonObj = eval('(' + data.chapterversion + ')');
+            var arr = []
+            for (var i in jsonObj) {
+                arr.push(jsonObj[i]); //属性
+            }
+            this.conntentVer = arr;
+            this.currentEidSave();
+          }else{
+            this.$router.replace({ path: '/booklist' })
+          }
+        }).catch((err) => {
+            
+        })
+      };
+
+      if(preUrl=='booklist'){
+        this.$axios.post('/api/api/chapter/count',{
+          "bookid": this.bookid,
+        } ).then((res) => {
+            this.chapterOrder = "第"+res.data.next_chapter+"章";
+            console.log(this.chapterOrder);
+            this.setTimeSave();
+        }).catch((err) => {
+            
+        })
+      }
+
+      if(preUrl=='bookdirectory'){
         this.$axios.post('/api/api/chapter/detail',{
           "eid": this.eid,
         } ).then((res) => {
@@ -293,23 +288,19 @@ export default{
               arr.push(jsonObj[i]); //属性
           }
           this.conntentVer = arr;
-        }).catch((err) => {
-            
-        })
-      }else{
-        this.$axios.post('/api/api/chapter/count',{
-          "bookid": this.bookid,
-        } ).then((res) => {
-            this.chapterOrder = "第"+res.data.next_chapter+"章";
-            console.log(this.chapterOrder);
+          this.currentEidSave();
         }).catch((err) => {
             
         })
       }
-    }
+    },
 } 
 </script>
 <style scoped>
+.chaptetit{
+  margin-bottom:5px;
+  margin-top:10px;
+}
 .app-container{
   padding-top: 0px;
 }
@@ -334,6 +325,7 @@ h5{
   padding-left:10px;
   padding-right:10px;
   margin-bottom:10px;
+  border-bottom: 2px solid #000;
 }
 .txtBlock p{
   text-align: left;
@@ -355,13 +347,13 @@ h5{
   font-size: 14px;
 }
 #contentTip{
-  width: 100%;
+  width: 80%;
   padding-left:5px;
   padding-right:5px;
   border: 1px solid #ccc;
   padding-top: 5px;
   padding-bottom: 5px;
-  text-indent: 32px;
+  font-size: 14px;
 }
 .tip{
   display: block;
@@ -382,28 +374,50 @@ h5{
 .left:nth-child(1){
   margin-left: 10px;
 }
-input[readOnly]{
-  background: transparent;
-  border: none;
-  color: #000;
-}
 .aiBtn{
     position: absolute;
-    top: 420px;
+    top: 480px;
     right: 30px;
     z-index: 100000;
 }
 .newChBtn{
     position: absolute;
-    top: 420px;
+    top: 480px;
     right: 180px;
     z-index: 100000;
 }
 .updateChBtn{
     position: absolute;
-    top: 420px;
-    right: 230px;
+    top: 480px;
+    right: 280px;
     z-index: 100000;
+}
+.resetBtn{
+    position: absolute;
+    top: 480px;
+    right: 180px;
+    z-index: 100000;
+}
+.header h3, p{
+  text-align:left;
+}
+.main{
+  background: #fff;
+  width:85%;
+  margin: 0 auto
+}
+label{
+  padding:10px;
+}
+.bookname{
+  font-size:24px;
+  font-weight: blod;
+  text-align: center;
+  width:100%;
+}
+input,textarea{
+  border: none;
+  font-size: 18px;
 }
 </style>
 
