@@ -1,6 +1,6 @@
 <template>
     <div>
-        <topNav></topNav>
+        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
         <el-row>
             <el-col :span="12" :offset="6">
                 <div style="margin-top: 15px;">
@@ -15,34 +15,49 @@
             </el-col>
         </el-row>
         <el-row>
-            <el-col :span="18" :offset="6">
-                <div id="chart"></div>
-            </el-col>
+            <div id="chart"></div>
+            <div id="relationTxt">
+                <h4></h4>
+                <span></span>
+                <p></p>
+                <div></div>
+            </div>
+            <p id="relationTxt" v-text="relationTxt"></p>
         </el-row>
         
     </div>
 </template>
 <script>
-    import topNav from '@/components/common/TopNav'
+    import axios  from 'axios' 
+    import topNav from '@/components/common/TopNav';
     export default {
         name: 'D3Show',
         components:{
             topNav
         },
         methods: {
+            returnPre(){
+                sessionStorage.setItem('url','login');
+                this.$router.push({
+                    path: '/edit', 
+                    name: 'Edit',
+                })
+            },
             searchRelation(){
-                this.d3Init("/api/relation1");
+                this.d3Init("/api/api/graph_search");
             },
             d3Init(url){
                 var width = 600;
-                var height = 500;
+                var height = 300;
                 var img_w = 45;
                 var img_h = 60;
+                var _this = this;
                 d3.select("svg").remove();
 
                 var svg = d3.select("#chart").append("svg")
                                 .attr("width",width)
                                 .attr("height",height);
+
                 d3.json(url,function(error,root){
                     if( error ){
                         console.log(error);
@@ -64,13 +79,31 @@
                                         .style("stroke","#ccc")
                                         .style("stroke-width",1);
                                         
+                                        
                     var edges_text = svg.selectAll(".linetext")
                                         .data(root.edges)
                                         .enter()
                                         .append("text")
                                         .attr("class","linetext")
                                         .text(function(d){
-                                            return d.relation;
+                                            return d.type;
+                                        })
+                                        .on("click",function(d,i){
+                                            console.log(d.eid);
+                                            axios.post("/api/api/news/detail",{
+                                                "eid": d.eid
+                                            }).then((res) => {
+                                                $("#relationTxt h4").text(res.data.title);
+                                                $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
+                                                $("#relationTxt span").text(res.data.create_date);
+                                                $("#relationTxt div").text(res.data.content);
+                                            }).catch((err) => {
+                                                this.$message({
+                                                    type: 'error',
+                                                    message: '网络错误，请重试',
+                                                    showClose: true
+                                                })
+                                            })
                                         });
                     
                                         
@@ -81,23 +114,8 @@
                                         .attr("width",img_w)
                                         .attr("height",img_h)
                                         .attr("xlink:href",function(d){
-                                            return d.image;
-                                        })
-                                        .on("mouseover",function(d,i){
-                                            //显示连接线上的文字
-                                            edges_text.style("fill-opacity",function(edge){
-                                                if( edge.source === d || edge.target === d ){
-                                                    return 1.0;
-                                                }
-                                            });
-                                        })
-                                        .on("mouseout",function(d,i){
-                                            //隐去连接线上的文字
-                                            edges_text.style("fill-opacity",function(edge){
-                                                if( edge.source === d || edge.target === d ){
-                                                    return 0.0;
-                                                }
-                                            });
+                                            console.log(d.image.toLowerCase());
+                                            return "../../assets/"+d.image.toLowerCase();
                                         })
                                         .call(force.drag);
                     
@@ -144,7 +162,9 @@
                          nodes_text.attr("x",function(d){ return d.x });
                          nodes_text.attr("y",function(d){ return d.y + img_w/2; });
                     });
-                });
+                })
+                .header("Content-Type","application/json")
+                .send("POST", JSON.stringify({search_text: "AI"}));
            } 
         },
         data () {
@@ -156,11 +176,12 @@
                     img_h: 90
                 },
                 search: '',
-                select: ''
+                select: '',
+                relationTxt:''
             }        
         },
         mounted() {
-            this.d3Init("/api/relation");
+            this.d3Init("/api/api/graph_search");
         }
     }
 </script>
@@ -175,18 +196,47 @@
     font-size: 12px ;
     font-family: SimSun;
     fill:#0000FF;
-    fill-opacity:0.0;
+    fill-opacity:1.0;
 }
 #chart{
-    width: 100%;
-    height:500px;
+    width: 600px;
+    height:300px;
     padding-top: 50px;
     padding-bottom: 50px;
+    margin: 0 auto;
 }
 .el-select .el-input {
     width: 130px;
 }
 .input-with-select .el-input-group__prepend {
     background-color: #fff;
+}
+#relationTxt{
+    font-size: 16px;
+    height: 30px;
+    line-height: 30px;
+    text-indent: 32px;
+    width: 100%;
+    float: left;
+    text-align: left;
+    margin-bottom: 50px;
+    padding-bottom: 50px;
+}
+#relationTxt h4{
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+#relationTxt span{
+    display: block;
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
+}
+#relationTxt p{
+    display: block;
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
 }
 </style>

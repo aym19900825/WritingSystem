@@ -10,11 +10,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
-// var appData = require('../relation.json')//加载本地数据文件
-// var nodes = appData.nodes;
-// var edges = appData.edges;
-// var tmpnodes = appData.tmpnodes;
-// var tmpedges = appData.tmpedges;
+var appData = require('../relation.json');//加载本地数据文件
+var nodes = appData.nodes;
+var edges = appData.edges;
+// var relationContent = appData.relationContent;
 
 
 
@@ -51,20 +50,14 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     watchOptions: {
       poll: config.dev.poll,
     },
-    // before(app) {
-    //   app.get('/api/relation', (req, res) => {
-    //     res.json({
-    //       nodes: nodes,
-    //       edges: edges
-    //     })//接口返回json数据，上面配置的数据seller就赋值给data请求后调用
-    //   }),
-    //   app.get('/api/relation1', (req, res) => {
-    //     res.json({
-    //       nodes: tmpnodes,
-    //       edges: tmpedges
-    //     })//接口返回json数据，上面配置的数据seller就赋值给data请求后调用
-    //   })
-    // }
+    before(app) {
+      app.get('/api/relation', (req, res) => {
+        res.json({
+          nodes: nodes,
+          edges: edges
+        })//接口返回json数据，上面配置的数据seller就赋值给data请求后调用
+      })
+    }
   },
   plugins: [
     new webpack.DefinePlugin({

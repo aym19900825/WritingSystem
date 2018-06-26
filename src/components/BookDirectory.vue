@@ -81,7 +81,7 @@
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                     }).then(({ value }) => {
-                        this.$axios.post('/api/api/chapter/delete',{
+                        this.$axios.post('http://192.168.1.168:8888/api/chapter/delete',{
                             eid: "F9yEAWQB0g6UZG9-oy6h",
                         }).then((res)=>{
                             if(res.data.code==1){
@@ -123,7 +123,7 @@
         },
         created(){
             this.getParams();
-            this.$axios.post('/api/api/chapter/list',{
+            this.$axios.post('http://192.168.1.168:8888/api/chapter/list',{
                 bookid: this.bookid
             }).then((res)=>{
                 if(res.data.length>0){

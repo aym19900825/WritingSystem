@@ -141,7 +141,7 @@
                 this.dialogFormVisible = true;
             },
             editBook(){
-                this.$axios.post('/api/api/editBook',{
+                this.$axios.post('http://192.168.1.168:8888/api/editBook',{
                     bookid: this.upDateBookId,
                     bookname: this.newBook.bookname,
                     bookstatus: 0
@@ -166,7 +166,7 @@
                 })
             },
             addBook() {
-                this.$axios.post('/api/api/addBook',{
+                this.$axios.post('http://192.168.1.168:8888/api/addBook',{
                     bookname: this.newBook.bookname,
                     userid: this.user.userid
                 }).then((res)=>{
@@ -223,7 +223,7 @@
                 this.upDateBookId = 1;
             },
             initBookList(){
-                this.$axios.post('/api/api/bookList',{
+                this.$axios.post('http://192.168.1.168:8888/api/bookList',{
                     userid: this.user.userid
                 }).then((res)=>{
                     if (res.data) {

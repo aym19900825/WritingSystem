@@ -99,7 +99,7 @@
                     people: []
                 };
                 obj.people = this.peoples;
-                this.$axios.post('/api/api/info/edit',{
+                this.$axios.post('http://192.168.1.168:8888/api/info/edit',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj),
@@ -128,7 +128,7 @@
                     people: []
                 };
                 obj.people = this.peoples;
-                this.$axios.post('/api/api/info/add',{
+                this.$axios.post('http://192.168.1.168:8888/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -177,7 +177,7 @@
         },
         mounted(){
             this.getParams();
-            this.$axios.post('/api/api/info/query',{
+            this.$axios.post('http://192.168.1.168:8888/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){

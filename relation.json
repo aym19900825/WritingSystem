@@ -1,59 +1,12 @@
 {
 "nodes":[
-{ "name": "云天河"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "韩菱纱"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "柳梦璃"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "慕容紫英" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "云天青" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "夙玉" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "玄霄" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "夙瑶" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "太清" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "宗炼" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "婵幽" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "奚仲" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "归邪" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" }
+	{ "name": "韩菱纱"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
+	{ "name": "云天河"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
+	{ "name": "柳梦璃"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" }
 ],
 "edges":[
-{ "source": 0 , "target": 1 , "relation":"挚友" },
-{ "source": 0 , "target": 2 , "relation":"挚友" },
-{ "source": 0 , "target": 3 , "relation":"挚友" },
-{ "source": 1 , "target": 2 , "relation":"挚友" },
-{ "source": 1 , "target": 3 , "relation":"挚友" },
-{ "source": 2 , "target": 3 , "relation":"挚友" },
-{ "source": 0 , "target": 4 , "relation":"父子" },
-{ "source": 0 , "target": 5 , "relation":"母子" },
-{ "source": 4 , "target": 5 , "relation":"夫妻" },
-{ "source": 0 , "target": 6 , "relation":"义兄弟" },
-{ "source": 4 , "target": 6 , "relation":"同门" },
-{ "source": 5 , "target": 6 , "relation":"同门" },
-{ "source": 4 , "target": 7 , "relation":"同门" },
-{ "source": 5 , "target": 7 , "relation":"同门" },
-{ "source": 6 , "target": 7 , "relation":"同门" },
-{ "source": 4 , "target": 8 , "relation":"师徒" },
-{ "source": 5 , "target": 8 , "relation":"师徒" },
-{ "source": 6 , "target": 8 , "relation":"师徒" },
-{ "source": 7 , "target": 8 , "relation":"师徒" },
-{ "source": 8 , "target": 9 , "relation":"同门" },
-{ "source": 3 , "target": 9 , "relation":"师徒" },
-{ "source": 2 , "target": 10 , "relation":"母子" },
-{ "source": 10 , "target": 11 , "relation":"主臣" },
-{ "source": 10 , "target": 12 , "relation":"主臣" },
-{ "source": 11 , "target": 12 , "relation":"同僚" }
-],
-"tmpnodes":[
-{ "name": "云天河"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "韩菱纱"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "柳梦璃"   , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "慕容紫英" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" },
-{ "name": "云天青" , "image" : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528777758417&di=c32280b28e9867c0bf1846117fea5596&imgtype=0&src=http%3A%2F%2Fi1.hdslb.com%2Fbfs%2Farchive%2F96dce37d84f4c86595b6ad2f5b31f2547e7a6f06.jpg" }
-],
-"tmpedges":[
-{ "source": 0 , "target": 1 , "relation":"挚友" },
-{ "source": 0 , "target": 2 , "relation":"挚友" },
-{ "source": 0 , "target": 3 , "relation":"挚友" },
-{ "source": 1 , "target": 2 , "relation":"挚友" },
-{ "source": 1 , "target": 3 , "relation":"挚友" },
-{ "source": 2 , "target": 3 , "relation":"挚友" }
+	{ "source": 0 , "target": 1 , "relation":"同学" ,"url": "http://www.baidu.com"},
+	{ "source": 0 , "target": 2 , "relation":"挚友" ,"url": "http://www.baidu.com"},
+	{ "source": 1 , "target": 2 , "relation":"恋人" ,"url": "http://www.baidu.com"}
 ]
 }

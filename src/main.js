@@ -11,9 +11,11 @@ import router from './router'
 import store from './vuex'
 
 import tinymce from 'vue-tinymce-editor'
+import axios  from 'axios' 
+import './assets/reset.css' 
 import './axios'
 
-import './assets/reset.css'
+Vue.prototype.$axios = axios;
 
 
 
@@ -22,6 +24,8 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 
 Vue.component('tinymce', tinymce)
+
+require('./mock.js')
 
 
 /* eslint-disable no-new */

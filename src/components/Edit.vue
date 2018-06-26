@@ -9,28 +9,30 @@
             <el-button type="primary" plain class="left" size="small">小说事件图谱</el-button>
             <el-button type="primary" plain class="left" size="small" @click="bookDirectory">查看目录</el-button>
             <el-button type="primary" plain class="left" size="small" @click="changeBook">切换图书</el-button>
+            <!--
             <el-button type="primary" plain class="left" size="small" @click="setTimeSave">zidongbaocun</el-button>
+            -->
           </el-col>
         </el-row>
         <div class="main">
           <h4 class="bookname">{{bookname}}</h4>
           <el-row :gutter="20" class="chaptetit">
             <el-col :span="24">
-              <label>章节名称:</label>
+              <label class="maintit">章节名称:</label>
               <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
             </el-col>
           </el-row> 
+          
           <el-row :gutter="20">
-            <el-col :span="24">
-              <label>章节大纲:</label>
+            <el-col :span="6">
+              <label class="maintit">章节大纲:</label>
               <textarea name="content" :autosize="{minRows:1}" class="input_textarea" id="contentTip" v-model="chapterabstract" placeholder="请输入章节大纲"></textarea>
             </el-col>
-          </el-row> 
-          <el-row :gutter="20">
-            <el-col :span="24">
+            <el-col :span="18">
               <!--
               <el-button size="medium" class="bigBtn" @click="newContent">+</el-button>
               -->
+              <label class="maintit">章节内容:</label>
               <tinymce id="d2" :other_options="options1" class="tinyBtm">
               </tinymce>
               <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
@@ -91,7 +93,7 @@ export default{
        
       },
       currentEidSave(){
-        this.$axios.post('/api/api/work/save',{
+        this.$axios.post('http://192.168.1.168:8888/api/work/save',{
             "eid": this.eid,
             "userid": this.user.userid
           }).then((res) => {
@@ -113,7 +115,7 @@ export default{
             versionName = "v"+eval(i+1);
             chapterversion[versionName] = this.conntentVer[i];
           }
-          this.$axios.post('/api/api/chapter/add',{
+          this.$axios.post('http://192.168.1.168:8888/api/chapter/add',{
               "chaptername": this.chaptername,
               "chapterabstract": this.chapterabstract,
               "chaptercontent": this.chaptercontent,
@@ -160,7 +162,7 @@ export default{
             "chapterversion": chapterversion,
             "chapterOrder": this.chapterOrder
         }
-        this.$axios.post('/api/api/chapter/edit',parma).then((res) => {
+        this.$axios.post('http://192.168.1.168:8888/api/chapter/edit',parma).then((res) => {
             if(res.data.code==1) {
               this.$message({
                 type: 'success',
@@ -236,7 +238,7 @@ export default{
       this.getParams();
       var preUrl = sessionStorage.getItem('url');
       if(preUrl=='login'){
-        this.$axios.post('/api/api/work/detail',{
+        this.$axios.post('http://192.168.1.168:8888/api/work/detail',{
           "userid": this.user.userid,
         } ).then((res) => {
           if(res.data.code==1){
@@ -263,7 +265,7 @@ export default{
       };
 
       if(preUrl=='booklist'){
-        this.$axios.post('/api/api/chapter/count',{
+        this.$axios.post('http://192.168.1.168:8888/api/chapter/count',{
           "bookid": this.bookid,
         } ).then((res) => {
             this.chapterOrder = "第"+res.data.next_chapter+"章";
@@ -275,7 +277,7 @@ export default{
       }
 
       if(preUrl=='bookdirectory'){
-        this.$axios.post('/api/api/chapter/detail',{
+        this.$axios.post('http://192.168.1.168:8888/api/chapter/detail',{
           "eid": this.eid,
         } ).then((res) => {
           this.chaptername = res.data.chaptername;
@@ -347,13 +349,15 @@ h5{
   font-size: 14px;
 }
 #contentTip{
-  width: 80%;
+  width: 90%;
+  height: 560px;
   padding-left:5px;
   padding-right:5px;
   border: 1px solid #ccc;
   padding-top: 5px;
   padding-bottom: 5px;
   font-size: 14px;
+  margin-left: 10px;
 }
 .tip{
   display: block;
@@ -418,6 +422,12 @@ label{
 input,textarea{
   border: none;
   font-size: 18px;
+}
+.maintit{
+  font-size:14px;
+  font-weight:bold;
+  height:30px;
+  line-height:30px;
 }
 </style>
 

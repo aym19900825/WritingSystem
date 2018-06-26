@@ -33,7 +33,7 @@
             register() {
                 this.$refs.registerForm.validate((valid) => {
                     if (valid) {
-                        this.$axios.post('/api/api/register',{
+                        this.$axios.post('http://192.168.1.168:8888/api/register',{
                             username: this.newUser.name,
                             password: this.newUser.pass
                         }).then((res) => {
