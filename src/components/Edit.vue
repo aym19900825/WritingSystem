@@ -3,12 +3,11 @@
         <el-row :gutter="20">
           <el-col :span="16" :offset="8">
             <el-button type="primary" plain class="left" size="small" @click="logout">退出</el-button>
-            <el-button type="primary" plain class="left" size="small">人物图谱</el-button>
-            <el-button type="primary" plain class="left" size="small">事件图谱</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="d3show">小说人物图谱</el-button>
-            <el-button type="primary" plain class="left" size="small">小说事件图谱</el-button>
+            <el-button type="primary" plain class="left" size="small" @click="d3show">图谱</el-button>
+            <el-button type="primary" plain class="left" size="small" @click="d3show">小说图谱</el-button>
             <el-button type="primary" plain class="left" size="small" @click="bookDirectory">查看目录</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="changeBook">切换图书</el-button>
+            <el-button type="primary" plain class="left" size="small" @click="changeBook">图书列表</el-button>
+            <el-button type="primary" plain class="left" size="small" @click="add">新增章节</el-button>
             <!--
             <el-button type="primary" plain class="left" size="small" @click="setTimeSave">zidongbaocun</el-button>
             -->
@@ -18,7 +17,7 @@
           <h4 class="bookname">{{bookname}}</h4>
           <el-row :gutter="20" class="chaptetit">
             <el-col :span="24">
-              <label class="maintit">章节名称:</label>
+              <label class="maintit">章节名称:第{{this.chapternumber}}章</label>
               <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
             </el-col>
           </el-row> 
@@ -51,7 +50,7 @@ export default{
     data(){
         return {
             isAutoSave: false,
-            next_chapter: 1,
+            chapternumber: 1,
             isNew: false,
             bookid: 1,
             bookname: "",
@@ -68,7 +67,6 @@ export default{
 
             autoContent: "<p>夕阳西下，彩霞满天。何以琛站在十楼办公室的落地窗前，奇怪自己怎么会有了欣赏夕阳的心情。也许，因为她回来了。美婷推开门，就看到何律师背对着她站在窗前，手里夹着烟，一身落寞的样子……落寞？美婷简直怀疑自己的眼睛了，这个词能用在从来都是自信沉着的何律师身上吗？以琛听到开门声，转过身问：“什么事？”“哦。”美婷这才从自己的迷思中惊醒，快速地说，“何律师，红远公司的张副总来了。“请他进来。”以琛收起杂乱的思绪，全身心地投入到工作中去。瞥了一眼壁上的钟——五点，她还没来。好不容易送走了张副总，以琛疲惫地靠在椅子上闭目养神，猛的一只巨掌拍下来，以琛无奈地睁开眼：“老袁。”</p>",
 
-            chapterOrder: '',
             chaptername: '',
             chapterabstract: '',
             conntentVer: [],
@@ -106,7 +104,23 @@ export default{
             })
         })
       },
-      
+      add(){
+        this.$axios.post('http://192.168.1.168:8888/api/chapter/count',{
+          "bookid": this.bookid,
+        } ).then((res) => {
+            this.eid='';
+            this.chapternumber = res.data.next_chapter;
+            this.chaptername = "";
+            this.chapterabstract = "";
+            this.chaptercontent = "";
+            tinyMCE.editors[0].setContent(this.chaptercontent);
+            this.conntentVer = [];
+            this.setTimeSave();
+            this.currentEidSave();
+        }).catch((err) => {
+            
+        })
+      },
       addChapter(successMsg,erroMsg){
           var chapterversion = {};
           var versionName = "";
@@ -120,8 +134,9 @@ export default{
               "chapterabstract": this.chapterabstract,
               "chaptercontent": this.chaptercontent,
               "chapterversion": chapterversion,
-              "chapterOrder": this.chapterOrder,
-              "bookid": this.bookid
+              "bookid": this.bookid,
+              "bookname": this.bookname,
+              "chapternumber": this.chapternumber
             }).then((res) => {
                if(res.data.code==1) {
                 this.$message({
@@ -155,12 +170,13 @@ export default{
         }
         var parma = {
             "bookid": this.bookid,
+            "bookname": this.bookname,
             "eid": this.eid,
             "chaptername": this.chaptername,
             "chapterabstract": this.chapterabstract,
             "chaptercontent": this.chaptercontent,
             "chapterversion": chapterversion,
-            "chapterOrder": this.chapterOrder
+            "chapternumber": this.chapternumber
         }
         this.$axios.post('http://192.168.1.168:8888/api/chapter/edit',parma).then((res) => {
             if(res.data.code==1) {
@@ -196,9 +212,9 @@ export default{
       bookDirectory(){
         this.$router.push({
             path: '/bookdirectory', 
-            name: 'BookDirectory',
             query: { 
                 bookid: this.bookid,
+                bookname: this.bookname,
             }
         })
       },
@@ -236,6 +252,7 @@ export default{
     },
     mounted(){
       this.getParams();
+      console.log(this.user.userid);
       var preUrl = sessionStorage.getItem('url');
       if(preUrl=='login'){
         this.$axios.post('http://192.168.1.168:8888/api/work/detail',{
@@ -244,10 +261,12 @@ export default{
           if(res.data.code==1){
             var data = res.data.chapter;
             this.bookid = data.bookid;
+            this.bookname = data.bookname;
             this.eid = res.data.eid;
             this.chaptername = data.chaptername;
             this.chapterabstract = data.chapterabstract;
             this.chaptercontent = data.chaptercontent;
+            this.chapternumber = data.chapternumber;
             tinyMCE.editors[0].setContent(this.chaptercontent);
             var jsonObj = eval('(' + data.chapterversion + ')');
             var arr = []
@@ -268,8 +287,7 @@ export default{
         this.$axios.post('http://192.168.1.168:8888/api/chapter/count',{
           "bookid": this.bookid,
         } ).then((res) => {
-            this.chapterOrder = "第"+res.data.next_chapter+"章";
-            console.log(this.chapterOrder);
+            this.chapternumber = res.data.next_chapter;
             this.setTimeSave();
         }).catch((err) => {
             
@@ -283,6 +301,7 @@ export default{
           this.chaptername = res.data.chaptername;
           this.chapterabstract = res.data.chapterabstract;
           this.chaptercontent = res.data.chaptercontent;
+          this.chapternumber = res.data.chapternumber;
           tinyMCE.editors[0].setContent(this.chaptercontent);
           var jsonObj = eval('(' + res.data.chapterversion + ')');
           var arr = []
@@ -420,7 +439,7 @@ label{
   width:100%;
 }
 input,textarea{
-  border: none;
+  border: 1px solid #ccc;
   font-size: 18px;
 }
 .maintit{

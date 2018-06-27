@@ -3,16 +3,16 @@
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
         <h2>{{bookname}}</h2>
         <h3>目录</h3>
+        <el-button type="primary" class="btnRight" @click="addChapter">新增章节</el-button>
         <el-table :data="tableData" border style="width: 100%">
-            <el-table-column  label="章节" width="80"></el-table-column>
-            <el-table-column prop="chaptername" label="标题" width="180"></el-table-column>
-            <el-table-column prop="chapterabstract" label="内容摘要"></el-table-column>
+            <el-table-column prop="chapternumber" label="章节" width="80"></el-table-column>
+            <el-table-column prop="chaptername" label="标题" width="280"></el-table-column>
+            <el-table-column prop="chapterabstract" label="章节大纲"></el-table-column>
             <el-table-column prop="edit_date" label="完成时间" width="120"></el-table-column>
             <el-table-column label="操作" width="250">
               <template scope="scope">
                 <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="handleDelete">删除</el-button>
-                <el-button size="small" type="danger">增加分卷</el-button>
+                <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
               </template>
             </el-table-column>
         </el-table>
@@ -76,16 +76,17 @@
             },
 
             //删除章节
-            handleDelete(){
+            handleDelete(index,row){
                 this.$confirm('确定删除此章节吗？', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                     }).then(({ value }) => {
                         this.$axios.post('http://192.168.1.168:8888/api/chapter/delete',{
-                            eid: "F9yEAWQB0g6UZG9-oy6h",
+                            eid: row.eid
                         }).then((res)=>{
                             if(res.data.code==1){
                                 alert("删除成功");
+                                this.init();
                             }
                         }).catch((err)=>{
                             
@@ -100,6 +101,18 @@
             addPart(){
 
             },
+            addChapter(){
+                sessionStorage.setItem('url','booklist');
+                this.$router.push({
+                    path: '/edit', 
+                    name: 'Edit',
+                    query: { 
+                        bookid: this.bookid,
+                        bookname: this.bookname,
+                        isNew: true
+                    }
+                })
+            },
             getParams () {
                 let bookid = this.$route.query.bookid;
                 let bookname = this.$route.query.bookname;
@@ -107,6 +120,27 @@
                 this.bookname = bookname;
                 console.log(bookid);
                 console.log(bookname);
+            },
+            init(){
+                this.$axios.post('http://192.168.1.168:8888/api/chapter/list',{
+                    bookid: this.bookid
+                }).then((res)=>{
+                    if(res.data.length>0){
+                        var arr = [];
+                        var tmpData = res.data;
+                        var tmpObj = {};
+                        for(let i=0,len=tmpData.length;i<len;i++){
+                            tmpObj = tmpData[i]._source;
+                            tmpObj.eid = tmpData[i]._id;
+                            arr.push(tmpObj);
+                        }
+                        this.tableData = arr;
+                    }else{
+                        this.tableData = [];
+                    }
+                }).catch((err)=>{
+                    
+                })
             }
         },
         data () {
@@ -119,27 +153,10 @@
                 currentPage: 1,
                 start: 1
             }
-            
         },
         created(){
             this.getParams();
-            this.$axios.post('http://192.168.1.168:8888/api/chapter/list',{
-                bookid: this.bookid
-            }).then((res)=>{
-                if(res.data.length>0){
-                    var arr = [];
-                    var tmpData = res.data;
-                    var tmpObj = {};
-                    for(let i=0,len=tmpData.length;i<len;i++){
-                        tmpObj = tmpData[i]._source;
-                        tmpObj.eid = tmpData[i]._id;
-                        arr.push(tmpObj);
-                    }
-                    this.tableData = arr;
-                }
-            }).catch((err)=>{
-                
-            })
+            this.init();
         }
     }
 </script>
@@ -160,5 +177,12 @@ h3{
 }
 .returnPre{
     float: left;
+}
+.el-button--primary{
+    color: #fff;
+    background-color: #409EFF;
+    border-color: #409EFF;
+    float: right;
+    margin-bottom: 5px;
 }
 </style>

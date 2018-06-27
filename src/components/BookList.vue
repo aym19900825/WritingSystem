@@ -14,7 +14,7 @@
                 <el-table-column label="创建时间" width="180" prop="createtime"></el-table-column>
                  <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)">增加新的章节</el-button>
+                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)">新增章节</el-button>
                         <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
                         <el-button size="mini" type="danger" @click="readBook(scope.$index, scope.row)">编辑图书信息</el-button>
                         <el-button size="mini" type="danger" @click="bookDirect(scope.$index, scope.row)">查看目录</el-button>
@@ -52,7 +52,6 @@
             </el-form>
             <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible"  append-to-body>
                 <P class="congratulation">恭喜您！创建成功！</P>
-                <el-button type="primary" @click="creatWorks" style="margin-left: 80px;">上传章节</el-button>
                 <el-button @click="returnList"  type="text">返回图书列表</el-button>
             </el-dialog>
             <div slot="footer" class="dialog-footer">
@@ -110,13 +109,11 @@
                 sessionStorage.setItem('url','login');
                 this.$router.push({
                     path: '/edit', 
-                    name: 'Edit',
                 })
             },
             readStory(index,row){
-                this.$router.push({
+               this.$router.push({
                     path: '/story', 
-                    name: 'Story',
                     query: { 
                         bookid: row.bookid,
                     }
@@ -126,7 +123,6 @@
                 sessionStorage.setItem('url','booklist');
                 this.$router.push({
                     path: '/edit', 
-                    name: 'Edit',
                     query: { 
                         bookid: item.bookid,
                         bookname: item.bookname,
@@ -187,7 +183,6 @@
                 sessionStorage.setItem('url','booklist');
                 this.$router.push({
                     path: '/edit', 
-                    name: 'Edit',
                     query: { 
                         bookid: row.bookid,
                         bookname: row.bookname,
@@ -198,7 +193,6 @@
             bookDirect(index,row){
                 this.$router.push({
                     path: '/bookdirectory', 
-                    name: 'BookDirectory',
                     query: { 
                         bookid: row.bookid,
                         bookname: row.bookname

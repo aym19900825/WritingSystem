@@ -44,9 +44,9 @@
                 })
             },
             searchRelation(){
-                this.d3Init("/api/api/graph_search");
+                this.d3Init("/api/api/graph_search",this.search);
             },
-            d3Init(url){
+            d3Init(url,queryParam){
                 var width = 600;
                 var height = 300;
                 var img_w = 45;
@@ -164,7 +164,7 @@
                     });
                 })
                 .header("Content-Type","application/json")
-                .send("POST", JSON.stringify({search_text: "AI"}));
+                .send("POST", JSON.stringify({search_text: queryParam}));
            } 
         },
         data () {
@@ -179,9 +179,6 @@
                 select: '',
                 relationTxt:''
             }        
-        },
-        mounted() {
-            this.d3Init("/api/api/graph_search");
         }
     }
 </script>

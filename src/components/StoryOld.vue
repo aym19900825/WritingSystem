@@ -32,7 +32,7 @@
                     </el-col>
                 </el-row>
                 <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in peoples" :key="item">
-                    <div class="peopleInfo" @click="editPeople(item)">{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})</div> 
+                    <div class="peopleInfo" @click="editPeople(item)">{{item.name}},{{item.position}},{{item.character}},({{item.relation}})</div> 
                 </el-row>
                 <el-footer class="btndiv">
                     <el-button type="primary" size="medium" @click="next">下一步</el-button>
@@ -53,13 +53,13 @@
                 <el-input  v-model="newPeople.name"></el-input>
               </el-form-item>
               <el-form-item label="身份特征">
-                <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
+                <el-input type="textarea" :rows="2" v-model="newPeople.position"  placeholder="请输入人物身份特征"></el-input>
               </el-form-item>
               <el-form-item label="性格特点">
-                <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
+                <el-input type="textarea" :rows="2" v-model="newPeople.character"  placeholder="请输入人物性格特点"></el-input>
               </el-form-item>
               <el-form-item label="人物关系">
-                <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
+                <el-input type="textarea" :rows="2" v-model="newPeople.relation"  placeholder="请输入人物关系"></el-input>
                 <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX;</p>
               </el-form-item>
               <el-form-item>
@@ -105,17 +105,18 @@
                 };
                 for(var i=0;i<this.peoples.length;i++){
                     var arr = [];
-                    var tmp =  this.peoples[i].relationship;
+                    var tmp =  this.peoples[i].relation;
                     var tmparr = tmp.split("；");
-                    for(var j=0;j<tmparr.length-1;j++){
+                    for(var j=0;j<tmparr.length;j++){
                         var tmpObj = {};
-                        tmpObj.realtion = tmparr[j].split("，")[0]
-                        tmpObj.being = tmparr[j].split("，")[1]
+                        var name = tmparr[j].split("，")[0];
+                        tmpObj[name] = tmparr[j].split("，")[1];
                         arr.push(tmpObj);
                     }
-                    this.peoples[i].relationship = arr;
+                    this.peoples[i].relation = arr;
                 }
                 obj.people = this.peoples;
+                console.log(obj.people);
                 this.$axios.post('http://192.168.1.168:8888/api/info/edit',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
@@ -151,35 +152,35 @@
             },
             editPeople(item){
                 this.newPeople.name = item.name;
-                this.newPeople.relationship = item.relationship;
-                this.newPeople.characters = item.characters;
-                this.newPeople.titles = item.titles;
+                this.newPeople.relation = item.relation;
+                this.newPeople.character = item.character;
+                this.newPeople.position = item.position;
                 this.dialogFormVisible = true;
                 this.isupdatePeople = true;
             },
             resetNewPeople(){
                 this.newPeople = {
                     name: '',
-                    relationship: '',
-                    characters: '',
-                    titles: ''
+                    relation: '',
+                    character: '',
+                    position: ''
                 }
             },
             finish(){
                 var obj = {
                     people: []
                 };
-               for(var i=0;i<this.peoples.length;i++){
+                for(var i=0;i<this.peoples.length;i++){
                     var arr = [];
-                    var tmp =  this.peoples[i].relationship;
-                    var tmparr = tmp.split("；");
-                    for(var j=0;j<tmparr.length-1;j++){
+                    var tmp =  this.peoples[i].relation;
+                    var obj = tmp.split("；")
+                    for(var j=0;j<obj.length;j++){
                         var tmpObj = {};
-                        tmpObj.realtion = tmparr[j].split("，")[0]
-                        tmpObj.being = tmparr[j].split("，")[1]
+                        var name = obj[j].split("：")[0];
+                        tmpObj[name] = obj[j].split("：")[1];
                         arr.push(tmpObj);
                     }
-                    this.peoples[i].relationship = arr;
+                    this.peoples[i].relation = arr;
                 }
                 obj.people = this.peoples;
                 console.log(obj.people);
@@ -243,11 +244,13 @@
                     }else{
                         for(var m=0;m<jsonObj.people.length;m++){
                             var relationStr = '';
-                            var relation = jsonObj.people[m].relationship;
+                            var relation = jsonObj.people[m].relation;
                             for(var n=0;n<relation.length;n++){
-                                relationStr+=relation[n].realtion+"，"+relation[n].being+"；";
+                                for(var key in relation[n]){
+                                    relationStr+=key+"，"+relation[n][key]+"；";
+                                }
                             }
-                            jsonObj.people[m].relationship = relationStr
+                            jsonObj.people[m].relation = relationStr
                         }
                         this.peoples = jsonObj.people;
                     }
@@ -278,9 +281,9 @@
                 innerVisible: false,
                 newPeople: {
                     name: '',
-                    relationship: '',
-                    characters: '',
-                    titles: '',
+                    relation: '',
+                    character: '',
+                    position: '',
                 }
             }
         }
