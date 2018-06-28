@@ -3,20 +3,26 @@
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
         <h2>{{bookname}}</h2>
         <h3>目录</h3>
-        <el-button type="primary" class="btnRight" @click="addChapter">新增章节</el-button>
+        <el-button type="primary" class="btnRight" @click="addChapter" style="float: right;">新增章节</el-button>
         <el-table :data="tableData" border style="width: 100%">
-            <el-table-column prop="chapternumber" label="章节" width="80"></el-table-column>
+            <el-table-column label="章节" width="80">
+                <template scope="scope">
+                    <el-input v-model="scope.row.chapternumber" :disabled="true"></el-input>
+                </template>
+            </el-table-column>
             <el-table-column prop="chaptername" label="标题" width="280"></el-table-column>
             <el-table-column prop="chapterabstract" label="章节大纲"></el-table-column>
             <el-table-column prop="edit_date" label="完成时间" width="120"></el-table-column>
-            <el-table-column label="操作" width="250">
+            <el-table-column label="操作" width="270">
               <template scope="scope">
                 <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                <el-button size="small" type="danger" @click="editNum(scope.$index, scope.row)">修改章节号</el-button>
               </template>
             </el-table-column>
         </el-table>
-        <div align="right">
+        <!--
+            <div align="right">
             <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
@@ -27,6 +33,7 @@
                 :total="totalCount">
             </el-pagination>
         </div>
+        -->
     </div>
 </template>
 
@@ -96,6 +103,10 @@
 
                 });
             }, 
+            //修改章节号码
+            editNum(index,row){
+                console.log(row);
+            },
 
             //增加分卷
             addPart(){
@@ -182,7 +193,6 @@ h3{
     color: #fff;
     background-color: #409EFF;
     border-color: #409EFF;
-    float: right;
     margin-bottom: 5px;
 }
 </style>

@@ -36,11 +36,17 @@
               </tinymce>
               <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
               <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
+              <el-button size="medium" class="finishBtn" @click="finishSave">完成保存</el-button>
               <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
               <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
             </el-col>
           </el-row>
-        </div>  
+        </div> 
+        <el-dialog  width="30%"  title="创建成功" :visible.sync="isFinish"  append-to-body>
+          <P class="congratulation">恭喜您！章节编辑完成！</P>
+          <el-button @click="add"  type="text">新增章节</el-button>
+          <el-button @click="returnLook"  type="text">查看本章内容</el-button>
+        </el-dialog> 
     </div>
 </template>
 
@@ -50,6 +56,7 @@ export default{
     data(){
         return {
             isAutoSave: false,
+            isFinish: false,
             chapternumber: 1,
             isNew: false,
             bookid: 1,
@@ -105,6 +112,7 @@ export default{
         })
       },
       add(){
+        this.isFinish = false;
         this.$axios.post('http://192.168.1.168:8888/api/chapter/count',{
           "bookid": this.bookid,
         } ).then((res) => {
@@ -157,6 +165,10 @@ export default{
               
           })
       },
+      returnLook(){
+        this.conntentVer = [];
+        this.isFinish = false;
+      },
       newChapter(){
         this.addChapter("新增成功","新增失败");
       },
@@ -196,8 +208,37 @@ export default{
             
         })
       },
+
+      //保存
       updateSave(){
         this.updateChapter("更新成功","更新失败");
+      },
+
+      //完成保存
+      finishSave(){
+        var parma = {
+            "bookid": this.bookid,
+            "bookname": this.bookname,
+            "eid": this.eid,
+            "chaptername": this.chaptername,
+            "chapterabstract": this.chapterabstract,
+            "chaptercontent": this.chaptercontent,
+            "chapterversion": {},
+            "chapternumber": this.chapternumber
+        }
+        this.$axios.post('http://192.168.1.168:8888/api/chapter/edit',parma).then((res) => {
+            if(res.data.code==1) {
+              this.isFinish = true;
+            }else{
+                this.$message({
+                  type: 'error',
+                  message: erroMsg,
+                  showClose: true
+                })  
+            }
+        }).catch((err) => {
+            
+        })
       },
       getParams () {
         let isNew = this.$route.query.isNew;
@@ -447,6 +488,12 @@ input,textarea{
   font-weight:bold;
   height:30px;
   line-height:30px;
+}
+.finishBtn{
+  position: absolute;
+  top: 480px;
+  right: 380px;
+  z-index: 100000;
 }
 </style>
 

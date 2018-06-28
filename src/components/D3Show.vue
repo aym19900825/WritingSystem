@@ -44,7 +44,7 @@
                 })
             },
             searchRelation(){
-                this.d3Init("/api/api/graph_search",this.search);
+                this.d3Init("http://192.168.1.168:8888/api/graph_search",this.search);
             },
             d3Init(url,queryParam){
                 var width = 600;
@@ -115,7 +115,7 @@
                                         .attr("height",img_h)
                                         .attr("xlink:href",function(d){
                                             console.log(d.image.toLowerCase());
-                                            return "../../assets/"+d.image.toLowerCase();
+                                            return "/static/"+d.image.toLowerCase();
                                         })
                                         .call(force.drag);
                     
