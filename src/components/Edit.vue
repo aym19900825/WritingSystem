@@ -1,37 +1,46 @@
 <template>
     <div class="app-container">
-        <el-row :gutter="20">
-          <el-col :span="16" :offset="8">
-            <el-button type="primary" plain class="left" size="small" @click="logout">退出</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="d3show">图谱</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="d3show">小说图谱</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="bookDirectory">查看目录</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="changeBook">图书列表</el-button>
-            <el-button type="primary" plain class="left" size="small" @click="add">新增章节</el-button>
-            <!--
-            <el-button type="primary" plain class="left" size="small" @click="setTimeSave">zidongbaocun</el-button>
-            -->
-          </el-col>
-        </el-row>
+        <el-menu class="el-menu-demo" mode="horizontal" 
+           @select="handleSelect" text-color="#000"  active-text-color="#409EFF">
+            <el-submenu index="5">
+              <template slot="title">
+                <i class="el-icon-write-ren"></i>
+              </template>
+              <el-menu-item index="5-1" @click="logout">退出</el-menu-item>
+            </el-submenu>
+            <el-menu-item index="4">
+              <router-link :to="{path: '/d3show'}">
+                图谱
+              </router-link>
+            </el-menu-item>
+            <el-menu-item index="3">小说图谱</el-menu-item>
+            <el-menu-item index="2">
+              <router-link :to="{path:'/bookdirectory',query:{bookid:bookid,bookname:bookname}}"> 查看目录
+              </router-link>
+            </el-menu-item>
+            <el-menu-item index="1">
+              <router-link :to="{path:'/booklist'}"> 
+                图书列表
+              </router-link>
+            </el-menu-item>
+        </el-menu>
         <div class="main">
-          <h4 class="bookname">{{bookname}}</h4>
-          <el-row :gutter="20" class="chaptetit">
-            <el-col :span="24">
-              <label class="maintit">章节名称:第{{this.chapternumber}}章</label>
-              <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
-            </el-col>
+          <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;">
+            <span class="bookTit">作品名称</span>
+            {{bookname}}
+            <el-button @click="add" type="primary" size="medium " style="float:right;margin-top:5px;margin-bottom:5px;">新增章节</el-button>
           </el-row> 
           
-          <el-row :gutter="20">
+          <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;font-size:14px;">
+              第{{this.chapternumber}}章:
+              <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
+          </el-row>
+
+          <el-row :gutter="20" style="border-bottom: 1px solid #ccc;border-left:1px solid #ccc;">
             <el-col :span="6">
-              <label class="maintit">章节大纲:</label>
               <textarea name="content" :autosize="{minRows:1}" class="input_textarea" id="contentTip" v-model="chapterabstract" placeholder="请输入章节大纲"></textarea>
             </el-col>
             <el-col :span="18">
-              <!--
-              <el-button size="medium" class="bigBtn" @click="newContent">+</el-button>
-              -->
-              <label class="maintit">章节内容:</label>
               <tinymce id="d2" :other_options="options1" class="tinyBtm">
               </tinymce>
               <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
@@ -363,9 +372,6 @@ export default{
   margin-bottom:5px;
   margin-top:10px;
 }
-.app-container{
-  padding-top: 0px;
-}
 h5{
   text-align:center;
 }
@@ -402,22 +408,21 @@ h5{
 }
 .titInput{
   width: 80%;
-  height: 25px;
-  line-height: 25px;
+  height: 47px;
+  line-height: 47px;
   padding-left: 5px;
   padding-right: 5px;
   font-size: 14px;
+  border:none;
 }
 #contentTip{
-  width: 90%;
+  width: 100%;
   height: 560px;
   padding-left:5px;
   padding-right:5px;
-  border: 1px solid #ccc;
   padding-top: 5px;
   padding-bottom: 5px;
   font-size: 14px;
-  margin-left: 10px;
 }
 .tip{
   display: block;
@@ -473,15 +478,12 @@ h5{
 label{
   padding:10px;
 }
-.bookname{
-  font-size:24px;
-  font-weight: blod;
-  text-align: center;
-  width:100%;
-}
 input,textarea{
   border: 1px solid #ccc;
-  font-size: 18px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-size: 14px;
 }
 .maintit{
   font-size:14px;
@@ -494,6 +496,37 @@ input,textarea{
   top: 480px;
   right: 380px;
   z-index: 100000;
+}
+.el-menu--horizontal>.el-menu-item{
+  float:right;
+}
+.el-menu--horizontal>.el-submenu{
+  float:right;
+  margin-left: 150px;
+}
+.el-menu--horizontal>.el-menu-item a:hover{
+  color:#409EFF;
+}
+.bookTit{
+  display: block;
+  height:47px;
+  width:70px;
+  float:left;
+  line-height:47px;
+  font-size:14px;
+}
+.bookTit::before{
+    content: "";
+    position: absolute;
+    left: 70px;
+    top: 20px;
+    width: 36px;
+    height: 20px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e6e6e6;
+    -webkit-transform: rotateZ(45deg) scale(1.414);
+    transform: rotateZ(120deg) scale(1.414);
 }
 </style>
 

@@ -15,9 +15,7 @@ export default {
   components:{
     topNav
   },
-  created () {
-    this.$router.push('/login'); // 页面加载时跳转
-  }
+  
 }
 </script>
 
@@ -30,12 +28,11 @@ export default {
     text-align:center;
   }
   #app{
-    background: url(./assets/bg-pattern.png) repeat;
     width: 100%;
   }
   .el-main{
-    padding-top: 10px;
     min-height: 650px;
+    padding:0px;
   }
 </style>
     

@@ -13,6 +13,7 @@ import store from './vuex'
 import tinymce from 'vue-tinymce-editor'
 import axios  from 'axios' 
 import './assets/reset.css' 
+import './assets/icon/iconfont.css' 
 import './axios'
 
 Vue.prototype.$axios = axios;

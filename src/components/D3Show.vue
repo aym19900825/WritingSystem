@@ -90,7 +90,7 @@
                                         })
                                         .on("click",function(d,i){
                                             console.log(d.eid);
-                                            axios.post("/api/api/news/detail",{
+                                            axios.post("http://192.168.1.168:8888/api/news/detail",{
                                                 "eid": d.eid
                                             }).then((res) => {
                                                 $("#relationTxt h4").text(res.data.title);
