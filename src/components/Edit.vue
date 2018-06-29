@@ -27,7 +27,7 @@
         <div class="main">
           <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;">
             <span class="bookTit">作品名称</span>
-            {{bookname}}
+            <span class="bookname">{{bookname}}</span>
             <el-button @click="add" type="primary" size="medium " style="float:right;margin-top:5px;margin-bottom:5px;">新增章节</el-button>
           </el-row> 
           
@@ -368,6 +368,9 @@ export default{
 } 
 </script>
 <style scoped>
+.app-container{
+  background: #fff;
+}
 .chaptetit{
   margin-bottom:5px;
   margin-top:10px;
@@ -507,7 +510,7 @@ input,textarea{
 .el-menu--horizontal>.el-menu-item a:hover{
   color:#409EFF;
 }
-.bookTit{
+.bookTit,.bookname{
   display: block;
   height:47px;
   width:70px;
@@ -527,6 +530,10 @@ input,textarea{
     border-bottom: 1px solid #e6e6e6;
     -webkit-transform: rotateZ(45deg) scale(1.414);
     transform: rotateZ(120deg) scale(1.414);
+}
+.bookname{
+  width:300px;
+  padding-left: 20px;
 }
 </style>
 

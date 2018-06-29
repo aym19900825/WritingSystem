@@ -1,23 +1,26 @@
 <template>
-    <div>
-        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
+    <div class="bookdirectory">
+        
         <h2>{{bookname}}</h2>
-        <h3>目录</h3>
-        <el-button type="primary" class="btnRight" @click="addChapter" style="float: right;">新增章节</el-button>
-        <el-table :data="tableData" border style="width: 100%">
-            <el-table-column label="章节" width="80">
-                <template scope="scope">
-                    <el-input v-model="scope.row.chapternumber" :disabled="true"></el-input>
+        <el-row class="bookFront">    
+            <h3>目录</h3>
+            <el-button type="primary" class="btnRight" @click="returnPre" plain style="margin-left:10px;">返回章节</el-button>
+            <el-button type="primary" class="btnRight" @click="addChapter">新增章节</el-button>
+        </el-row>
+        <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
+            <el-table-column prop="chapternumber" label="章节" width="80"></el-table-column>
+            <el-table-column prop="chaptername" label="标题" width="200" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="chapterabstract" label="章节大纲" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column label="完成时间" width="200">
+                <template slot-scope="scope">
+                    <i class="el-icon-time"></i>
+                    <span style="margin-left: 10px">{{ scope.row.edit_date }}</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="chaptername" label="标题" width="280"></el-table-column>
-            <el-table-column prop="chapterabstract" label="章节大纲"></el-table-column>
-            <el-table-column prop="edit_date" label="完成时间" width="120"></el-table-column>
-            <el-table-column label="操作" width="270">
+            <el-table-column label="操作" width="200">
               <template scope="scope">
                 <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-                <el-button size="small" type="danger" @click="editNum(scope.$index, scope.row)">修改章节号</el-button>
               </template>
             </el-table-column>
         </el-table>
@@ -172,27 +175,36 @@
     }
 </script>
 <style scoped>
-h2,h3{
-    text-align:center;
+.bookdirectory{
+    width: 100%;
+    background: #fff;
+    min-height: 600px;
 }
-h2{
-    font-size: 20px;
-    height: 32px;
-    line-height: 32px;
+h2,h3{
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #e6e6e6;
 }
 h3{
-    font-size: 18px;
-    height: 32px;
-    line-height: 32px;
-    color: #666;
+    float: left;
+    width: 30%;
+    border: none;
+}
+.bookFront{
+    height: 47px;
+    line-height: 47px;
+    width: 85%;
+    border-bottom: 1px solid #e6e6e6;
+    margin: 0 auto;
 }
 .returnPre{
     float: left;
 }
-.el-button--primary{
-    color: #fff;
-    background-color: #409EFF;
-    border-color: #409EFF;
+.btnRight{
+    float: right;
+    margin-top: 3px;
     margin-bottom: 5px;
 }
 </style>

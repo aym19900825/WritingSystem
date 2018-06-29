@@ -1,14 +1,10 @@
 <template>
-    <div>
+    <div id="d3show">
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
         <el-row>
             <el-col :span="12" :offset="6">
                 <div style="margin-top: 15px;">
                     <el-input placeholder="请输入内容" v-model="search" class="input-with-select">
-                        <el-select v-model="select" slot="prepend" placeholder="请选择">
-                            <el-option label="人物" value="person"></el-option>
-                            <el-option label="事件" value="event"></el-option>
-                        </el-select>
                         <el-button slot="append" icon="el-icon-search" @click="searchRelation"></el-button>
                     </el-input>
                 </div>
@@ -47,10 +43,10 @@
                 this.d3Init("http://192.168.1.168:8888/api/graph_search",this.search);
             },
             d3Init(url,queryParam){
-                var width = 600;
-                var height = 300;
-                var img_w = 45;
-                var img_h = 60;
+                var width = this.d3Params.width;
+                var height = this.d3Params.height;
+                var img_w = this.d3Params.img_w;
+                var img_h = this.d3Params.img_h;
                 var _this = this;
                 d3.select("svg").remove();
 
@@ -172,17 +168,25 @@
                 d3Params: {
                     width: 600,
                     height: 600,
-                    img_w: 77,
-                    img_h: 90
+                    img_w: 30,
+                    img_h: 40
                 },
                 search: '',
                 select: '',
                 relationTxt:''
             }        
+        },
+        mounted(){
+            this.d3Params.width = $("#d3show").width();
         }
     }
 </script>
 <style scoped>
+#d3show{
+    width: 90%;
+    margin: 0 auto;
+    min-height: 600px;
+}
 .nodetext {
     font-size: 12px ;
     font-family: SimSun;
@@ -196,8 +200,8 @@
     fill-opacity:1.0;
 }
 #chart{
-    width: 600px;
-    height:300px;
+    width: 100%;
+    height:600;
     padding-top: 50px;
     padding-bottom: 50px;
     margin: 0 auto;

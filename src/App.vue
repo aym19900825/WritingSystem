@@ -15,7 +15,9 @@ export default {
   components:{
     topNav
   },
-  
+  created(){
+    this.$router.push('/login');
+  }
 }
 </script>
 
@@ -29,6 +31,7 @@ export default {
   }
   #app{
     width: 100%;
+    background:  url('./assets/bg-pattern.png') repeat; 
   }
   .el-main{
     min-height: 650px;

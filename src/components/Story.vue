@@ -28,6 +28,8 @@
                             <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogFormVisible = true">
                                 +
                             </div>
+                            <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
+                            <div id="chart"></div>
                         </el-card>
                     </el-col>
                 </el-row>
@@ -88,6 +90,129 @@
             getParams () {
                 let bookid = this.$route.query.bookid;
                 this.bookid = bookid;
+            },
+            d3Init(url,queryParam){
+                var width = 400;
+                var height = 400;
+                var img_w = 20;
+                var img_h = 20;
+                var _this = this;
+                d3.select("svg").remove();
+
+                var svg = d3.select("#chart").append("svg")
+                                .attr("width",width)
+                                .attr("height",height);
+
+                d3.json(url,function(error,root){
+                    if( error ){
+                        console.log(error);
+                    }
+                    console.log(root);
+                    
+                    var force = d3.layout.force()
+                                    .nodes(root.nodes)
+                                    .links(root.edges)
+                                    .size([width,height])
+                                    .linkDistance(200)
+                                    .charge(-1500)
+                                    .start();
+                                    
+                    var edges_line = svg.selectAll("line")
+                                        .data(root.edges)
+                                        .enter()
+                                        .append("line")
+                                        .style("stroke","#ccc")
+                                        .style("stroke-width",1);
+                                        
+                                        
+                    var edges_text = svg.selectAll(".linetext")
+                                        .data(root.edges)
+                                        .enter()
+                                        .append("text")
+                                        .attr("class","linetext")
+                                        .text(function(d){
+                                            return d.type;
+                                        })
+                                        .on("click",function(d,i){
+                                            console.log(d.eid);
+                                            axios.post("http://192.168.1.168:8888/api/news/detail",{
+                                                "eid": d.eid
+                                            }).then((res) => {
+                                                $("#relationTxt h4").text(res.data.title);
+                                                $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
+                                                $("#relationTxt span").text(res.data.create_date);
+                                                $("#relationTxt div").text(res.data.content);
+                                            }).catch((err) => {
+                                                this.$message({
+                                                    type: 'error',
+                                                    message: '网络错误，请重试',
+                                                    showClose: true
+                                                })
+                                            })
+                                        });
+                    
+                                        
+                    var nodes_img = svg.selectAll("image")
+                                        .data(root.nodes)
+                                        .enter()
+                                        .append("image")
+                                        .attr("width",img_w)
+                                        .attr("height",img_h)
+                                        .attr("xlink:href",function(d){
+                                            console.log(d.image.toLowerCase());
+                                            return "/static/"+d.image.toLowerCase();
+                                        })
+                                        .call(force.drag);
+                    
+                    var text_dx = -20;
+                    var text_dy = 20;
+                    
+                    var nodes_text = svg.selectAll(".nodetext")
+                                        .data(root.nodes)
+                                        .enter()
+                                        .append("text")
+                                        .attr("class","nodetext")
+                                        .attr("dx",text_dx)
+                                        .attr("dy",text_dy)
+                                        .text(function(d){
+                                            return d.name;
+                                        });
+                    
+                                        
+                    force.on("tick", function(){
+                        
+                        //限制结点的边界
+                        root.nodes.forEach(function(d,i){
+                            d.x = d.x - img_w/2 < 0     ? img_w/2 : d.x ;
+                            d.x = d.x + img_w/2 > width ? width - img_w/2 : d.x ;
+                            d.y = d.y - img_h/2 < 0      ? img_h/2 : d.y ;
+                            d.y = d.y + img_h/2 + text_dy > height ? height - img_h/2 - text_dy : d.y ;
+                        });
+                    
+                        //更新连接线的位置
+                         edges_line.attr("x1",function(d){ return d.source.x; });
+                         edges_line.attr("y1",function(d){ return d.source.y; });
+                         edges_line.attr("x2",function(d){ return d.target.x; });
+                         edges_line.attr("y2",function(d){ return d.target.y; });
+                         
+                         //更新连接线上文字的位置
+                         edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; });
+                         edges_text.attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
+                         
+                         
+                         //更新结点图片和文字
+                         nodes_img.attr("x",function(d){ return d.x - img_w/2; });
+                         nodes_img.attr("y",function(d){ return d.y - img_h/2; });
+                         
+                         nodes_text.attr("x",function(d){ return d.x });
+                         nodes_text.attr("y",function(d){ return d.y + img_w/2; });
+                    });
+                })
+                .header("Content-Type","application/json")
+                .send("POST", JSON.stringify({eid: queryParam}));
+            },
+            characterMap(){
+                this.d3Init("http://192.168.1.168:8888/api/char_graph_search","u5F6QGQBEBnYWdPIqZUv");
             },
             returnEdit(){
                 this.$router.push({
@@ -287,6 +412,10 @@
     }
 </script>
 <style scoped>
+#chart{
+    width: 500px;
+    height: 500px;
+}
 .bookAbstract{
     display: block;
     font-size: 18px;

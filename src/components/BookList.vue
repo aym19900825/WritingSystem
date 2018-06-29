@@ -1,17 +1,22 @@
 <template>
     <div class="bookList">
         <template>
-            <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
             <h4 class="bookTit">我的作品</h4>
             <el-row class="bookFront">    
                 <span>当前作品共</span><span>{{books.length}}</span><span>个</span>
+                <el-button type="primary" class="btnRight" @click="returnPre" style="margin-left: 10px;" plain>返回章节</el-button>
                 <el-button type="primary" class="btnRight" @click="dialogFormVisible = true">创建作品</el-button>
             </el-row>
-            <el-table :data="books" style="width: 100%">
-                <el-table-column label="书名" width="180" prop="bookname">
+            <el-table :data="books" style="width: 85%;margin: 0 auto;">
+                <el-table-column label="书名" width="250" prop="bookname">
                 </el-table-column>
                 <el-table-column label="状态" width="180" prop="bookstatus"></el-table-column>
-                <el-table-column label="创建时间" width="180" prop="createtime"></el-table-column>
+                <el-table-column label="创建时间" width="250">
+                    <template slot-scope="scope">
+                        <i class="el-icon-time"></i>
+                        <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
+                  </template>
+                </el-table-column>
                  <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button size="mini" @click="addChapter(scope.$index, scope.row)">新增章节</el-button>
@@ -249,30 +254,40 @@
 </script>
 <style scoped>
 .bookList{
-    width:90%;
-    margin: 0 auto;
+    width: 100%;
+    background: #fff;
 }
 .bookTit{
-    height: 50px;
-    line-height: 50px;
+    height: 60px;
+    line-height: 60px;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
+    border-bottom: 1px solid #e6e6e6;
 }
 .btnRight{
     float: right;
+    margin-top: 3px;
+    margin-bottom: 5px;
+}
+.bookFront{
+    height: 47px;
+    line-height: 47px;
+    border-bottom: 1px solid #e6e6e6;
+    width: 85%;
+    margin: 0 auto;
 }
 .bookFront span{
     display: block;
     float: left;
-    height: 45px;
-    line-height: 45px;
+    height: 47px;
+    line-height: 70px;
 }
 .time {
     font-size: 13px;
     color: #999;
-  }
+}
   
-  .bottom {
+.bottom {
     margin-top: 13px;
     line-height: 12px;
   }
@@ -301,7 +316,6 @@
     margin-bottom:20px;
     border-bottom:1px solid #ccc;
     padding-bottom:10px;
-
   }
   .inputTip{
     font-size:12px;
@@ -324,8 +338,8 @@
   table.el-table__body tbody tr td:nth-child(1){
     cursor: pointer;
   }
-  .returnPre{
-    float: left;
+  .el-table th{
+    background: #f9f9f9;
   }
 </style>
 
