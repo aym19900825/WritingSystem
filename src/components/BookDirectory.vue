@@ -4,7 +4,7 @@
         <h2>{{bookname}}</h2>
         <el-row class="bookFront">    
             <h3>目录</h3>
-            <el-button type="primary" class="btnRight" @click="returnPre" plain style="margin-left:10px;">返回章节</el-button>
+            <el-button type="primary" class="btnRight" @click="returnPre" plain style="margin-left:10px;">返回</el-button>
             <el-button type="primary" class="btnRight" @click="addChapter">新增章节</el-button>
         </el-row>
         <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
@@ -24,8 +24,8 @@
               </template>
             </el-table-column>
         </el-table>
-        <!--
-            <div align="right">
+       
+        <div align="right">
             <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
@@ -36,7 +36,7 @@
                 :total="totalCount">
             </el-pagination>
         </div>
-        -->
+      
     </div>
 </template>
 
@@ -137,11 +137,15 @@
             },
             init(){
                 this.$axios.post('http://192.168.1.168:8888/api/chapter/list',{
-                    bookid: this.bookid
+                    bookid: this.bookid,
+                    page_index: this.currentPage,
+                    page_size: this.pagesize
                 }).then((res)=>{
-                    if(res.data.length>0){
+                    if(res.data.total>0){
+                        this.totalCount = res.data.total;
                         var arr = [];
-                        var tmpData = res.data;
+                        var tmpData = res.data.data;
+                        console.log(res.data);
                         var tmpObj = {};
                         for(let i=0,len=tmpData.length;i<len;i++){
                             tmpObj = tmpData[i]._source;
@@ -155,6 +159,14 @@
                 }).catch((err)=>{
                     
                 })
+            },
+            handleSizeChange(val) {
+                this.pagesize = val;
+                this.init();
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.init();
             }
         },
         data () {
@@ -162,10 +174,11 @@
                 bookid:1,
                 tableData: [],
                 bookname:"",
+
+                //page信息
                 pagesize: 10,
-                totalCount: 1000,
+                totalCount: 100,
                 currentPage: 1,
-                start: 1
             }
         },
         created(){

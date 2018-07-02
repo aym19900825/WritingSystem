@@ -3,8 +3,8 @@
         <template>
             <h4 class="bookTit">我的作品</h4>
             <el-row class="bookFront">    
-                <span>当前作品共</span><span>{{books.length}}</span><span>个</span>
-                <el-button type="primary" class="btnRight" @click="returnPre" style="margin-left: 10px;" plain>返回章节</el-button>
+                <span>当前作品共</span><span>{{totalCount}}</span><span>个</span>
+                <el-button type="primary" class="btnRight" @click="returnPre" style="margin-left: 10px;" plain>返回</el-button>
                 <el-button type="primary" class="btnRight" @click="dialogFormVisible = true">创建作品</el-button>
             </el-row>
             <el-table :data="books" style="width: 85%;margin: 0 auto;">
@@ -15,7 +15,7 @@
                     <template slot-scope="scope">
                         <i class="el-icon-time"></i>
                         <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
-                  </template>
+                    </template>
                 </el-table-column>
                  <el-table-column label="操作">
                     <template slot-scope="scope">
@@ -29,9 +29,9 @@
         </template>
 
 
-        <el-dialog title="作品信息" :visible.sync="dialogFormVisible">
-            <el-form :model="newBook" :rules="rules">
-                <el-form-item label="作品名称" :label-width="formLabelWidth" prop="tit">
+        <el-dialog title="作品信息" :visible.sync="dialogFormVisible"  :before-close="handleCloseBookInfo">
+            <el-form :model="newBook" :rules="rules" ref="bookinfoForm">
+                <el-form-item label="作品名称" :label-width="formLabelWidth" prop="bookname">
                     <el-input v-model="newBook.bookname" auto-complete="off"></el-input>
                     <p class="inputTip">15字内，请勿添加特殊符号</p>
                 </el-form-item>
@@ -47,15 +47,15 @@
                 <el-form-item label="作品简介" :label-width="formLabelWidth" prop="abstract">
                     <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6}"  placeholder="请输入内容"  v-model="newBook.abstract">
                     </el-input>
-                    <p class="inputTip">10~300字</p>
+                    <p class="inputTip">10~1000字</p>
                 </el-form-item>
                 <el-form-item label="作者寄语" :label-width="formLabelWidth" prop="writing">
                     <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6}"  placeholder="请输入内容"  v-model="newBook.writing">
                     </el-input>
-                    <p class="inputTip">0~30字</p>
+                    <p class="inputTip">0~500字</p>
                 </el-form-item>
             </el-form>
-            <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible"  append-to-body>
+            <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleClose" append-to-body>
                 <P class="congratulation">恭喜您！创建成功！</P>
                 <el-button @click="returnList"  type="text">返回图书列表</el-button>
             </el-dialog>
@@ -65,19 +65,52 @@
                 <el-button @click="reset">取 消</el-button>
             </div>
         </el-dialog>
+        <div align="right">
+            <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[10, 20, 30, 40]"
+                :page-size="pagesize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="totalCount">
+            </el-pagination>
+        </div>
     </div>
 </template>
 
 <script>
     export default {
         data(){
+            var validateWriting = (rule, value, callback) => {
+                if(value.length >1000){
+                    callback(new Error('长度在 0 到 1000个字符'));
+                }else {
+                  callback();
+                }
+            };
+            var validateAbstract = (rule, value, callback) => {
+                if(value.length <= 0){
+                    callback(new Error('必填'));
+                }else if(value.length > 1000){
+                    callback(new Error('长度在 0 到 1000个字符'));
+                }else{
+                    callback();
+                }
+            };
             return{
+                //page信息
+                pagesize: 10,
+                totalCount: 100,
+                currentPage: 1,
+
                 books: [],
                 dialogFormVisible:false,
                 innerVisible:false,
                 formLabelWidth: '120px',
                 upDateBook: false,
                 upDateBookId: 1,
+
                 //新增图书信息
                 newBook: {
                   bookname: '',
@@ -93,13 +126,31 @@
                    
                 ],
                 rules:  {
-                    tit:[
+                    bookname:[
                         {
                             required: true,
                             message: '必填信息',
                             trigger: 'blur',
+                        },
+                        { min: 1,
+                          max: 15, 
+                          message: '15个字符内', 
+                          trigger: 'blur' 
+                        }
+                    ],
+                    writing:[
+                        {
+                            validator: validateWriting, 
+                            trigger: 'blur'
+                        }
+                    ],
+                    abstract:[
+                        {
+                            validator: validateAbstract, 
+                            trigger: 'blur'
                         }
                     ]
+
                 }
 
             }
@@ -110,6 +161,9 @@
             }
         },
         methods: {
+            handleCloseBookInfo(){
+                this.reset();
+            },
             returnPre(){
                 sessionStorage.setItem('url','login');
                 this.$router.push({
@@ -136,15 +190,20 @@
                 })
             },
             readBook(index,row){
-                this.newBook.bookname = row.bookname;
+                this.newBook = JSON.parse(JSON.stringify(row));
                 this.upDateBook = true;
                 this.upDateBookId = row.bookid;
                 this.dialogFormVisible = true;
+                console.log(this.newBook);
             },
             editBook(){
                 this.$axios.post('http://192.168.1.168:8888/api/editBook',{
                     bookid: this.upDateBookId,
                     bookname: this.newBook.bookname,
+                    category: this.newBook.category,
+                    label: this.newBook.label,
+                    abstract: this.newBook.abstract,
+                    writing: this.newBook.writing,
                     bookstatus: 0
                 }).then((res)=>{
                     if(res.data.code==1){
@@ -169,6 +228,10 @@
             addBook() {
                 this.$axios.post('http://192.168.1.168:8888/api/addBook',{
                     bookname: this.newBook.bookname,
+                    category: this.newBook.category,
+                    label: this.newBook.label,
+                    abstract: this.newBook.abstract,
+                    writing: this.newBook.writing,
                     userid: this.user.userid
                 }).then((res)=>{
                     if(res.data.code==1){
@@ -204,6 +267,9 @@
                     }
                 })
             },
+            handleClose(){
+                this.returnList();
+            },
             returnList(){
                 this.innerVisible = false;
                 this.dialogFormVisible = false;
@@ -211,11 +277,7 @@
                 this.initBookList();
             },
             reset(){
-                this.newBook.bookname = '';
-                this.newBook.category = '';
-                this.newBook.label = '';
-                this.newBook.abstract = '';
-                this.newBook.writing = '';
+                this.$refs["bookinfoForm"].resetFields();
                 this.dialogFormVisible = false;
                 //更新完图书基本信息后reset
                 this.upDateBook = false;
@@ -223,7 +285,9 @@
             },
             initBookList(){
                 this.$axios.post('http://192.168.1.168:8888/api/bookList',{
-                    userid: this.user.userid
+                    userid: this.user.userid,
+                    page_index: this.currentPage,
+                    page_size: this.pagesize
                 }).then((res)=>{
                     if (res.data) {
                         this.doingWorks  = res.data.books["0"];
@@ -235,6 +299,7 @@
                         }else{
                             this.books = res.data.books["1"].concat(res.data.books["0"]);
                         }
+                        this.totalCount = res.data.total;
                     }else {
                         this.$message({
                             type: 'error',
@@ -245,6 +310,15 @@
                 }).catch((err)=>{
                     
                 })
+            },
+            handleSizeChange(val) {
+                this.pagesize = val;
+                this.initBookList();
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.initBookList();
+                console.log(val);
             }
         },
         created(){

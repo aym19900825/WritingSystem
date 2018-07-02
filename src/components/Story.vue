@@ -2,7 +2,7 @@
     <div class="main">
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回图书列表</el-button>
         <el-steps :active="active" finish-status="success">
-            <el-step title="故事大纲"></el-step>
+            <el-step title="故事简介"></el-step>
             <el-step title="人物设定"></el-step>
             <el-step title="事件设定"></el-step>
         </el-steps>
@@ -15,8 +15,8 @@
                             在w3school，你可以找到你所需要的所有的网站建设教程。
                         </textarea>
                         <el-footer class="btndiv">
+                            <el-button size="medium" @click="resetStory">重置</el-button>
                             <el-button type="primary" size="medium" @click="next">下一步</el-button>
-                            <el-button size="medium">重置</el-button>
                         </el-footer>
                     </el-col>
                 </el-row>
@@ -28,17 +28,21 @@
                             <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogFormVisible = true">
                                 +
                             </div>
-                            <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
-                            <div id="chart"></div>
                         </el-card>
                     </el-col>
                 </el-row>
                 <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in peoples" :key="item">
-                    <div class="peopleInfo" @click="editPeople(item)">{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})</div> 
+                    <div class="peopleInfo" @click="editPeople(item,index)">{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})</div> 
+                </el-row>
+                <el-row type="flex" justify="center">
+                    <div id="chart" v-show="updateBook"></div>
                 </el-row>
                 <el-footer class="btndiv">
-                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
                     <el-button size="medium" @click="pre">上一步</el-button>
+                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
+                    <!--
+                        <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
+                    -->
                 </el-footer>
             </el-tab-pane>
             <el-tab-pane name="third">
@@ -49,20 +53,20 @@
                 </el-footer>
             </el-tab-pane>
         </el-tabs>
-        <el-dialog title="人物信息" :visible.sync="dialogFormVisible">
-            <el-form ref="form" :model="newPeople"  label-width="80px">
-              <el-form-item label="姓名">
+        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose">
+            <el-form ref="form" :model="newPeople" label-width="80px">
+              <el-form-item label="姓名" prop="name">
                 <el-input  v-model="newPeople.name"></el-input>
               </el-form-item>
-              <el-form-item label="身份特征">
+              <el-form-item label="身份特征" prop="titles">
                 <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
               </el-form-item>
-              <el-form-item label="性格特点">
+              <el-form-item label="性格特点" prop="characters">
                 <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
               </el-form-item>
-              <el-form-item label="人物关系">
+              <el-form-item label="人物关系" prop="relationship">
                 <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX;</p>
+                <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX；</p>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">立即创建</el-button>
@@ -71,10 +75,10 @@
               </el-form-item>
             </el-form>
         </el-dialog>
-        <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible"  append-to-body>
+        <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleCloseStory"  append-to-body>
             <P class="congratulation" v-show="!updateBook">恭喜您！创建成功！</P>
             <P class="congratulation" v-show="updateBook">恭喜您！更新成功！</P>
-            <el-button type="primary" @click="returnEdit" style="margin-left: 130px;margin-top: 20px;">返回编辑章节</el-button>
+            <el-button type="primary" @click="returnBookList" style="margin-left: 130px;margin-top: 20px;">返回图书列表</el-button>
         </el-dialog>
     </div>
 </template>
@@ -84,6 +88,15 @@
     export default {
         name: 'Story',
         methods: {
+            handleCloseStory(){
+                this.returnBookList();
+            },
+            handleClose(){
+                this.resetPeople();
+            },
+            resetStory(){
+                this.bookabstract = '';
+            },
             returnPre(){
                 this.$router.replace('/booklist');
             },
@@ -214,17 +227,13 @@
             characterMap(){
                 this.d3Init("http://192.168.1.168:8888/api/char_graph_search","u5F6QGQBEBnYWdPIqZUv");
             },
-            returnEdit(){
+            returnBookList(){
                 this.$router.push({
-                    path: '/edit', 
-                    name: 'Edit',
-                    query: { 
-                        bookid: this.bookid,
-                        isNew: true
-                    }
+                    path: '/booklist', 
                 })
             },
             update(){
+                var _this = this;
                 var obj = {
                     people: []
                 };
@@ -247,24 +256,17 @@
                     "charactersetting": JSON.stringify(obj),
                     "eid":  this.eid
                 } ).then((res) => {
-                    this.innerVisible = true;
+                    _this.innerVisible = true;
                 }).catch((err) => {
                 
                 })
             },
             addPeople(){
-                Vue.set(this.peoples,this.peoples.length, this.newPeople);
-                this.dialogFormVisible = false;
-                this.resetNewPeople();
+                Vue.set(this.peoples,this.peoples.length, JSON.parse(JSON.stringify(this.newPeople)));
+                this.resetPeople()
             },
             updatePeople(){
-                var index = 1;
-                for(var i=0;i<this.peoples.length;i++){
-                    if(this.peoples[i].name == this.newPeople.name){
-                        index=i;
-                    }
-                }
-                Vue.set(this.peoples,index,this.newPeople);
+                Vue.set(this.peoples,this.upDatePeopelIndex,JSON.parse(JSON.stringify(this.newPeople)));
                 this.resetNewPeople();
                 this.isupdatePeople = false;
                 this.dialogFormVisible = false;
@@ -274,23 +276,17 @@
                 this.dialogFormVisible = false;
                 this.isupdatePeople = false;
             },
-            editPeople(item){
-                this.newPeople.name = item.name;
-                this.newPeople.relationship = item.relationship;
-                this.newPeople.characters = item.characters;
-                this.newPeople.titles = item.titles;
+            editPeople(item,index){
+                this.upDatePeopelIndex = index;
+                this.newPeople = JSON.parse(JSON.stringify(item));
                 this.dialogFormVisible = true;
                 this.isupdatePeople = true;
             },
             resetNewPeople(){
-                this.newPeople = {
-                    name: '',
-                    relationship: '',
-                    characters: '',
-                    titles: ''
-                }
+                this.$refs["form"].resetFields();
             },
             finish(){
+                var _this = this;
                 var obj = {
                     people: []
                 };
@@ -307,16 +303,16 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                console.log(obj.people);
                 this.$axios.post('http://192.168.1.168:8888/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
                 }).then((res) => {
                     if(res.data.code==1){
-                        this.innerVisible = true;
+                        //新增失败但是实际新增成功
+                        _this.innerVisible = true;
                     }else{
-
+                        _this.innerVisible = true;
                     }
                 }).catch((err) => {
                     
@@ -394,6 +390,7 @@
                 active: 0,
                 activeName: 'first',
                 eid: "",
+                upDatePeopelIndex: 1,
                 //故事大纲
                 bookabstract: '',
                 //人物设定
@@ -406,6 +403,11 @@
                     relationship: '',
                     characters: '',
                     titles: '',
+                },
+                rules:{
+                    name:[
+                        { required: true, message: '必填', trigger: 'blur' },
+                    ],
                 }
             }
         }

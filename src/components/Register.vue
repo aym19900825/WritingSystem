@@ -1,35 +1,54 @@
 <template>
-    <el-form ref="registerForm" :model="newUser" :rules="rules" status-icon  label-width="80px" label-position="right"  class="login-container"> 
-        <h3 class="title">注册</h3>
-        <el-form-item label="用户名" prop="name">
-             <el-input type="text" v-model="newUser.name"></el-input>
-        </el-form-item>
-        <el-form-item label="电话" prop="phoneNum">
-            <el-input type="text" v-model="newUser.phoneNum"></el-input>
-        </el-form-item>
-        <el-form-item label="性别" prop="sex">
-            <el-radio-group v-model="newUser.sex">
-                <el-radio label="男"></el-radio>
-                <el-radio label="女"></el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-form-item label="密码" prop="pass">
-             <el-input type="password" v-model="newUser.pass"></el-input>
-        </el-form-item>
-        <el-form-item label="确认密码" prop="checkPass">
-             <el-input type="password" v-model="newUser.checkPass"></el-input>
-        </el-form-item>
-        <el-form-item> 
-            <el-button type="primary" @click="register" class="registerBtn">注册</el-button>
-        </el-form-item>
-        <p class="regitstTip">已有账号？<router-link to="/login">登录</router-link></p>
-    </el-form>
+    <div>
+        <el-form ref="registerForm" :model="newUser" :rules="rules" status-icon  label-width="80px" label-position="right"  class="login-container"> 
+            <h3 class="title">注册</h3>
+            <el-form-item label="用户名" prop="name">
+                 <el-input type="text" v-model="newUser.name"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" prop="phoneNum">
+                <el-input type="text" v-model="newUser.phoneNum"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" prop="sex">
+                <el-radio-group v-model="newUser.sex">
+                    <el-radio label="男"></el-radio>
+                    <el-radio label="女"></el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="密码" prop="pass">
+                 <el-input type="password" v-model="newUser.pass"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="checkPass">
+                 <el-input type="password" v-model="newUser.checkPass"></el-input>
+            </el-form-item>
+            <el-form-item> 
+                <el-button type="primary" @click="register" class="registerBtn">注册</el-button>
+            </el-form-item>
+            <p class="regitstTip">已有账号？<router-link to="/login">登录</router-link></p>
+        </el-form>
+        <el-dialog
+          title="提示"
+          :visible.sync="dialogVisible"
+          width="30%"
+          :before-close="handleClose">
+          <span>恭喜您注册成功！</span>
+          <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="login">登录</el-button>
+          </span>
+        </el-dialog>
+    </div>
 </template>
 
 <script>
     export default {
         name: 'Register',
         methods: {
+            login(){
+                this.dialogVisible = false;
+                this.$router.replace("/login");
+            },
+            handleClose(){
+                this.login();
+            },
             register() {
                 this.$refs.registerForm.validate((valid) => {
                     if (valid) {
@@ -38,14 +57,7 @@
                             password: this.newUser.pass
                         }).then((res) => {
                             if (res.data.code==1) {
-                                this.$confirm('您已经注册成功！', '提示', {
-                                        confirmButtonText: '确定',
-                                    }).then(({ value }) => {
-                                        this.$router.replace('/login');
-                                    }).catch(() => {
-                                
-                                });
-                    
+                                this.dialogVisible = true;
                             }else {
                                 this.$message({
                                     type: 'error',
@@ -98,6 +110,8 @@
                     phoneNum: '',
                     sex: ''
                 },
+
+                dialogVisible: false,
 
                 rules:  {
                     name:[

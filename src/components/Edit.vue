@@ -1,7 +1,7 @@
 <template>
     <div class="app-container">
         <el-menu class="el-menu-demo" mode="horizontal" 
-           @select="handleSelect" text-color="#000"  active-text-color="#409EFF">
+            text-color="#000"  active-text-color="#409EFF">
             <el-submenu index="5">
               <template slot="title">
                 <i class="el-icon-write-ren"></i>
@@ -45,7 +45,7 @@
               </tinymce>
               <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
               <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
-              <el-button size="medium" class="finishBtn" @click="finishSave">完成保存</el-button>
+              <el-button size="medium" class="finishBtn" @click="finishSave">完成</el-button>
               <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
               <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
             </el-col>
@@ -302,7 +302,6 @@ export default{
     },
     mounted(){
       this.getParams();
-      console.log(this.user.userid);
       var preUrl = sessionStorage.getItem('url');
       if(preUrl=='login'){
         this.$axios.post('http://192.168.1.168:8888/api/work/detail',{

@@ -1,6 +1,6 @@
 <template>
     <div id="d3show">
-        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回章节</el-button>
+        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回</el-button>
         <el-row>
             <el-col :span="12" :offset="6">
                 <div style="margin-top: 15px;">
