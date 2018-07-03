@@ -43,10 +43,13 @@
             <el-col :span="18">
               <tinymce id="d2" :other_options="options1" class="tinyBtm">
               </tinymce>
-              <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
-              <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
-              <el-button size="medium" class="finishBtn" @click="finishSave">完成</el-button>
-              <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
+              <div class="btngroup">
+                <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
+                <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
+                <el-button size="medium" class="finishBtn" @click="finishSave">完成</el-button>
+                <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
+              </div>
+              
               <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
             </el-col>
           </el-row>
@@ -533,6 +536,11 @@ input,textarea{
 .bookname{
   width:300px;
   padding-left: 20px;
+}
+.btngroup{
+  width: 100%;
+  height: 50px;
+  clear: both;
 }
 </style>
 

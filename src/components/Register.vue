@@ -54,7 +54,9 @@
                     if (valid) {
                         this.$axios.post('http://192.168.1.168:8888/api/register',{
                             username: this.newUser.name,
-                            password: this.newUser.pass
+                            password: this.newUser.pass,
+                            phonenumber: this.newUser.phoneNum,
+                            sex: this.newUser.sex
                         }).then((res) => {
                             if (res.data.code==1) {
                                 this.dialogVisible = true;
@@ -74,7 +76,7 @@
                         })
                     }
                     else {
-                        return false
+                        return false;
                     }
                 })
             }
@@ -107,7 +109,7 @@
                     name: '',
                     pass: '',
                     checkPass: '',
-                    phoneNum: '',
+                    phoneNum: 15032566561,
                     sex: ''
                 },
 
