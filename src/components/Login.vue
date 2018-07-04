@@ -2,10 +2,10 @@
     <el-form ref="loginForm" :model="user" :rules="rules" status-icon  label-width="80px" label-position="left"  class="login-container"> 
         <h3 class="title">登录</h3>
         <el-form-item prop="name" label="用户名">
-            <el-input v-model="user.name" type="text" placeholder="用户名"></el-input>
+            <el-input v-model="user.name" type="text" placeholder="用户名" @keydown="loginEnter($event)"></el-input>
         </el-form-item>
         <el-form-item prop="pass"  label="密码">
-            <el-input v-model="user.pass" type="password" placeholder="密码"></el-input>
+            <el-input v-model="user.pass" type="password" placeholder="密码" @keydown="loginEnter($event)"></el-input>
         </el-form-item>
         <el-form-item> 
             <el-button type="primary" icon="el-icon-upload" @click="login" class="submitBtn">登录</el-button>
@@ -18,6 +18,11 @@
     export default {
         name: 'Login',
         methods: {
+            loginEnter(e){
+                if(e.keyCode==13){
+                    this.login();
+                }
+            },
             login() {
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {

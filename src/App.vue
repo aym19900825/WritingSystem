@@ -14,9 +14,6 @@ export default {
   name: 'App',
   components:{
     topNav
-  },
-  created(){
-    this.$router.push('/login');
   }
 }
 </script>

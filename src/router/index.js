@@ -7,12 +7,18 @@ import Register from '@/components/Register'
 import D3Show from '@/components/D3Show'
 import BookDirectory from '@/components/BookDirectory'
 import Story from '@/components/Story'
+import ShowRelation from '@/components/ShowRelation'
 
 Vue.use(Router)
 
 export default new Router({
   mode:'history',
   routes: [
+    {
+      path: '/',
+      name: 'Login',
+      component: Login
+    },
     {
       path: '/booklist',
       name: 'BookList',
@@ -47,6 +53,11 @@ export default new Router({
       path: '/story',
       name: 'Story',
       component: Story
+    },
+    {
+      path: '/showrelation',
+      name: 'ShowRelation',
+      component: ShowRelation
     }
   ]
 })

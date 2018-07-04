@@ -32,7 +32,7 @@
           </el-row> 
           
           <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;font-size:14px;">
-              第{{this.chapternumber}}章:
+              第<input type="text" class="chapterNum" v-model="chapternumber"/>章:
               <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
           </el-row>
 
@@ -541,6 +541,10 @@ input,textarea{
   width: 100%;
   height: 50px;
   clear: both;
+}
+.chapterNum{
+  width: 30px;
+  text-align: center;
 }
 </style>
 

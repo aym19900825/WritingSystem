@@ -4,23 +4,30 @@
         <el-row>
             <el-col :span="12" :offset="6">
                 <div style="margin-top: 15px;">
-                    <el-input placeholder="请输入内容" v-model="search" class="input-with-select">
+                    <el-input placeholder="请输入内容" v-model="search" class="input-with-select" @keydown="searchEnter($event)">
                         <el-button slot="append" icon="el-icon-search" @click="searchRelation"></el-button>
                     </el-input>
                 </div>
             </el-col>
         </el-row>
         <el-row>
-            <div id="chart"></div>
-            <div id="relationTxt">
-                <h4></h4>
-                <span></span>
-                <p></p>
-                <div></div>
+            <div >
+                <ul>
+                    <li @click="searchChart(item._source.eid)" v-for="item in listData">{{item._source.title}}</li>
+                </ul>
             </div>
-            <p id="relationTxt" v-text="relationTxt"></p>
         </el-row>
-        
+        <div align="right">
+            <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[10, 20, 30, 40]"
+                :page-size="pagesize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="totalCount">
+            </el-pagination>
+        </div>
     </div>
 </template>
 <script>
@@ -39,129 +46,50 @@
                     name: 'Edit',
                 })
             },
-            searchRelation(){
-                this.d3Init("http://192.168.1.168:8888/api/graph_search",this.search);
+            searchEnter(e){
+                if(e.keyCode==13){
+                    this.searchRelation();
+                 }
             },
-            d3Init(url,queryParam){
-                var width = this.d3Params.width;
-                var height = this.d3Params.height;
-                var img_w = this.d3Params.img_w;
-                var img_h = this.d3Params.img_h;
-                var _this = this;
-                d3.select("svg").remove();
-
-                var svg = d3.select("#chart").append("svg")
-                                .attr("width",width)
-                                .attr("height",height);
-
-                d3.json(url,function(error,root){
-                    if( error ){
-                        console.log(error);
-                    }
-                    console.log(root);
-                    
-                    var force = d3.layout.force()
-                                    .nodes(root.nodes)
-                                    .links(root.edges)
-                                    .size([width,height])
-                                    .linkDistance(200)
-                                    .charge(-1500)
-                                    .start();
-                                    
-                    var edges_line = svg.selectAll("line")
-                                        .data(root.edges)
-                                        .enter()
-                                        .append("line")
-                                        .style("stroke","#ccc")
-                                        .style("stroke-width",1);
-                                        
-                                        
-                    var edges_text = svg.selectAll(".linetext")
-                                        .data(root.edges)
-                                        .enter()
-                                        .append("text")
-                                        .attr("class","linetext")
-                                        .text(function(d){
-                                            return d.type;
-                                        })
-                                        .on("click",function(d,i){
-                                            console.log(d.eid);
-                                            axios.post("http://192.168.1.168:8888/api/news/detail",{
-                                                "eid": d.eid
-                                            }).then((res) => {
-                                                $("#relationTxt h4").text(res.data.title);
-                                                $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
-                                                $("#relationTxt span").text(res.data.create_date);
-                                                $("#relationTxt div").text(res.data.content);
-                                            }).catch((err) => {
-                                                this.$message({
-                                                    type: 'error',
-                                                    message: '网络错误，请重试',
-                                                    showClose: true
-                                                })
-                                            })
-                                        });
-                    
-                                        
-                    var nodes_img = svg.selectAll("image")
-                                        .data(root.nodes)
-                                        .enter()
-                                        .append("image")
-                                        .attr("width",img_w)
-                                        .attr("height",img_h)
-                                        .attr("xlink:href",function(d){
-                                            console.log(d.image.toLowerCase());
-                                            return "/static/"+d.image.toLowerCase();
-                                        })
-                                        .call(force.drag);
-                    
-                    var text_dx = -20;
-                    var text_dy = 20;
-                    
-                    var nodes_text = svg.selectAll(".nodetext")
-                                        .data(root.nodes)
-                                        .enter()
-                                        .append("text")
-                                        .attr("class","nodetext")
-                                        .attr("dx",text_dx)
-                                        .attr("dy",text_dy)
-                                        .text(function(d){
-                                            return d.name;
-                                        });
-                    
-                                        
-                    force.on("tick", function(){
-                        
-                        //限制结点的边界
-                        root.nodes.forEach(function(d,i){
-                            d.x = d.x - img_w/2 < 0     ? img_w/2 : d.x ;
-                            d.x = d.x + img_w/2 > width ? width - img_w/2 : d.x ;
-                            d.y = d.y - img_h/2 < 0      ? img_h/2 : d.y ;
-                            d.y = d.y + img_h/2 + text_dy > height ? height - img_h/2 - text_dy : d.y ;
-                        });
-                    
-                        //更新连接线的位置
-                         edges_line.attr("x1",function(d){ return d.source.x; });
-                         edges_line.attr("y1",function(d){ return d.source.y; });
-                         edges_line.attr("x2",function(d){ return d.target.x; });
-                         edges_line.attr("y2",function(d){ return d.target.y; });
-                         
-                         //更新连接线上文字的位置
-                         edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; });
-                         edges_text.attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
-                         
-                         
-                         //更新结点图片和文字
-                         nodes_img.attr("x",function(d){ return d.x - img_w/2; });
-                         nodes_img.attr("y",function(d){ return d.y - img_h/2; });
-                         
-                         nodes_text.attr("x",function(d){ return d.x });
-                         nodes_text.attr("y",function(d){ return d.y + img_w/2; });
-                    });
+            searchChart(eid){
+                const {href} = this.$router.resolve({
+                                    path: "/showrelation",
+                                    query: {
+                                        search: this.search,
+                                        eid: eid
+                                    }
+                                });
+                window.open(href, '_blank');
+            },
+            searchRelation(){
+                this.requestData();
+            },
+            requestData(){
+                var url = "http://192.168.1.168:8888/api/search/list";
+                this.$axios.post(url,{
+                            search_text: this.search,
+                            page_index: this.currentPage,
+                            page_size: this.pagesize
+                }).then((res) => {
+                    this.listData = res.data.data;
+                    this.totalCount = res.data.total;
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络错误，请重试',
+                        showClose: true
+                    })
                 })
-                .header("Content-Type","application/json")
-                .send("POST", JSON.stringify({search_text: queryParam}));
-           } 
+            },
+            handleSizeChange(val) {
+                this.pagesize = val;
+                this.initBookList();
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.initBookList();
+                console.log(val);
+            }
         },
         data () {
             return {
@@ -173,11 +101,14 @@
                 },
                 search: '',
                 select: '',
-                relationTxt:''
+                relationTxt:'',
+                listData:[],
+
+                //page信息
+                pagesize: 20,
+                totalCount: 1,
+                currentPage: 1,
             }        
-        },
-        mounted(){
-            this.d3Params.width = $("#d3show").width();
         }
     }
 </script>
@@ -239,5 +170,18 @@
     font-size: 12px;
     width: 100%;
     text-align: center;
+}
+ul{
+    margin-top: 50px;
+    min-height: 350px;
+}
+ul li{
+    line-height: 30px;
+    height: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    padding-left: 15%;
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>
