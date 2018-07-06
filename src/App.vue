@@ -28,7 +28,7 @@ export default {
   }
   #app{
     width: 100%;
-    background:  url('./assets/bg-pattern.png') repeat; 
+    height: 100%;
   }
   .el-main{
     min-height: 650px;

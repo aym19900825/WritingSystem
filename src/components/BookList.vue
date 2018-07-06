@@ -1,4 +1,5 @@
 <template>
+    <!--
     <div class="bookList">
         <template>
             <h4 class="bookTit">我的作品</h4>
@@ -77,9 +78,76 @@
             </el-pagination>
         </div>
     </div>
+    -->
+
+
+    <div id="booklist">
+        <v-header></v-header>
+        <p class="navTxt">
+            我的作品
+            <el-button type="primary" v-if="books.length != 0" @click="creatWork">创建作品</el-button>
+        </p>
+        <div class="emptyContent" v-if="books.length == 0" v-cloak>
+            <img src="../assets/img/empty-bg.png" alt="">
+            <p>对不起，您还没有创建任何的作品哦！</p>
+            <el-button type="primary">创建作品</el-button>
+        </div>
+        <div class="bookList" v-else v-cloak>
+            <el-table :data="books" style="width: 85%;margin: 0 auto;">
+                <el-table-column label="书名" width="200" prop="bookname">
+                </el-table-column>
+
+                <!--
+                <el-table-column label="最新章节" width="250">
+                    <template slot-scope="scope">
+                        <span style="display: block;color:#0064FF;">{{ scope.row.lastedChapter }}</span>
+                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
+                    </template>
+                </el-table-column>
+                -->
+                
+                <el-table-column label="作品类别" width="100" prop="category">
+                    <template slot-scope="scope">
+                        <span v-text="scope.row.category=='fiction'?'小说':'剧本'"></span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" width="100" prop="bookstatus">
+                    <template slot-scope="scope">
+                        <span v-text="scope.row.bookstatus==0?'未完成':'完成'"></span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="创建时间" width="250">
+                    <template slot-scope="scope">
+                        <i class="el-icon-time"></i>
+                        <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success">写新章节</el-button>
+                        <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
+                        <el-button size="mini" type="primary" @click="readBook(scope.$index, scope.row)">编辑作品</el-button>
+                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div align="right">
+                <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes="[10, 20, 30, 40]"
+                    :page-size="pagesize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="totalCount">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
+    import Header from './common/Header.vue'
     export default {
         data(){
             var validateWriting = (rule, value, callback) => {
@@ -161,6 +229,12 @@
             }
         },
         methods: {
+            creatWork(){
+                this.$router.push({
+                    path: '/bookinfo', 
+                    bookid: ''
+                })
+            },
             handleCloseBookInfo(){
                 this.reset();
             },
@@ -195,57 +269,6 @@
                 this.upDateBookId = row.bookid;
                 this.dialogFormVisible = true;
                 console.log(this.newBook);
-            },
-            editBook(){
-                this.$axios.post('http://192.168.1.168:8888/api/editBook',{
-                    bookid: this.upDateBookId,
-                    bookname: this.newBook.bookname,
-                    category: this.newBook.category,
-                    label: this.newBook.label,
-                    abstract: this.newBook.abstract,
-                    writing: this.newBook.writing,
-                    bookstatus: 0
-                }).then((res)=>{
-                    if(res.data.code==1){
-                        this.$message({
-                          type: 'success',
-                          message: '修改成功',
-                          showClose: true
-                        }) 
-                        this.initBookList();
-                        this.reset();
-                    }else{
-                        this.$message({
-                          type: 'error',
-                          message: '修改失败',
-                          showClose: true
-                        }) 
-                    }
-                }).catch((err)=>{
-                    
-                })
-            },
-            addBook() {
-                this.$axios.post('http://192.168.1.168:8888/api/addBook',{
-                    bookname: this.newBook.bookname,
-                    category: this.newBook.category,
-                    label: this.newBook.label,
-                    abstract: this.newBook.abstract,
-                    writing: this.newBook.writing,
-                    userid: this.user.userid
-                }).then((res)=>{
-                    if(res.data.code==1){
-                        this.innerVisible = true;
-                    }else{
-                        this.$message({
-                            type: 'error',
-                            message: res.data.message,
-                            showClose: true
-                        })
-                    }
-                }).catch((err)=>{
-                    
-                })
             },
             addChapter(index,row){
                 sessionStorage.setItem('url','booklist');
@@ -323,97 +346,62 @@
         },
         created(){
            this.initBookList();
+        },
+        components: {
+            'v-header': Header
         }
     }
 </script>
 <style scoped>
-.bookList{
-    width: 100%;
-    background: #fff;
+.navTxt{
+    height: 56px;
+    line-height: 65px;
+    padding: 0px 100px;
+    background:rgba(243,246,250,1);
+    font-size: 18px;
+    color:rgba(170,178,192,1);
+    text-align: left;
 }
-.bookTit{
-    height: 60px;
-    line-height: 60px;
-    text-align: center;
+.navTxt button{
+    float: right;
+    margin-top: 10px;
+}
+.emptyContent{
+    padding-top: 100px;
+}
+.emptyContent img{
+    width: 127px;
+    height: 135px;
+    position: absolute;
+    left: 50%;
+    margin-left: -64px;
+}
+.emptyContent p{
+    width: 100%;
+    height: 22px;
     font-size: 16px;
-    border-bottom: 1px solid #e6e6e6;
+    color: rgba(170,178,192,1);
+    line-height: 22px;
+    text-align: center;
+    margin-top: 160px;
 }
-.btnRight{
-    float: right;
-    margin-top: 3px;
-    margin-bottom: 5px;
+.emptyContent button{
+    width:200px;
+    height:40px;
+    background:rgba(17,175,248,1);
+    border-radius:4px;
+    font-size:14px;
+    color:rgba(255,255,255,1);
+    position: absolute;
+    left: 50%;
+    margin-left: -100px;
+    margin-top: 40px;
 }
-.bookFront{
-    height: 47px;
-    line-height: 47px;
-    border-bottom: 1px solid #e6e6e6;
-    width: 85%;
-    margin: 0 auto;
+.bookdirect{
+    border:1px solid rgba(104,133,206,1);
+    color:rgba(104,133,206,1);
 }
-.bookFront span{
-    display: block;
-    float: left;
-    height: 47px;
-    line-height: 70px;
+[v-cloak] {
+   display: none;
 }
-.time {
-    font-size: 13px;
-    color: #999;
-}
-  
-.bottom {
-    margin-top: 13px;
-    line-height: 12px;
-  }
-
-  .button {
-    padding: 0;
-    float: right;
-  }
-
-  .image {
-    width: 100%;
-    height: 160px;
-    display: block;
-  }
-
-  .clearfix:before,
-  .clearfix:after {
-      display: table;
-      content: "";
-  }
-  
-  .clearfix:after {
-      clear: both
-  }
-  h4.tit{
-    margin-bottom:20px;
-    border-bottom:1px solid #ccc;
-    padding-bottom:10px;
-  }
-  .inputTip{
-    font-size:12px;
-    color:#ccc;
-    height:18px;
-    line-height:18px;
-    text-align:left;
-    padding-top:5px;
-  }
-  p.congratulation{
-    font-size:18px;
-    color:red;
-    height:48px;
-    padding-top:0px;
-    padding-bottom:30px;
-  }
-  .dialog-footer{
-    text-align:center;
-  }
-  table.el-table__body tbody tr td:nth-child(1){
-    cursor: pointer;
-  }
-  .el-table th{
-    background: #f9f9f9;
-  }
 </style>
-

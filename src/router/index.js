@@ -6,6 +6,7 @@ import Edit from '@/components/Edit'
 import Register from '@/components/Register'
 import D3Show from '@/components/D3Show'
 import BookDirectory from '@/components/BookDirectory'
+import BookInfo from '@/components/BookInfo'
 import Story from '@/components/Story'
 import ShowRelation from '@/components/ShowRelation'
 
@@ -58,6 +59,11 @@ export default new Router({
       path: '/showrelation',
       name: 'ShowRelation',
       component: ShowRelation
+    },
+    {
+      path: '/bookinfo',
+      name: 'BookInfo',
+      component: BookInfo
     }
   ]
 })

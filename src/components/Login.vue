@@ -1,20 +1,37 @@
 <template>
-    <el-form ref="loginForm" :model="user" :rules="rules" status-icon  label-width="80px" label-position="left"  class="login-container"> 
-        <h3 class="title">登录</h3>
-        <el-form-item prop="name" label="用户名">
-            <el-input v-model="user.name" type="text" placeholder="用户名" @keydown="loginEnter($event)"></el-input>
-        </el-form-item>
-        <el-form-item prop="pass"  label="密码">
-            <el-input v-model="user.pass" type="password" placeholder="密码" @keydown="loginEnter($event)"></el-input>
-        </el-form-item>
-        <el-form-item> 
-            <el-button type="primary" icon="el-icon-upload" @click="login" class="submitBtn">登录</el-button>
-        </el-form-item>
-        <p class="regitstTip">没有账号？<router-link to="/regiser">注册</router-link></p>
-    </el-form>
+    <div id="login">
+        <v-header></v-header>
+        <div style="height: 50px; width: 100%;"></div>
+        <el-container>
+            <el-main>
+                <el-row type="flex" class="row-bg" justify="center">
+                    <el-col :span="8">
+                        <img src="../assets/img/login_img.png" alt="" class="loginbg"/>
+                    </el-col>
+                    <el-col :span="4"><div class="grid-content bg-purple-light"></div></el-col>
+                    <el-col :span="6">
+                        <el-form ref="loginForm" :model="user" :rules="rules"  status-icon  label-width="80px" label-position="top"  class="login-container"> 
+                            <h3>作者登录</h3>
+                            <el-form-item label="用户名" prop="name">
+                                <el-input  type="text" placeholder="用户名" v-model="user.name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="密码" prop="pass">
+                                <el-input type="password" placeholder="密码" v-model="user.pass"></el-input>
+                            </el-form-item>
+                            <el-form-item> 
+                                <el-button type="primary" class="submitBtn" @click="login">登录</el-button>
+                            </el-form-item>
+                            <p class="regitstTip"><router-link to="/regiser">新用户？</router-link></p>
+                        </el-form>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+  </div>
 </template>
 
 <script>
+import Header from './common/Header.vue'
     export default {
         name: 'Login',
         methods: {
@@ -29,7 +46,7 @@
                         this.$axios.post('http://192.168.1.168:8888/api/login',{
                             username: this.user.name,
                             password: this.user.pass
-                        } ).then((res) => {
+                        }).then((res) => {
                             if (res.data.code==1) {
                                 this.$store.dispatch('login', res.data).then(() => {
                                     sessionStorage.setItem('url','login');
@@ -56,6 +73,9 @@
                 })
             }
         },
+        components:{
+            'v-header': Header
+        },
         data () {
             return {
                 user: {},
@@ -79,44 +99,53 @@
         }
     }
 </script>
+
 <style scoped>
-.login-container {
-    /*box-shadow: 0 0px 8px 0 rgba(0, 0, 0, 0.06), 0 1px 0px 0 rgba(0, 0, 0, 0.02);*/
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    background-clip: padding-box;
-    margin: 180px auto;
-    width: 350px;
-    padding: 35px 35px 15px 35px;
-    background: #fff;
-    border: 1px solid #eaeaea;
-    box-shadow: 0 0 25px #cac6c6;
+<!--
+header{
+    height: 80px;
+    line-height: 80px;
 }
-.login-container .title {
-    margin: 0px auto 40px auto;
-    text-align: center;
-    color: #505458;
+.login_list{
+    padding-top: 25px;
 }
-.login-container .remember {
-    margin: 0px 0px 35px 0px;
+.login-container{
+    margin-top: 100px;
 }
-.login-container .title:after{
-    content: ' ';
-    display: block;
+-->
+#login{
     width: 100%;
-    height: 2px;
-    margin-top: 10px;
-    background: -webkit-linear-gradient(left, rgba(235,228,242,0) 0%,rgba(235,228,242,0.8) 20%,rgba(235,228,242,1) 53%,rgba(235,228,242,0.8) 79%,rgba(235,228,242,0) 100%);
+    height: 100%;
+    overflow: hidden;   
+    min-width: 960px;
+}
+.login-container{
+    margin-top: 100px;
+}
+.login-container h3{
+    height: 50px;
+    line-height: 50px;
+    font-size: 27px;
+    border-bottom:2px solid rgba(233,235,242,1);
+    margin-bottom: 15px;
 }
 .submitBtn{
-    float: right;
-    width: 100px;
+    width: 100%;
+    margin-top: 30px;
 }
-p.regitstTip{
+.regitstTip{
+    font-size: 13px;
+    color:rgba(44,193,108,1);
     text-align: right;
 }
-p.regitstTip a{
+.regitstTip a{
+    color:rgba(44,193,108,1);
     text-decoration: underline;
+}
+.el-form-item{
+    margin-bottom: 12px;
+}
+.loginbg{
+    width: 486px;
 }
 </style>

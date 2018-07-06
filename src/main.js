@@ -14,6 +14,7 @@ import tinymce from 'vue-tinymce-editor'
 import axios  from 'axios' 
 import './assets/reset.css' 
 import './assets/icon/iconfont.css' 
+import './assets/icomoon/style.css' 
 import './axios'
 
 Vue.prototype.$axios = axios;
@@ -25,9 +26,6 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 
 Vue.component('tinymce', tinymce)
-
-require('./mock.js')
-
 
 /* eslint-disable no-new */
 new Vue({
