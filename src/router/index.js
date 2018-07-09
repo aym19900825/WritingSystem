@@ -13,7 +13,7 @@ import ShowRelation from '@/components/ShowRelation'
 Vue.use(Router)
 
 export default new Router({
-  mode:'history',
+  // mode:'history',  没有后端配合，打包index.html页面为空
   routes: [
     {
       path: '/',

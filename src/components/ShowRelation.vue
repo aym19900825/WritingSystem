@@ -16,13 +16,13 @@
     import axios  from 'axios' 
     import topNav from '@/components/common/TopNav';
     export default {
-        name: 'D3Show',
+        name: 'ShowRelation',
         components:{
             topNav
         },
         methods: {
             searchChart(eid){
-                this.d3Init("http://192.168.1.168:8888/api/graph_search",this.search,eid);
+                this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,eid);
             },
             d3Init(url,queryParam1,queryParam2){
                 var width = this.d3Params.width;
@@ -68,7 +68,7 @@
                                         })
                                         .on("click",function(d,i){
                                             console.log(d.eid);
-                                            axios.post("http://192.168.1.168:8888/api/news/detail",{
+                                            axios.post("http://203.93.173.179:8888/api/news/detail",{
                                                 "eid": d.eid
                                             }).then((res) => {
                                                 $("#relationTxt h4").text(res.data.title);
@@ -161,7 +161,7 @@
             this.d3Params.width = $("#d3show").width();
             this.search = this.$route.query.search;
             this.eid = this.$route.query.eid;
-            this.d3Init("http://192.168.1.168:8888/api/graph_search",this.search,this.eid);
+            this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,this.eid);
         }
     }
 </script>

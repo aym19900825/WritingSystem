@@ -1,158 +1,78 @@
 <template>
     <div class="main">
-        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回图书列表</el-button>
-        <el-steps :active="active" finish-status="success">
-            <el-step title="故事简介"></el-step>
-            <el-step title="人物设定"></el-step>
-            <el-step title="事件设定"></el-step>
-        </el-steps>
-        <el-tabs v-model="activeName"  @tab-click="handleClick">
-
-            <!--故事简介-->
-            <el-tab-pane name="first">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="16">
-                        <span class="bookAbstract">故事简介：</span>
-                        <textarea rows="20" cols="120" v-model="bookabstract">
-                            在w3school，你可以找到你所需要的所有的网站建设教程。
-                        </textarea>
-                        <el-footer class="btndiv">
-                            <el-button size="medium" @click="resetStory">重置</el-button>
-                            <el-button type="primary" size="medium" @click="next">下一步</el-button>
-                        </el-footer>
-                    </el-col>
-                </el-row>
-            </el-tab-pane>
-
-            <!--人物设定-->
-            <el-tab-pane name="second">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="24">
-                        <el-card :body-style="{ padding: '0px' }">
-                            <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogFormVisible = true">
-                                +
-                            </div>
-                        </el-card>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in peoples" :key="item">
-                    <div class="peopleInfo" >{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})
-                        <div class="itembtn">
-                        <el-button type="success" icon="edit" size="mini" @click="editPeople(item,index)">编辑</el-button>
-                        <el-button type="danger" icon="delete" size="mini" @click="delPeople(item,index)">删除</el-button>
+        <v-header></v-header>
+        <div class="tabBox">
+            <el-tabs type="border-card" v-model="activeName">
+                <el-tab-pane label="故事大纲" disabled style="font-size:24px;" name="title">故事大纲</el-tab-pane>
+                <el-tab-pane label="故事简介" name="abstract">
+                    <div class="abstract">
+                        <p>故事简介</p>
+                        <textarea></textarea>
+                        <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;">保存</el-button>
                     </div>
-                    </div> 
-                    
-                </el-row>
-                <el-footer class="btndiv">
-                    <el-button size="medium" @click="pre">上一步</el-button>
-                    <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
-                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
-                </el-footer>
-                <el-row type="flex" justify="center" v-show="updateBook">
-                    <div id="chart"></div>
-                </el-row>
-            </el-tab-pane>
+                </el-tab-pane>
+                <el-tab-pane label="人物设定" name="person">
+                    <div class="person">
+                        <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;">添加人物</el-button>
+                        <el-table :data="peoples" style="width: 85%;margin: 0 auto;"  :row-class-name="tableRowClassName">
+                            <el-table-column label="序号" width="100">
+                                <template slot-scope="scope">
+                                    <span class="index-box">{{scope.$index+1}}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="姓名/性格特点" width="250" >
+                                <template slot-scope="scope">
+                                    <p class="title">{{ scope.row.name }}</p>
+                                    <p class="charact">{{ scope.row.characters }}</p>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="身份特征" prop="titles"></el-table-column>
+                            <el-table-column label="人物关系" width="180" prop="relationship"></el-table-column>
+                            <el-table-column label="操作" width="180">
+                                <template slot-scope="scope">
+                                    <el-button type="success" icon="edit" size="mini" @click="editPeople(item,index)">编辑</el-button>
+                                    <el-button type="danger" icon="delete" size="mini" @click="delPeople(item,index)">删除</el-button>
+                                </template>
+                             </el-table-column>
+                       </el-table>
+                       <el-row style="text-align: center;margin-top: 30px;">
+                            <el-button type="primary">保存</el-button>
+                            <el-button type="primary" plain>人物图谱</el-button>
+                       </el-row>
 
-            <!--事件设定-->
-            <el-tab-pane name="third">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="24">
-                        <el-card :body-style="{ padding: '0px' }">
-                            <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogSthVisible = true">
-                                +
-                            </div>
-                        </el-card>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in things" :key="item">
-                    <div class="peopleInfo" >{{item.name}},{{item.times}},{{item.position}},({{item.people}})
-                        <div class="itembtn">
-                            <el-button type="success" icon="edit" size="mini" @click="editSth(item,index)">编辑</el-button>
-                            <el-button type="danger" icon="delete" size="mini" @click="delSth(item,index)">删除</el-button>
-                        </div>
-                    </div> 
-
-                </el-row>
-                <el-footer class="btndiv">
-                    <el-button type="primary" size="medium" @click="finish" v-show="!updateBook">完成</el-button>
-                    <el-button type="primary" size="medium" @click="update" v-show="updateBook">更新</el-button>
-                    <el-button size="medium" @click="pre">上一步</el-button>
-                </el-footer>
-            </el-tab-pane>
-        </el-tabs>
-
-        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose">
-            <el-form ref="form" :model="newPeople" label-width="80px">
-              <el-form-item label="姓名" prop="name">
-                <el-input  v-model="newPeople.name"></el-input>
-              </el-form-item>
-              <el-form-item label="身份特征" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
-              </el-form-item>
-              <el-form-item label="性格特点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
-              </el-form-item>
-              <el-form-item label="人物关系" prop="relationship">
-                <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX；</p>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">立即创建</el-button>
-                <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
-                <el-button @click="resetPeople">取消</el-button>
-              </el-form-item>
-            </el-form>
-        </el-dialog>
-
-        <el-dialog title="事件信息" :visible.sync="dialogSthVisible"  :rules="rules1" :before-close="resetSth">
-            <el-form ref="sthForm" :model="newSth" label-width="80px">
-              <el-form-item label="事件名称" prop="name">
-                <el-input  v-model="newSth.name"></el-input>
-              </el-form-item>
-              <el-form-item label="时间" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="newSth.times"  placeholder="请输入事件发生的时间"></el-input>
-              </el-form-item>
-              <el-form-item label="地点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="newSth.position"  placeholder="请输入事件发生的地点"></el-input>
-              </el-form-item>
-              <el-form-item label="相关人物" prop="relationship">
-                <el-input type="textarea" :rows="2" v-model="newSth.people"  placeholder="请输入相关人物"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="addSth" v-show="!isupdateSth">立即创建</el-button>
-                <el-button type="primary" @click="updateSth" v-show="isupdateSth">更新</el-button>
-                <el-button @click="resetSth">取消</el-button>
-              </el-form-item>
-            </el-form>
-        </el-dialog>
-
-        <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleCloseStory"  append-to-body>
-            <P class="congratulation" v-show="!updateBook">恭喜您！创建成功！</P>
-            <P class="congratulation" v-show="updateBook">恭喜您！更新成功！</P>
-            <el-button type="primary" @click="returnBookList" style="margin-left: 130px;margin-top: 20px;">返回图书列表</el-button>
-        </el-dialog>
-
-        <!--图谱点击的人物卡-->
-        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
-            <i class="el-icon-close" @click="closePeople"></i>
-            <el-form ref="form" :model="peopleInfo" label-width="80px">
-              <el-form-item label="姓名" prop="name">
-                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
-              </el-form-item>
-              <el-form-item label="身份特征" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
-              </el-form-item>
-              <el-form-item label="性格特点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
-              </el-form-item>
-            </el-form>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="事件设定" name="sth">事件设定</el-tab-pane>
+            </el-tabs>
+            <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%">
+                <el-form ref="form" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
+                    <el-form-item label="姓名" prop="name">
+                         <el-input  v-model="newPeople.name"></el-input>
+                     </el-form-item>
+                    <el-form-item label="身份特征" prop="titles">
+                        <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性格特点" prop="characters">
+                        <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
+                    </el-form-item>
+                    <el-form-item label="人物关系" prop="relationship">
+                        <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
+                         <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX；</p>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">立即创建</el-button>
+                        <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
+                        <el-button @click="resetPeople">取消</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-dialog>
         </div>
-        
+
     </div>
 </template>
 
 <script>
+    import Header from './common/Header.vue'
     import Vue from 'vue'
     export default {
         name: 'Story',
@@ -223,7 +143,6 @@
                         .attr('stroke-width',2)
                         .attr("marker-end", "url(#resolved)");
 
-                     
                     var nodes_img = svg.append("svg:g").selectAll("image")
                                         .data(root.nodes)
                                         .enter()
@@ -231,8 +150,7 @@
                                         .attr("width",img_w)
                                         .attr("height",img_h)
                                         .attr("xlink:href",function(d){
-                                            console.log(d.image.toLowerCase());
-                                            return "/static/"+d.image.toLowerCase();
+                                            return _this.person;
                                         })
                                         .on("click",function(d,i){
                                             console.log(d);
@@ -286,7 +204,7 @@
                 .send("POST", JSON.stringify({eid: queryParam}));
             },
             characterMap(){
-                this.d3Init("http://192.168.1.168:8888/api/char_graph_search",this.eid);
+                this.d3Init("http://203.93.173.179:8888/api/char_graph_search",this.eid);
             },
             returnBookList(){
                 this.$router.push({
@@ -311,7 +229,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://192.168.1.168:8888/api/info/edit',{
+                this.$axios.post('http://203.93.173.179:8888/api/info/edit',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj),
@@ -391,7 +309,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://192.168.1.168:8888/api/info/add',{
+                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -449,8 +367,12 @@
             }
         },
         mounted(){
+            $(".el-tabs__nav-wrap").css("paddingTop","20px");
+            $(".el-tabs__nav-wrap").css("paddingLeft","100px");
+            $(".el-tabs__nav-wrap").css("paddingRight","100px");
+            $(".el-tabs__nav-wrap").css("boxSizing","boxBorder");
             this.getParams();
-            this.$axios.post('http://192.168.1.168:8888/api/info/query',{
+            this.$axios.post('http://203.93.173.179:8888/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
@@ -472,6 +394,8 @@
                     this.eid = res.data[0]._id;
                     this.updateBook = true;
                     console.log(this.updateBook);
+
+                    $(".el-tabs__nav-wrap").attr("padd");
                 }else{
                     this.updateBook = false;
                 }
@@ -481,7 +405,9 @@
         },
         data () {
             return {
+                activeName:'abstract',
                 //事件设定
+                person: require('../assets/img/person.png'),
                 dialogSthVisible: false,
                 newSth:{
                     name:'',
@@ -505,9 +431,9 @@
                 //人物设定
                 peoples:[
                 ],
-                dialogFormVisible: false,
+                dialogFormVisible: true,
                 innerVisible: false,
-                peopleInfoVisible: false,
+                peopleInfoVisible: true,
                 peopleInfo: {
                     name: '',
                     relationship: '',
@@ -526,6 +452,9 @@
                     ],
                 }
             }
+        },
+        components: {
+            'v-header': Header
         }
     }
 </script>
@@ -561,10 +490,6 @@
     padding-bottom: 10px;
     padding-left: 5px;
     padding-right: 5px;
-}
-.main{
-    width: 85%;
-    margin: 0 auto;
 }
 .tip{
     text-align: left;
@@ -614,5 +539,60 @@ text.shadow {
 .itembtn i{
     font-size: 18px;
     coursor: pointer;
+}
+.tabBox{
+    width: 100%;
+}
+.tabBox .el-tabs__nav-wrap{
+    padding-left: 100px; 
+    padding-top: 30px; 
+    padding-right: 100px; 
+    box-sizing: box-border; 
+}
+.abstract{
+    padding-left: 100px;
+    padding-right: 100px;
+    box-sizing: box-border;
+}
+.abstract p{
+    text-align: left;
+    height:22px;
+    font-size:13px;
+    color:rgba(151,163,180,1);
+    line-height:22px;
+    margin-top: 60px;
+    margin-bottom: 20px;
+}
+.abstract textarea{
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+}
+.person{
+    min-height: 500px;
+}
+.index-box{
+    width: 32px;
+    height: 32px;
+    border: 1px solid #0064FF;
+    text-align: center;
+    color: #0064FF;
+    font-size: 15px;
+    display: block;
+    line-height: 32px;
+}
+p.title{
+    height:20px;
+    font-size:15px;
+    color:rgba(0,34,87,1);
+    line-height:21px;
+    text-align: left;
+}
+p.charact{
+    height:20px;
+    font-size:13px;
+    color:rgba(151,163,180,1);
+    line-height:22px;
+    text-align: left;
 }
 </style>

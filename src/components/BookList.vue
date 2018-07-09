@@ -232,7 +232,10 @@
             creatWork(){
                 this.$router.push({
                     path: '/bookinfo', 
-                    bookid: ''
+                    query: { 
+                        bookid: '',
+                        userid: this.user.userid
+                    }
                 })
             },
             handleCloseBookInfo(){
@@ -264,11 +267,13 @@
                 })
             },
             readBook(index,row){
-                this.newBook = JSON.parse(JSON.stringify(row));
-                this.upDateBook = true;
-                this.upDateBookId = row.bookid;
-                this.dialogFormVisible = true;
-                console.log(this.newBook);
+                this.$router.push({
+                    path: '/bookinfo', 
+                    query: { 
+                        bookid: row.bookid,
+                        bookInfo: row
+                    }
+                })
             },
             addChapter(index,row){
                 sessionStorage.setItem('url','booklist');
@@ -286,7 +291,7 @@
                     path: '/bookdirectory', 
                     query: { 
                         bookid: row.bookid,
-                        bookname: row.bookname
+                        bookname: row.bookname,
                     }
                 })
             },
@@ -307,20 +312,20 @@
                 this.upDateBookId = 1;
             },
             initBookList(){
-                this.$axios.post('http://192.168.1.168:8888/api/bookList',{
+                this.$axios.post('http://203.93.173.179:8888/api/bookList',{
                     userid: this.user.userid,
                     page_index: this.currentPage,
                     page_size: this.pagesize
                 }).then((res)=>{
                     if (res.data) {
-                        this.doingWorks  = res.data.books["0"];
-                        this.doneWorks  = res.data.books["1"];
+                        this.doingWorks  = res.data.books["未完成"];
+                        this.doneWorks  = res.data.books["已完成"];
                         if(this.doneWorks ==undefined){
-                            this.books = res.data.books["0"];
+                            this.books = res.data.books["未完成"];
                         }else if(this.doingWorks ==undefined){
-                            this.books = res.data.books["1"];
+                            this.books = res.data.books["已完成"];
                         }else{
-                            this.books = res.data.books["1"].concat(res.data.books["0"]);
+                            this.books = res.data.books["已完成"].concat(res.data.books["未完成"]);
                         }
                         this.totalCount = res.data.total;
                     }else {
@@ -341,7 +346,6 @@
             handleCurrentChange(val) {
                 this.currentPage = val;
                 this.initBookList();
-                console.log(val);
             }
         },
         created(){

@@ -43,7 +43,7 @@ import Header from './common/Header.vue'
             login() {
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
-                        this.$axios.post('http://192.168.1.168:8888/api/login',{
+                        this.$axios.post('http://203.93.173.179:8888/api/login',{
                             username: this.user.name,
                             password: this.user.pass
                         }).then((res) => {

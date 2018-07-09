@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+     <div class="main">
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回图书列表</el-button>
         <el-steps :active="active" finish-status="success">
             <el-step title="故事简介"></el-step>
@@ -7,10 +7,12 @@
             <el-step title="事件设定"></el-step>
         </el-steps>
         <el-tabs v-model="activeName"  @tab-click="handleClick">
+
+            <!--故事简介-->
             <el-tab-pane name="first">
                 <el-row type="flex" class="row-bg" justify="center">
                     <el-col :span="16">
-                        <span class="bookAbstract">故事大纲：</span>
+                        <span class="bookAbstract">故事简介：</span>
                         <textarea rows="20" cols="120" v-model="bookabstract">
                             在w3school，你可以找到你所需要的所有的网站建设教程。
                         </textarea>
@@ -21,6 +23,8 @@
                     </el-col>
                 </el-row>
             </el-tab-pane>
+
+            <!--人物设定-->
             <el-tab-pane name="second">
                 <el-row type="flex" class="row-bg" justify="center">
                     <el-col :span="24">
@@ -32,18 +36,44 @@
                     </el-col>
                 </el-row>
                 <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in peoples" :key="item">
-                    <div class="peopleInfo" @click="editPeople(item,index)">{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})</div> 
-                </el-row>
-                <el-row type="flex" justify="center">
-                    <div id="chart" v-show="updateBook"></div>
+                    <div class="peopleInfo" >{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})
+                        <div class="itembtn">
+                        <el-button type="success" icon="edit" size="mini" @click="editPeople(item,index)">编辑</el-button>
+                        <el-button type="danger" icon="delete" size="mini" @click="delPeople(item,index)">删除</el-button>
+                    </div>
+                    </div> 
+                    
                 </el-row>
                 <el-footer class="btndiv">
                     <el-button size="medium" @click="pre">上一步</el-button>
-                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
                     <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
+                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
                 </el-footer>
+                <el-row type="flex" justify="center" v-show="updateBook">
+                    <div id="chart"></div>
+                </el-row>
             </el-tab-pane>
+
+            <!--事件设定-->
             <el-tab-pane name="third">
+                <el-row type="flex" class="row-bg" justify="center">
+                    <el-col :span="24">
+                        <el-card :body-style="{ padding: '0px' }">
+                            <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogSthVisible = true">
+                                +
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in things" :key="item">
+                    <div class="peopleInfo" >{{item.name}},{{item.times}},{{item.position}},({{item.people}})
+                        <div class="itembtn">
+                            <el-button type="success" icon="edit" size="mini" @click="editSth(item,index)">编辑</el-button>
+                            <el-button type="danger" icon="delete" size="mini" @click="delSth(item,index)">删除</el-button>
+                        </div>
+                    </div> 
+
+                </el-row>
                 <el-footer class="btndiv">
                     <el-button type="primary" size="medium" @click="finish" v-show="!updateBook">完成</el-button>
                     <el-button type="primary" size="medium" @click="update" v-show="updateBook">更新</el-button>
@@ -51,6 +81,7 @@
                 </el-footer>
             </el-tab-pane>
         </el-tabs>
+
         <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose">
             <el-form ref="form" :model="newPeople" label-width="80px">
               <el-form-item label="姓名" prop="name">
@@ -73,11 +104,50 @@
               </el-form-item>
             </el-form>
         </el-dialog>
+
+        <el-dialog title="事件信息" :visible.sync="dialogSthVisible"  :rules="rules1" :before-close="resetSth">
+            <el-form ref="sthForm" :model="newSth" label-width="80px">
+              <el-form-item label="事件名称" prop="name">
+                <el-input  v-model="newSth.name"></el-input>
+              </el-form-item>
+              <el-form-item label="时间" prop="titles">
+                <el-input type="textarea" :rows="2" v-model="newSth.times"  placeholder="请输入事件发生的时间"></el-input>
+              </el-form-item>
+              <el-form-item label="地点" prop="characters">
+                <el-input type="textarea" :rows="2" v-model="newSth.position"  placeholder="请输入事件发生的地点"></el-input>
+              </el-form-item>
+              <el-form-item label="相关人物" prop="relationship">
+                <el-input type="textarea" :rows="2" v-model="newSth.people"  placeholder="请输入相关人物"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="addSth" v-show="!isupdateSth">立即创建</el-button>
+                <el-button type="primary" @click="updateSth" v-show="isupdateSth">更新</el-button>
+                <el-button @click="resetSth">取消</el-button>
+              </el-form-item>
+            </el-form>
+        </el-dialog>
+
         <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleCloseStory"  append-to-body>
             <P class="congratulation" v-show="!updateBook">恭喜您！创建成功！</P>
             <P class="congratulation" v-show="updateBook">恭喜您！更新成功！</P>
             <el-button type="primary" @click="returnBookList" style="margin-left: 130px;margin-top: 20px;">返回图书列表</el-button>
         </el-dialog>
+
+        <!--图谱点击的人物卡-->
+        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
+            <i class="el-icon-close" @click="closePeople"></i>
+            <el-form ref="form" :model="peopleInfo" label-width="80px">
+              <el-form-item label="姓名" prop="name">
+                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+              </el-form-item>
+              <el-form-item label="身份特征" prop="titles">
+                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+              </el-form-item>
+              <el-form-item label="性格特点" prop="characters">
+                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+              </el-form-item>
+            </el-form>
+        </div>
     </div>
 </template>
 

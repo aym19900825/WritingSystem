@@ -3,17 +3,27 @@
         <v-header></v-header>
         <p class="navTxt">
         	创建作品
-            <span class="returnList"><router-link to="/regiser">返回</router-link></span>
+            <span class="returnList"><router-link to="/booklist">返回</router-link></span>
+            <i class="icon-back"></i>
         </p>
         <div class="infoContent">
             <h2>完善作品信息</h2>
-            <el-form :model="newBook" :rules="rules" ref="bookinfoForm"  :label-position="top">
-                <el-form-item label="作品名称" prop="bookname" style="width: 48%;float: left;">
-                    <el-input v-model="newBook.bookname" auto-complete="off" placeholder="15字内，请勿添加特殊符号"></el-input>
-                </el-form-item>
-                <el-form-item label="作品体裁" label-position="top" prop="category" style="width: 48%;float: right;">
-                     <el-input v-model="newBook.category" auto-complete="off" placeholder="15字内，请勿添加特殊符号"></el-input>
-                </el-form-item>
+            <el-form :model="newBook" :rules="rules" ref="bookinfoForm">
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="作品名称" prop="bookname">
+                            <el-input v-model="newBook.bookname" placeholder="15字内，请勿添加特殊符号"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="作品体裁" prop="category">
+                            <el-select v-model="newBook.category"  placeholder="请选择作品体裁">
+                                <el-option label="小说" value="fiction"></el-option>
+                                <el-option label="剧本" value="scripts"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
                 <el-form-item label="作品简介" prop="abstract">
                     <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6}"  placeholder="请填写"  v-model="newBook.abstract">
                     </el-input>
@@ -24,11 +34,7 @@
                     </el-input>
                     <p class="inputTip">0~500字</p>
                 </el-form-item>
-            </el-form>
-            <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleClose" append-to-body>
-                <P class="congratulation">恭喜您！创建成功！</P>
-                <el-button @click="returnList"  type="text">返回图书列表</el-button>
-            </el-dialog>
+            </el-form>            
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="addBook" v-if="bookid==''">创建作品</el-button>
                 <el-button type="primary" @click="editBook" v-else>更新作品</el-button>
@@ -42,8 +48,26 @@ import Header from './common/Header.vue'
 export default {
   name: 'BookInfo',
   data () {
+   var validateWriting = (rule, value, callback) => {
+                if(value.length >1000){
+            callback(new Error('长度在 0 到 1000个字符'));
+        }else {
+          callback();
+        }
+    };
+    var validateAbstract = (rule, value, callback) => {
+        if(value.length <= 0){
+            callback(new Error('必填'));
+        }else if(value.length > 1000){
+            callback(new Error('长度在 0 到 1000个字符'));
+        }else{
+            callback();
+        }
+    };
     return {
+        userid: 0,
         bookid: '',
+        innerVisible: false,
 	    newBook: {
             bookname: '',
             category: '',
@@ -51,12 +75,39 @@ export default {
             abstract: '',
             writing: '',
         },
+        rules:  {
+            bookname:[
+                {
+                    required: true,
+                    message: '必填信息',
+                    trigger: 'blur',
+                },
+                { min: 1,
+                  max: 15, 
+                  message: '15个字符内', 
+                  trigger: 'blur' 
+                }
+            ],
+            writing:[
+                {
+                    validator: validateWriting, 
+                    trigger: 'blur'
+                }
+            ],
+            abstract:[
+                {
+                    validator: validateAbstract, 
+                    trigger: 'blur'
+                }
+            ]
+
+        }
     }
   },
   methods:{
   	editBook(){
-        this.$axios.post('http://192.168.1.168:8888/api/editBook',{
-            bookid: this.upDateBookId,
+        this.$axios.post('http://203.93.173.179:8888/api/editBook',{
+            bookid: this.bookid,
             bookname: this.newBook.bookname,
             category: this.newBook.category,
             label: this.newBook.label,
@@ -65,6 +116,7 @@ export default {
             bookstatus: 0
         }).then((res)=>{
             if(res.data.code==1){
+                /*
                 this.$message({
                   type: 'success',
                   message: '修改成功',
@@ -72,6 +124,10 @@ export default {
                 }) 
                 this.initBookList();
                 this.reset();
+                */
+                this.$router.push({
+                    path: '/booklist'
+                })
             }else{
                 this.$message({
                   type: 'error',
@@ -84,13 +140,13 @@ export default {
         })
     },
     addBook() {
-        this.$axios.post('http://192.168.1.168:8888/api/addBook',{
+        this.$axios.post('http://203.93.173.179:8888/api/addBook',{
             bookname: this.newBook.bookname,
             category: this.newBook.category,
             label: this.newBook.label,
             abstract: this.newBook.abstract,
             writing: this.newBook.writing,
-            userid: this.user.userid
+            userid: this.userid
         }).then((res)=>{
             if(res.data.code==1){
                 this.$router.push({
@@ -112,7 +168,13 @@ export default {
   	    'v-header': Header
     },
     mounted(){
-        this.bookid = this.$route.query.bookid;
+        if(this.$route.query.bookid){
+            this.bookid = this.$route.query.bookid;
+            this.newBook = JSON.parse(JSON.stringify(this.$route.query.bookInfo));
+        }else{
+            console.log(this.$route.query.userid);
+            this.userid = this.$route.query.userid;
+        }
     }
 }
 </script>
@@ -130,6 +192,15 @@ export default {
 .navTxt button{
 	float: right;
 	margin-top: 10px;
+}
+.navTxt i{
+    width: 13px;
+    height: 13px;
+    float: right;
+    margin-top: 23px;
+    color: #00BAFC;
+    margin-right: 10px;
+    cursor: pointer;
 }
 .infoContent{
     padding: 0px 100px;
@@ -158,5 +229,8 @@ p.inputTip{
 .returnList a{
     color: #00BAFC;
     font-size: 13px;
+}
+.el-select{
+    width: 100%;
 }
 </style>
