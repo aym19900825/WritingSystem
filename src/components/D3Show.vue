@@ -1,4 +1,5 @@
 <template>
+    <!--
     <div id="d3show">
         <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回</el-button>
         <el-row>
@@ -20,6 +21,7 @@
                 </div>
             </el-col>
             <el-col :span="12">
+
                 <div >
                     <ul>
                         <li @click="searchChart(item._source.eid)" v-for="item in listData">{{item._source.title}}</li>
@@ -47,16 +49,115 @@
             </div>
         </el-row>
     </div>
+    -->
+    <div id="d3show">
+        <v-header></v-header>
+        <el-row>
+            <el-col :span="16" style="position: relative;" class="main">
+                <p class="navTxt">
+                    <span class="tit">{{bookname}}-作品图谱</span>
+                    <ul class="tabList">
+                        <li @click="tabChang('first')">图谱</li>
+                        <li @click="tabChang('second')">小说人物图谱</li>
+                    </ul>
+                    <span class="returnList" @click="returnPre">返回</span>
+                    <i class="icon-back"></i>
+                </p>
+                <div class="tabContent">
+                    <div id="first">
+                        <el-row>
+                            <div id="chart"></div>
+                        </el-row>
+                        <el-row>
+                            <div id="relationTxt">
+                                <h4></h4>
+                                <span></span>
+                                <p></p>
+                                <div></div>
+                            </div>
+                        </el-row>
+                    </div>
+                    <div id="second">
+                       second
+                    </div>
+                </div>
+                <span class="cirle icon-arrow2-right" @click="showHide" v-show="isRelation"></span>
+            </el-col>
+            <el-col :span="8" v-show="isSearch">
+                <div class="search-div">
+                    <p class="search-box">
+                        <el-input placeholder="请输入搜索关键字" v-model="search" class="input-with-select" @keydown="searchEnter($event)">
+                                <el-button type="primary" slot="append" icon="el-icon-search" @click="searchRelation"></el-button>
+                        </el-input>
+                    </p>
+                    <div class="searchResult">
+                        <ul>
+                           <li @click="searchChart(item._source.eid)" v-for="item in listData" :title="item._source.title">{{item._source.title}}</li>
+                        </ul>
+                    </div>
+                    <div align="right">
+                        <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage"
+                            :page-sizes="[10, 20, 30, 40]"
+                            :page-size="pagesize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="totalCount">
+                        </el-pagination>
+                    </div>
+                </div>
+            </el-col>
+        </el-row>
+    </div>
 </template>
 <script>
+    import Header from './common/Header.vue'
     import axios  from 'axios' 
     import topNav from '@/components/common/TopNav';
     export default {
         name: 'D3Show',
-        components:{
-            topNav
+        components: {
+            'v-header': Header
         },
         methods: {
+            showHide(){
+                if(this.isSearch){
+                    $(".main").width("100%");
+                    $(".cirle").removeClass("icon-arrow2-right");
+                    $(".cirle").addClass("icon-arrow2-left");
+                }else{
+                    $(".main").width("66.66%");
+                    $(".cirle").removeClass("icon-arrow2-left");
+                    $(".cirle").addClass("icon-arrow2-right");
+                }
+                this.isSearch = !this.isSearch;
+            },
+            tabChang(tabname){
+                if(tabname=="first"){
+                    $("#first").show();
+                    $("#second").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#fff");
+                    $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
+
+                    //人物图谱样式设置
+                    this.isRelation = true;
+                    this.isSearch = true;
+                    $(".main").width("66.66%");
+                    $(".cirle").removeClass("icon-arrow2-left");
+                    $(".cirle").addClass("icon-arrow2-right");
+                }else{
+                    $("#second").show();
+                    $("#first").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#F3F6FA");
+                    $("ul.tabList li:nth-child(2)").css("background","#fff");
+
+                    //人物图谱样式设置
+                    this.isRelation = false;
+                    this.isSearch = false;
+                    $(".main").width("100%");
+                }
+            },
             d3Init(url,queryParam1,queryParam2){
                 var _this = this;
                 var width = this.d3Params.width;
@@ -235,6 +336,7 @@
                 this.requestData();
             },
             requestData(){
+                var _this = this;
                 var url = "http://203.93.173.179:8888/api/search/list";
                 this.$axios.post(url,{
                             search_text: this.search,
@@ -243,7 +345,10 @@
                 }).then((res) => {
                     this.listData = res.data.data;
                     this.totalCount = res.data.total;
-                    this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,this.listData[0]['_source'].eid);
+                    if(_this.firstLoad){
+                        this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,this.listData[0]['_source'].eid);
+                        _this.firstLoad = false;
+                    }
                 }).catch((err) => {
                     this.$message({
                         type: 'error',
@@ -254,20 +359,25 @@
             },
             handleSizeChange(val) {
                 this.pagesize = val;
-                this.initBookList();
+                this.requestData();
             },
             handleCurrentChange(val) {
                 this.currentPage = val;
-                this.initBookList();
-                console.log(val);
+                this.requestData();
             }
         },
         data () {
             return {
+                bookname: '',
+                bookid: 1,
+                isRelation: true,
+                isSearch: true,
+                firstLoad: true,
+
                 country: require('../assets/img/country.png'),
                 d3Params: {
                     width: 600,
-                    height: 600,
+                    height: 300,
                     img_w: 30,
                     img_h: 40
                 },
@@ -288,17 +398,24 @@
 
 
                 //page信息
-                pagesize: 20,
+                pagesize: 10,
                 totalCount: 1,
                 currentPage: 1,
             }        
+        },
+        mounted(){
+            this.bookname = this.$route.query.bookname;
+            this.bookid = this.$route.query.bookid;
+
+            $("#first").show();
+            $("#second").hide();
+            $("ul.tabList li:nth-child(1)").css("background","#fff");
+            $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
         }
     }
 </script>
 <style scoped>
 #d3show{
-    width: 90%;
-    margin: 0 auto;
     min-height: 600px;
 }
 .nodetext {
@@ -306,7 +423,6 @@
     font-family: SimSun;
     fill:#000000;
 }
-
 .linetext {
     font-size: 12px ;
     font-family: SimSun;
@@ -315,7 +431,7 @@
 }
 #chart{
     width: 100%;
-    height:600;
+    height:400;
     padding-top: 50px;
     padding-bottom: 50px;
     margin: 0 auto;
@@ -354,20 +470,127 @@
     width: 100%;
     text-align: center;
 }
-ul{
-    margin-top: 50px;
-    min-height: 350px;
-}
-ul li{
-    line-height: 30px;
-    height: 30px;
-    font-size: 16px;
-    font-weight: bold;
-    padding-left: 15%;
-    text-decoration: underline;
-    cursor: pointer;
-}
 #relationTxt div{
     padding-bottom: 50px;
+}
+.navTxt{
+    width: 100%;
+    height: 65px;
+    background:rgba(243,246,250,1);
+    padding-left: 100px;
+    box-sizing: border-box;
+}
+.navTxt .tabList,.navTxt .tit{
+    display: block;
+    float: left;
+}
+.navTxt .tit{
+    height:25px;
+    font-size:18px;
+    color:rgba(170,178,192,1);
+    line-height:25px;
+    margin-top: 25px;
+}
+.navTxt .tabList{
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    margin-top: 25px;
+    margin-left: 50px;
+}
+.navTxt .tabList li{
+    height: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #000;
+    display: block;
+    float: left;
+    backgound: #fff;
+    font-size:15px;
+    color:rgba(91,99,113,1);
+    line-height: 40px;
+    cursor: pointer;
+    border-radius: 8px 8px 0px 0px;
+}
+.navTxt .tabList li:hover{
+    color: #0083FF;
+    background: #fff;
+}
+.navTxt .returnList,.navTxt i{
+    display: block;
+    float: right;
+    color:rgba(0,186,252,1);
+    font-size: 14px;
+    margin-top: 38px;
+    cursor: pointer;
+}
+.navTxt .returnList{
+    margin-left: 5px;
+    margin-right: 20px;
+}
+.tabContent{
+    box-sizing: border-box;
+    padding-left: 100px;
+    padding-right: 100px;
+    min-height: 500px;
+}
+.search-div{
+    box-shadow:-3px 0px 5px 0px rgba(0,0,0,0.1);
+    border:1px solid rgba(225,232,238,1);
+    border-bottom: none;
+    min-height: 700px;
+    position: relative;
+}
+.search-div p{
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100%;
+    height: 65px;
+    background:rgba(243,246,250,1);
+    box-sizing: border-box;
+    padding-top: 15px;
+}
+.searchResult ul li{
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 60px;
+    line-height: 60px;
+    font-size:15px;
+    color:rgba(0,34,87,1);
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    white-space:nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.searchResult ul{
+    padding-left: 15px;
+    box-sizing: border-box;
+    padding-right: 15px;
+    margin-top: 20px;
+    min-height: 400px;
+    z-index: 4;
+    margin-bottom: 40px;
+}
+.cirle{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #0064FF;
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -20px;
+    margin-right: -20px;
+    font-size: 24px;
+    background: #fff;
+    text-align: center;
+    line-height: 40px;
+    box-shadow:-3px 0px 5px 0px rgba(0,0,0,0.1);
+    border:1px solid rgba(225,232,238,1);
+    z-index: 3;
+    border-top: none;
+    border-right: none;
 }
 </style>

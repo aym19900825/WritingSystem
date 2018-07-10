@@ -77,7 +77,7 @@
           <el-row>
             <span>{{bookname}}</span>
             <el-button type="primary" plain size="small" @click="readDirect">查看目录</el-button>
-            <el-button type="success" plain style="margin-left: 20px;" size="small">查看作品图谱</el-button>
+            <el-button type="success" plain style="margin-left: 20px;" size="small" @click="readRelation">查看作品图谱</el-button>
           </el-row>
           <el-row>
             <el-button type="success" class="newChapter" @click="add">写新章节</el-button>
@@ -156,6 +156,15 @@ export default{
         }
     },
     methods: {
+      readRelation(){
+        this.$router.push({
+            path: '/d3show', 
+            query: { 
+                bookid: this.bookid,
+                bookname: this.bookname
+            }
+        })
+      },
       readDirect(){
         this.$router.push({
             path: '/bookdirectory', 

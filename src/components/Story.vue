@@ -1,73 +1,81 @@
 <template>
     <div class="main">
         <v-header></v-header>
-        <div class="tabBox">
-            <el-tabs type="border-card" v-model="activeName">
-                <el-tab-pane label="故事大纲" disabled style="font-size:24px;" name="title">故事大纲</el-tab-pane>
-                <el-tab-pane label="故事简介" name="abstract">
-                    <div class="abstract">
-                        <p>故事简介</p>
-                        <textarea></textarea>
-                        <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;">保存</el-button>
-                    </div>
-                </el-tab-pane>
-                <el-tab-pane label="人物设定" name="person">
-                    <div class="person">
-                        <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;">添加人物</el-button>
-                        <el-table :data="peoples" style="width: 85%;margin: 0 auto;"  :row-class-name="tableRowClassName">
-                            <el-table-column label="序号" width="100">
-                                <template slot-scope="scope">
-                                    <span class="index-box">{{scope.$index+1}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="姓名/性格特点" width="250" >
-                                <template slot-scope="scope">
-                                    <p class="title">{{ scope.row.name }}</p>
-                                    <p class="charact">{{ scope.row.characters }}</p>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="身份特征" prop="titles"></el-table-column>
-                            <el-table-column label="人物关系" width="180" prop="relationship"></el-table-column>
-                            <el-table-column label="操作" width="180">
-                                <template slot-scope="scope">
-                                    <el-button type="success" icon="edit" size="mini" @click="editPeople(item,index)">编辑</el-button>
-                                    <el-button type="danger" icon="delete" size="mini" @click="delPeople(item,index)">删除</el-button>
-                                </template>
-                             </el-table-column>
-                       </el-table>
-                       <el-row style="text-align: center;margin-top: 30px;">
-                            <el-button type="primary">保存</el-button>
-                            <el-button type="primary" plain>人物图谱</el-button>
-                       </el-row>
-
-                    </div>
-                </el-tab-pane>
-                <el-tab-pane label="事件设定" name="sth">事件设定</el-tab-pane>
-            </el-tabs>
-            <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%">
-                <el-form ref="form" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
-                    <el-form-item label="姓名" prop="name">
-                         <el-input  v-model="newPeople.name"></el-input>
-                     </el-form-item>
-                    <el-form-item label="身份特征" prop="titles">
-                        <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
-                    </el-form-item>
-                    <el-form-item label="性格特点" prop="characters">
-                        <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
-                    </el-form-item>
-                    <el-form-item label="人物关系" prop="relationship">
-                        <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                         <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX；</p>
-                    </el-form-item>
-                    <el-form-item>
-                        <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">立即创建</el-button>
-                        <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
-                        <el-button @click="resetPeople">取消</el-button>
-                    </el-form-item>
-                </el-form>
-            </el-dialog>
+        <p class="navTxt">
+            <span class="tit">故事大纲</span>
+            <ul class="tabList">
+                <li @click="tabChang('first')">故事简介</li>
+                <li @click="tabChang('second')">人物设定</li>
+            </ul>
+            <span class="returnList" @click="returnPre">返回我的作品</span>
+            <i class="icon-back"></i>
+        </p>
+         <div class="tabContent">
+            <div id="first">
+               <div class="abstract">
+                    <p>故事简介</p>
+                    <textarea style="padding: 10px;" v-model="bookabstract"></textarea>
+                    <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;" @click="addAbstract" v-if="abstracteid==''">保存</el-button>
+                    <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;" @click="editAbstract" v-else>更新</el-button>
+                </div>
+            </div>
+            <div id="second">
+               <div class="person">
+                    <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;" @click="dialogFormVisible = true">添加人物</el-button>
+                    <el-table :data="peoples" style="width: 85%;margin: 0 auto;">
+                        <el-table-column label="序号" width="100">
+                            <template slot-scope="scope">
+                                <span class="index-box">{{scope.$index+1}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="姓名/性格特点" width="250" >
+                            <template slot-scope="scope">
+                                <p class="title">{{ scope.row.name }}</p>
+                                <p class="charact">{{ scope.row.characters }}</p>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="身份特征" prop="titles"></el-table-column>
+                        <el-table-column label="人物关系" width="180" prop="relationship"></el-table-column>
+                        <el-table-column label="操作" width="180">
+                            <template slot-scope="scope">
+                                <el-button type="success" icon="edit" size="mini" @click="editPeople(scope.row,scope.$index)">编辑</el-button>
+                                <el-button type="danger" icon="delete" size="mini" @click="delPeople(scope.row,scope.$index)">删除</el-button>
+                            </template>
+                         </el-table-column>
+                   </el-table>
+                   <el-row style="text-align: center;margin-top: 30px;">
+                        <el-button type="primary" @click="addPeoples" v-if="peopleeid==''">保存</el-button>
+                        <el-button type="primary" @click="editPeoples"  v-else>更新</el-button>
+                        <el-button type="primary"  @click="characterMap" plain v-if="peopleeid!=''">人物图谱</el-button>
+                   </el-row>
+                   <el-row type="flex" justify="center" v-show="isShowRelation">
+                        <div id="chart"></div>
+                   </el-row>
+                </div>
+            </div>
         </div>
-
+        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%" id="peopleDialog">
+            <el-form ref="form" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
+                <el-form-item label="姓名" prop="name">
+                     <el-input  v-model="newPeople.name"></el-input>
+                 </el-form-item>
+                <el-form-item label="身份特征" prop="titles">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
+                </el-form-item>
+                <el-form-item label="性格特点" prop="characters">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
+                </el-form-item>
+                <el-form-item label="人物关系" prop="relationship">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
+                     <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
+                </el-form-item>
+                <el-form-item class="btnGrounp">
+                    <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">添加</el-button>
+                    <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
+                    <el-button @click="resetPeople" type="info">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
@@ -77,6 +85,158 @@
     export default {
         name: 'Story',
         methods: {
+            addPeoples(){
+                var _this = this;
+                var obj = {
+                    people: []
+                };
+                var peoples = JSON.parse(JSON.stringify(this.peoples));
+                for(var i=0;i<peoples.length;i++){
+                    var arr = [];
+                    var tmp =  peoples[i].relationship;
+                    var tmparr = tmp.split("；");
+                    for(var j=0;j<tmparr.length-1;j++){
+                        var tmpObj = {};
+                        tmpObj.realtion = tmparr[j].split("，")[0]
+                        tmpObj.being = tmparr[j].split("，")[1]
+                        arr.push(tmpObj);
+                    }
+                    peoples[i].relationship = arr;
+                }
+                obj.people = this.peoples;
+                this.$axios.post('http://spark2:8888/api/character/add',{
+                    "bookid": _this.bookid,
+                    "charactersetting": JSON.stringify(obj) 
+                }).then((res) => {
+                    if(res.data.code==1){
+                        _this.peopleeid = res.data.eid;
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络异常',
+                        showClose: true
+                    })
+                })
+            },
+            editPeoples(){
+                var _this = this;
+                var obj = {
+                    people: []
+                };
+                var peoples = JSON.parse(JSON.stringify(this.peoples));
+                for(var i=0;i<peoples.length;i++){
+                    var arr = [];
+                    var tmp =  peoples[i].relationship;
+                    var tmparr = tmp.split("；");
+                    for(var j=0;j<tmparr.length-1;j++){
+                        var tmpObj = {};
+                        tmpObj.realtion = tmparr[j].split("，")[0]
+                        tmpObj.being = tmparr[j].split("，")[1]
+                        arr.push(tmpObj);
+                    }
+                    peoples[i].relationship = arr;
+                }
+                obj.people = peoples;
+                this.$axios.post('http://spark2:8888/api/character/edit',{
+                    "bookid": this.bookid,
+                    "charactersetting": JSON.stringify(obj),
+                    "eid":  this.peopleeid
+                } ).then((res) => {
+                    if(res.data.code==1){
+                        _this.peopleeid = res.data.eid;
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络异常',
+                        showClose: true
+                    })
+                })
+            },
+            addAbstract(){
+                var _this = this;
+                this.$axios.post('http://spark2:8888/api/info/add',{
+                    "bookid": this.bookid,
+                    "bookabstract": this.bookabstract,
+                }).then((res) => {
+                    if(res.data.code==1){
+                        _this.abstracteid = res.data.eid;
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    
+                })
+            },
+            editAbstract(){
+                var _this = this;
+                this.$axios.post('http://spark2:8888/api/info/edit',{
+                    "bookid": _this.bookid,
+                    "bookabstract": _this.bookabstract,
+                    "eid": _this.abstracteid
+                }).then((res) => {
+                    if(res.data.code==1){
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    
+                })
+            },
+            tabChang(tabname){
+                if(tabname=="first"){
+                    $("#first").show();
+                    $("#second").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#fff");
+                    $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
+                }else{
+                    $("#second").show();
+                    $("#first").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#F3F6FA");
+                    $("ul.tabList li:nth-child(2)").css("background","#fff");
+                }
+            },
             handleCloseStory(){
                 this.returnBookList();
             },
@@ -204,7 +364,8 @@
                 .send("POST", JSON.stringify({eid: queryParam}));
             },
             characterMap(){
-                this.d3Init("http://203.93.173.179:8888/api/char_graph_search",this.eid);
+                this.d3Init("http://203.93.173.179:8888/api/char_graph_search",this.peopleeid);
+                this.isShowRelation = true;
             },
             returnBookList(){
                 this.$router.push({
@@ -251,6 +412,7 @@
                 this.dialogFormVisible = false;
             },
             resetPeople(){
+                alert("resetPeople");
                 this.resetNewPeople();
                 this.dialogFormVisible = false;
                 this.isupdatePeople = false;
@@ -309,7 +471,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
+                this.$axios.post('http://spark2:8888/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -327,56 +489,31 @@
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            next() {
-                if (this.active++ > 2) this.active = 0;
-                switch(this.active)
-                    {
-                    case 0:
-                        this.activeName = 'first';
-                        this.peopleInfoVisible = false;
-                        break;
-                    case 1:
-                        this.activeName = 'second';
-                        this.peopleInfoVisible = false;
-                        break;
-                    default:
-                        this.activeName = 'third';
-                        this.peopleInfoVisible = false;
-                    }
-            },
-            pre() {
-                this.active = this.active-1;
-                if ( this.active < 0 ) this.active = 0;
-                switch(this.active)
-                    {
-                    case 0:
-                        this.activeName = 'first';
-                        this.peopleInfoVisible = false;
-                        break;
-                    case 1:
-                        this.activeName = 'second';
-                        this.peopleInfoVisible = false;
-                        break;
-                    default:
-                        this.activeName = 'third';
-                        this.peopleInfoVisible = false;
-                    }
-            },
             closePeople(){
                 this.peopleInfoVisible = false;
             }
         },
         mounted(){
-            $(".el-tabs__nav-wrap").css("paddingTop","20px");
-            $(".el-tabs__nav-wrap").css("paddingLeft","100px");
-            $(".el-tabs__nav-wrap").css("paddingRight","100px");
-            $(".el-tabs__nav-wrap").css("boxSizing","boxBorder");
+            $("#first").show();
+            $("#second").hide();
+            $("ul.tabList li:nth-child(1)").css("background","#fff");
+            $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
+
             this.getParams();
-            this.$axios.post('http://203.93.173.179:8888/api/info/query',{
+            this.$axios.post('http://spark2:8888/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
-                    this.bookabstract = res.data[0]._source.chapterabstract;
+                    this.bookabstract = res.data[0]._source.bookabstract;
+                    this.abstracteid = res.data[0]._id;
+                }
+            }).catch((err) => {
+            
+            })
+            this.$axios.post('http://spark2:8888/api/character/query',{
+                "bookid": this.bookid,
+            } ).then((res) => {
+                if(res.data.length>0){
                     var jsonObj = eval('(' + res.data[0]._source.charactersetting + ')');
                     if(!jsonObj.people){
                         this.peoples = [];
@@ -391,13 +528,7 @@
                         }
                         this.peoples = jsonObj.people;
                     }
-                    this.eid = res.data[0]._id;
-                    this.updateBook = true;
-                    console.log(this.updateBook);
-
-                    $(".el-tabs__nav-wrap").attr("padd");
-                }else{
-                    this.updateBook = false;
+                    this.peopleeid = res.data[0]._id;
                 }
             }).catch((err) => {
             
@@ -405,7 +536,9 @@
         },
         data () {
             return {
-                activeName:'abstract',
+                isShowRelation: false,
+                abstracteid: '',
+                peopleeid:'',
                 //事件设定
                 person: require('../assets/img/person.png'),
                 dialogSthVisible: false,
@@ -431,9 +564,9 @@
                 //人物设定
                 peoples:[
                 ],
-                dialogFormVisible: true,
+                dialogFormVisible: false,
                 innerVisible: false,
-                peopleInfoVisible: true,
+                peopleInfoVisible: false,
                 peopleInfo: {
                     name: '',
                     relationship: '',
@@ -594,5 +727,74 @@ p.charact{
     color:rgba(151,163,180,1);
     line-height:22px;
     text-align: left;
+}
+.btnGrounp{
+    text-align: center;
+}
+.btnGrounp button{
+    padding-left: 87px;
+    padding-right: 87px;
+}
+.navTxt{
+    width: 100%;
+    height: 65px;
+    background:rgba(243,246,250,1);
+    padding-left: 100px;
+    padding-right: 100px;
+    box-sizing: border-box;
+}
+.navTxt .tabList,.navTxt .tit{
+    display: block;
+    float: left;
+}
+.navTxt .tit{
+    height:25px;
+    font-size:18px;
+    color:rgba(170,178,192,1);
+    line-height:25px;
+    margin-top: 25px;
+}
+.navTxt .tabList{
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    margin-top: 25px;
+    margin-left: 50px;
+}
+.navTxt .tabList li{
+    height: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #000;
+    display: block;
+    float: left;
+    backgound: #fff;
+    font-size:15px;
+    color:rgba(91,99,113,1);
+    line-height: 40px;
+    cursor: pointer;
+    border-radius: 8px 8px 0px 0px;
+}
+.navTxt .tabList li:hover{
+    color: #0083FF;
+    background: #fff;
+}
+.navTxt .returnList,.navTxt i{
+    display: block;
+    float: right;
+    color:rgba(0,186,252,1);
+    font-size: 14px;
+    margin-top: 38px;
+    cursor: pointer;
+}
+.navTxt .returnList{
+    margin-left: 5px;
+    margin-right: 20px;
+}
+.tabContent{
+    box-sizing: border-box;
+    padding-left: 100px;
+    padding-right: 100px;
+    min-height: 500px;
 }
 </style>

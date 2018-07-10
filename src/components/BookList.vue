@@ -112,9 +112,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="状态" width="100" prop="bookstatus">
-                    <template slot-scope="scope">
-                        <span v-text="scope.row.bookstatus==0?'未完成':'完成'"></span>
-                    </template>
                 </el-table-column>
                 <el-table-column label="创建时间" width="250">
                     <template slot-scope="scope">
