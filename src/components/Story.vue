@@ -43,10 +43,26 @@
                             </template>
                          </el-table-column>
                    </el-table>
-                   <el-row style="text-align: center;margin-top: 30px;">
+                   <el-row style="text-align: center;margin-top: 30px;position: relative;">
                         <el-button type="primary" @click="addPeoples" v-if="peopleeid==''">保存</el-button>
                         <el-button type="primary" @click="editPeoples"  v-else>更新</el-button>
                         <el-button type="primary"  @click="characterMap" plain v-if="peopleeid!=''">人物图谱</el-button>
+
+                        <!--图谱点击的人物卡-->
+                        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
+                            <i class="el-icon-close" @click="closePeople"></i>
+                            <el-form ref="form" :model="peopleInfo" label-width="80px">
+                              <el-form-item label="姓名" prop="name">
+                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="身份特征" prop="titles">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="性格特点" prop="characters">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                            </el-form>
+                        </div>
                    </el-row>
                    <el-row type="flex" justify="center" v-show="isShowRelation">
                         <div id="chart"></div>
@@ -76,6 +92,7 @@
                 </el-form-item>
             </el-form>
         </el-dialog>
+
     </div>
 </template>
 
@@ -103,8 +120,8 @@
                     }
                     peoples[i].relationship = arr;
                 }
-                obj.people = this.peoples;
-                this.$axios.post('http://spark2:8888/api/character/add',{
+                obj.people = peoples;
+                this.$axios.post('http://203.93.173.179:8888/api/character/add',{
                     "bookid": _this.bookid,
                     "charactersetting": JSON.stringify(obj) 
                 }).then((res) => {
@@ -149,13 +166,12 @@
                     peoples[i].relationship = arr;
                 }
                 obj.people = peoples;
-                this.$axios.post('http://spark2:8888/api/character/edit',{
+                this.$axios.post('http://203.93.173.179:8888/api/character/edit',{
                     "bookid": this.bookid,
                     "charactersetting": JSON.stringify(obj),
                     "eid":  this.peopleeid
                 } ).then((res) => {
                     if(res.data.code==1){
-                        _this.peopleeid = res.data.eid;
                         this.$message({
                             type: 'success',
                             message: '保存成功',
@@ -178,7 +194,7 @@
             },
             addAbstract(){
                 var _this = this;
-                this.$axios.post('http://spark2:8888/api/info/add',{
+                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
                     "bookid": this.bookid,
                     "bookabstract": this.bookabstract,
                 }).then((res) => {
@@ -202,7 +218,7 @@
             },
             editAbstract(){
                 var _this = this;
-                this.$axios.post('http://spark2:8888/api/info/edit',{
+                this.$axios.post('http://203.93.173.179:8888/api/info/edit',{
                     "bookid": _this.bookid,
                     "bookabstract": _this.bookabstract,
                     "eid": _this.abstracteid
@@ -271,7 +287,6 @@
                     if( error ){
                         console.log(error);
                     }
-                    console.log(root);
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
                                     .links(root.edges)
@@ -313,10 +328,9 @@
                                             return _this.person;
                                         })
                                         .on("click",function(d,i){
-                                            console.log(d);
-                                            console.log(i);
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
-                                            $(".d3PeopleInfo").offset({top: d.py+400, left: d.px+60})
+                                            $(".d3PeopleInfo").css("left",d.px-100);
+                                            $(".d3PeopleInfo").css("top",d.py);
                                             _this.peopleInfoVisible = true;
                                         })
                                         .call(force.drag);
@@ -412,7 +426,6 @@
                 this.dialogFormVisible = false;
             },
             resetPeople(){
-                alert("resetPeople");
                 this.resetNewPeople();
                 this.dialogFormVisible = false;
                 this.isupdatePeople = false;
@@ -431,7 +444,6 @@
             },
             addSth(){
                 Vue.set(this.things,this.things.length, JSON.parse(JSON.stringify(this.newSth)));
-                console.log("addSth");
                 this.resetSth();
             },
             resetSth(){
@@ -471,7 +483,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://spark2:8888/api/info/add',{
+                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -486,9 +498,6 @@
                     
                 })
             },
-            handleClick(tab, event) {
-                console.log(tab, event);
-            },
             closePeople(){
                 this.peopleInfoVisible = false;
             }
@@ -500,7 +509,7 @@
             $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
 
             this.getParams();
-            this.$axios.post('http://spark2:8888/api/info/query',{
+            this.$axios.post('http://203.93.173.179:8888/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
@@ -510,7 +519,7 @@
             }).catch((err) => {
             
             })
-            this.$axios.post('http://spark2:8888/api/character/query',{
+            this.$axios.post('http://203.93.173.179:8888/api/character/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
@@ -658,6 +667,7 @@ text.shadow {
     padding-top: 30px;
     background: #fff;
     position: absolute;
+    z-index: 1000;
 }
 .el-icon-close{
     float: right;

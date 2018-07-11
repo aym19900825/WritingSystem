@@ -1,70 +1,4 @@
 <template>
-    <!--
-
-    <div class="app-container">
-        <el-menu class="el-menu-demo" mode="horizontal" 
-            text-color="#000"  active-text-color="#409EFF">
-            <el-submenu index="5">
-              <template slot="title">
-                <i class="el-icon-write-ren"></i>
-              </template>
-              <el-menu-item index="5-1" @click="logout">退出</el-menu-item>
-            </el-submenu>
-            <el-menu-item index="4">
-              <router-link :to="{path: '/d3show'}">
-                图谱
-              </router-link>
-            </el-menu-item>
-            <el-menu-item index="3">小说图谱</el-menu-item>
-            <el-menu-item index="2">
-              <router-link :to="{path:'/bookdirectory',query:{bookid:bookid,bookname:bookname}}"> 查看目录
-              </router-link>
-            </el-menu-item>
-            <el-menu-item index="1">
-              <router-link :to="{path:'/booklist'}"> 
-                图书列表
-              </router-link>
-            </el-menu-item>
-        </el-menu>
-        <div class="main">
-          <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;">
-            <span class="bookTit">作品名称</span>
-            <span class="bookname">{{bookname}}</span>
-            <el-button @click="add" type="primary" size="medium " style="float:right;margin-top:5px;margin-bottom:5px;">新增章节</el-button>
-          </el-row> 
-          
-          <el-row :gutter="24" style="border-bottom: 1px solid #e6e6e6;font-size:14px;">
-              第<input type="text" class="chapterNum" v-model="chapternumber"/>章:
-              <input type="text" class="titInput" v-model="chaptername" placeholder="请输入章节名称"/>
-          </el-row>
-
-          <el-row :gutter="20" style="border-bottom: 1px solid #ccc;border-left:1px solid #ccc;">
-            <el-col :span="6">
-              <textarea name="content" :autosize="{minRows:1}" class="input_textarea" id="contentTip" v-model="chapterabstract" placeholder="请输入章节大纲"></textarea>
-            </el-col>
-            <el-col :span="18">
-              <textarea :autosize="{minRows:1}" class="input_textarea" id="content" v-model="chaptercontent" placeholder="请输入正文内容"></textarea>
-
-              <div class="btngroup">
-                <el-button size="medium" class="aiBtn" @click="autoCreat">人工智能生成</el-button>
-                <el-button size="medium" class="updateChBtn" @click="updateSave">保存</el-button>
-                <el-button size="medium" class="finishBtn" @click="finishSave">完成</el-button>
-                <el-button size="medium" class="resetBtn" @click="newContent">重置</el-button>
-              </div>
-              
-              <div v-for="item in conntentVer" v-html="item" class="txtBlock"></div>
-            </el-col>
-          </el-row>
-        </div> 
-        <el-dialog  width="30%"  title="创建成功" :visible.sync="isFinish"  append-to-body>
-          <P class="congratulation">恭喜您！章节编辑完成！</P>
-          <el-button @click="add"  type="text">新增章节</el-button>
-          <el-button @click="returnLook"  type="text">查看本章内容</el-button>
-        </el-dialog> 
-    </div>
-
-    -->
-
     <div id="bookInfo">
         <v-header></v-header>
         <p class="navTxt">
@@ -362,18 +296,6 @@ export default{
       },
       d3show(){
         this.$router.replace('/d3show');
-      },
-      editContent(){
-        $("#contentTip").prop("readonly",false)
-      },
-      tipSave(){
-        $("#contentTip").prop("readonly",true)
-      },
-      editTit(){
-        $(".titInput").prop("readonly",false)
-      },
-      titSave(){
-        $(".titInput").prop("readonly",true)
       },
       newContent(){
         var newContent = this.chaptercontent; 

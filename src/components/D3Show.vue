@@ -1,55 +1,4 @@
 <template>
-    <!--
-    <div id="d3show">
-        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回</el-button>
-        <el-row>
-            <el-col :span="12" :offset="6">
-                <div style="margin-top: 15px;">
-                    <el-input placeholder="请输入内容" v-model="search" class="input-with-select" @keydown="searchEnter($event)">
-                        <el-button slot="append" icon="el-icon-search" @click="searchRelation"></el-button>
-                    </el-input>
-                </div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="12">
-                <div id="d3show">
-                    <el-row>
-                        <div id="chart"></div>
-                        <p id="relationTxt" v-text="relationTxt"></p>
-                    </el-row>
-                </div>
-            </el-col>
-            <el-col :span="12">
-
-                <div >
-                    <ul>
-                        <li @click="searchChart(item._source.eid)" v-for="item in listData">{{item._source.title}}</li>
-                    </ul>
-                </div>
-                <div align="right">
-                    <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes="[10, 20, 30, 40]"
-                        :page-size="pagesize"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="totalCount">
-                    </el-pagination>
-                </div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <div id="relationTxt">
-                <h4></h4>
-                <span></span>
-                <p></p>
-                <div></div>
-            </div>
-        </el-row>
-    </div>
-    -->
     <div id="d3show">
         <v-header></v-header>
         <el-row>
@@ -77,8 +26,26 @@
                             </div>
                         </el-row>
                     </div>
-                    <div id="second">
-                       second
+                    <div id="second" style="position: relative;">
+                       <div v-show="chaptereid==''">
+                            <p style="width:100%;font-size:24px;text-align:center;margin-top:200px;">您还没有人物图谱</p>
+                       </div>
+                       <div id="chapterchart" v-show="chaptereid!=''"></div>
+                        <!--图谱点击的人物卡-->
+                        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
+                            <i class="el-icon-close" @click="closePeople"></i>
+                            <el-form ref="form" :model="peopleInfo" label-width="80px">
+                              <el-form-item label="姓名" prop="name">
+                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="身份特征" prop="titles">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="性格特点" prop="characters">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                            </el-form>
+                        </div>
                     </div>
                 </div>
                 <span class="cirle icon-arrow2-right" @click="showHide" v-show="isRelation"></span>
@@ -100,15 +67,16 @@
                             @size-change="handleSizeChange"
                             @current-change="handleCurrentChange"
                             :current-page="currentPage"
-                            :page-sizes="[10, 20, 30, 40]"
+                            :pager-count="3"
                             :page-size="pagesize"
-                            layout="total, sizes, prev, pager, next, jumper"
+                            layout="total, prev, pager, next"
                             :total="totalCount">
                         </el-pagination>
                     </div>
                 </div>
             </el-col>
         </el-row>
+
     </div>
 </template>
 <script>
@@ -121,6 +89,9 @@
             'v-header': Header
         },
         methods: {
+            closePeople(){
+                this.peopleInfoVisible = false;
+            },
             showHide(){
                 if(this.isSearch){
                     $(".main").width("100%");
@@ -156,9 +127,18 @@
                     this.isRelation = false;
                     this.isSearch = false;
                     $(".main").width("100%");
+
+                    //首次点击人物图谱加载数据
+                    if(this.chaptereid==""){
+                        this.initChaptereid();
+                    }
                 }
             },
-            d3Init(url,queryParam1,queryParam2){
+            initChaptereid(){
+                this.chaptereid = "1V04h2QB7mI_3iJyuFO3";
+                this.initchapter("http://203.93.173.179:8888/api/char_graph_search","1V04h2QB7mI_3iJyuFO3");
+            },
+            d3Init(url,svgdom,queryParam1,queryParam2){
                 var _this = this;
                 var width = this.d3Params.width;
                 var height = this.d3Params.height;
@@ -166,8 +146,15 @@
                 var img_h = this.d3Params.img_h;
                 var _this = this;
                 d3.select("svg").remove();
+                var svgdom = '#'+svgdom;
+                var param = '';
+                if(queryParam2){
+                    param = JSON.stringify({search_text: queryParam1,eid:queryParam2});
+                }else{
+                    param = JSON.stringify({eid: queryParam1});
+                }
 
-                var svg = d3.select("#chart").append("svg")
+                var svg = d3.select(svgdom).append("svg")
                                 .attr("width",width)
                                 .attr("height",height);
 
@@ -175,8 +162,6 @@
                     if( error ){
                         console.log(error);
                     }
-                    console.log(root);
-                    
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
                                     .links(root.edges)
@@ -202,7 +187,6 @@
                                             return d.type;
                                         })
                                         .on("click",function(d,i){
-                                            console.log(d.eid);
                                             axios.post("http://203.93.173.179:8888/api/news/detail",{
                                                 "eid": d.eid
                                             }).then((res) => {
@@ -210,6 +194,12 @@
                                                 $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
                                                 $("#relationTxt span").text(res.data.create_date);
                                                 $("#relationTxt div").text(res.data.content);
+
+                                                //设置d3show的高度
+                                                var txtHeight = $("#relationTxt div").height()+700;
+                                                console.log(txtHeight);
+                                                $("#d3show").height(txtHeight+"px");
+
                                             }).catch((err) => {
                                                 this.$message({
                                                     type: 'error',
@@ -227,7 +217,6 @@
                                         .attr("width",img_w)
                                         .attr("height",img_h)
                                         .attr("xlink:href",function(d){
-                                            console.log(d.image.toLowerCase());
                                             switch(d.image.toLowerCase())
                                                 {
                                                 case "person.png":
@@ -303,7 +292,7 @@
                     });
                 })
                 .header("Content-Type","application/json")
-                .send("POST", JSON.stringify({search_text: queryParam1,eid:queryParam2}));
+                .send("POST", param);
             } ,
             returnPre(){
                 sessionStorage.setItem('url','login');
@@ -329,8 +318,11 @@
                 window.open(href, '_blank');
                 */
                
-               this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,eid);
-
+               this.d3Init("http://203.93.173.179:8888/api/graph_search","chart",this.search,eid);
+               $("#relationTxt h4").text("");
+               $("#relationTxt span").text("");
+               $("#relationTxt p").text("");
+               $("#relationTxt div").text("");
             },
             searchRelation(){
                 this.requestData();
@@ -346,7 +338,7 @@
                     this.listData = res.data.data;
                     this.totalCount = res.data.total;
                     if(_this.firstLoad){
-                        this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,this.listData[0]['_source'].eid);
+                        this.d3Init("http://203.93.173.179:8888/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
                         _this.firstLoad = false;
                     }
                 }).catch((err) => {
@@ -364,16 +356,132 @@
             handleCurrentChange(val) {
                 this.currentPage = val;
                 this.requestData();
+            },
+            initchapter(url,queryParam){
+                var _this = this;
+                var width = 600;
+                var height = 400;
+                var img_w = 20;
+                var img_h = 20;
+                var _this = this;
+                d3.select("svg").remove();
+
+                var svg = d3.select("#chapterchart").append("svg:svg")
+                                .attr("width",width)
+                                .attr("height",height);
+
+
+                d3.json(url,function(error,root){
+                    if( error ){
+                        console.log(error);
+                    }
+                    var force = d3.layout.force()
+                                    .nodes(root.nodes)
+                                    .links(root.edges)
+                                    .size([width,height])
+                                    .linkDistance(200)
+                                    .charge(-1500)
+                                    .on("tick", tick)
+                                    .start();
+                                    
+                    
+                    svg.append("svg:defs")
+                        .append("svg:marker")
+                        .attr("id", "resolved")
+                        .attr("viewBox", "0 -5 10 10")
+                        .attr("refX", 15)
+                        .attr("refY", -1.5)
+                        .attr("markerWidth", 6)
+                        .attr("markerHeight", 6)
+                        .attr('fill','#ccc')
+                        .attr("orient", "auto")
+                        .append("svg:path")
+                        .attr("d", "M0,-5L10,0L0,5");
+                    //(2)根据连线类型引用上面创建的标记
+                    var path = svg.append("svg:g").selectAll("path")
+                        .data(root.edges)
+                        .enter().append("svg:path")
+                        .attr('fill','none')
+                        .attr('stroke','#ccc')
+                        .attr('stroke-width',2)
+                        .attr("marker-end", "url(#resolved)");
+
+                    var nodes_img = svg.append("svg:g").selectAll("image")
+                                        .data(root.nodes)
+                                        .enter()
+                                        .append("image")
+                                        .attr("width",img_w)
+                                        .attr("height",img_h)
+                                        .attr("xlink:href",function(d){
+                                            return _this.person;
+                                        })
+                                        .on("click",function(d,i){
+                                            _this.peopleInfo = JSON.parse(JSON.stringify(d));
+                                            $(".d3PeopleInfo").css("left",d.px-100);
+                                            $(".d3PeopleInfo").css("top",d.py);
+                                            _this.peopleInfoVisible = true;
+                                        })
+                                        .call(force.drag);
+                     
+                    var text = svg.append("svg:g").selectAll("g")
+                        .data(root.nodes)
+                        .enter().append("svg:g");
+
+                    var text_dx = -40;
+                    var text_dy = 20;
+                     
+                    // A copy of the text with a thick white stroke for legibility.
+                    text.append("svg:text")
+                        .attr("x", text_dx)
+                        .attr("y", text_dy)
+                        .attr("class", "shadow")
+                        .text(function(d) { return d.name; });
+                     
+                    text.append("svg:text")
+                        .attr("x", text_dx)
+                        .attr("y", text_dy)
+                        .text(function(d) { return d.name; });
+                     
+                    function tick() {
+                      path.attr("d", function(d) {
+                        var dx = d.target.x - d.source.x,//增量
+                            dy = d.target.y - d.source.y,
+                            dr = Math.sqrt(dx * dx + dy * dy);
+                        return "M" + d.source.x + "," 
+                        + d.source.y + "A" + dr + "," 
+                        + dr + " 0 0,1 " + d.target.x + "," 
+                        + d.target.y;
+                      });
+                     
+                      nodes_img.attr("transform", function(d) {
+                        return "translate(" + d.x + "," + d.y + ")";
+                      });
+                     
+                      text.attr("transform", function(d) {
+                        return "translate(" + d.x + "," + d.y + ")";
+                      });
+                    }
+                })
+                .header("Content-Type","application/json")
+                .send("POST", JSON.stringify({eid: queryParam}));
             }
         },
         data () {
             return {
+                peopleInfoVisible: false,
+                peopleInfo: {
+                    name: '',
+                    relationship: '',
+                    character: '',
+                    title: '',
+                },
+                person: require('../assets/img/person.png'),
                 bookname: '',
                 bookid: 1,
                 isRelation: true,
                 isSearch: true,
                 firstLoad: true,
-
+                chaptereid: '',
                 country: require('../assets/img/country.png'),
                 d3Params: {
                     width: 600,
@@ -415,8 +523,27 @@
     }
 </script>
 <style scoped>
-#d3show{
-    min-height: 600px;
+
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+circle {
+  fill: #ccc;
+  stroke: #333;
+  stroke-width: 1.5px;
+}
+ 
+text {
+  font: 10px sans-serif;
+  pointer-events: none;
+}
+ 
+text.shadow {
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-opacity: .8;
 }
 .nodetext {
     font-size: 12px ;
@@ -592,5 +719,25 @@
     z-index: 3;
     border-top: none;
     border-right: none;
+}
+#chapterchart{
+    width: 600px;
+    height: 400px;
+    margin: 0 auto;
+}
+.d3PeopleInfo{
+    width: 350px;
+    border: 2px solid #ccc;
+    padding: 10px;
+    padding-top: 30px;
+    background: #fff;
+    position: absolute;
+}
+.el-icon-close{
+    float: right;
+    display: block;
+    margin-top: -20px;
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 </style>

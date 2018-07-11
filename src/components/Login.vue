@@ -21,7 +21,9 @@
                             <el-form-item> 
                                 <el-button type="primary" class="submitBtn" @click="login">登录</el-button>
                             </el-form-item>
+                            <!--
                             <p class="regitstTip"><router-link to="/regiser">新用户？</router-link></p>
+                            -->
                         </el-form>
                     </el-col>
                 </el-row>
