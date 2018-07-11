@@ -135,8 +135,16 @@
                 }
             },
             initChaptereid(){
-                this.chaptereid = "1V04h2QB7mI_3iJyuFO3";
-                this.initchapter("http://203.93.173.179:8888/api/char_graph_search","1V04h2QB7mI_3iJyuFO3");
+                this.$axios.post('http://203.93.173.179:8888/api/character/query',{
+                    "bookid": this.bookid,
+                } ).then((res) => {
+                    if(res.data.length>0){
+                        this.chaptereid = res.data[0]._id;
+                        this.initchapter("http://203.93.173.179:8888/api/char_graph_search",this.chaptereid);
+                    }
+                }).catch((err) => {
+                
+                })
             },
             d3Init(url,svgdom,queryParam1,queryParam2){
                 var _this = this;
