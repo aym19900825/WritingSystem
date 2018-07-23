@@ -7,7 +7,7 @@
             <router-link :to="{path:'/booklist'}">返回我的作品</router-link></span>
             <i class="icon-back"></i>
         </p>
-        <el-row :gutter="20" class="tit">
+        <div class="tit">
           <el-row>
             <span>{{bookname}}</span>
             <el-button type="primary" plain size="small" @click="readDirect">查看目录</el-button>
@@ -34,11 +34,11 @@
             </el-col>
             <el-col :span="18">
               <p style="width: 50%;display: block;float: left;">章节正文</p>
-              <el-button type="success" class="aibtn" @click="autoCreat">人工智能生成</el-button>
+              <el-button type="success" class="aibtn" @click="dialogFormVisible=true">人工智能生成</el-button>
               <textarea id="content" placeholder="请填写内容" v-model="chaptercontent"></textarea>
             </el-col>
           </el-row>
-          <el-row :gutter="20" class="history-box" style="margin-left: 10px;">
+          <el-row :gutter="20" class="history-box" style="margin-left: 10px;    padding-bottom: 20px;">
             <el-col :span="12" :offset="10">
                 <el-button type="info" @click="newContent">重写</el-button>
                 <el-button type="primary" style="padding-left: 60px;padding-right: 60px;margin-top: 20px;" @click="updateSave">保存</el-button>
@@ -48,13 +48,58 @@
               <el-button type="warning" @click="finishSave" v-if="conntentVer.length>0">清空版本</el-button>
               <div v-for="(item,key) in conntentVer">
                 <span class="point"></span>
-                <h6>历史版本{{key+1}}</h6>
+                <h6>
+                  <span>历史版本{{key+1}}</span>
+                  <span class="el-icon-delete del" @click="delHistory(key)"></span>
+                </h6>
                 <div>
                     {{item}}
                 </div>
               </div>
           </div>
-        </el-row>
+        </div>
+        <el-dialog title="人工智能参数" :visible.sync="dialogFormVisible"  :before-close="resetDialog">
+          <el-form :model="autoTxt" ref="autoForm">
+            <el-form-item label="场景">
+              <el-autocomplete
+                popper-class="my-autocomplete"
+                v-model="autoTxt.scence"
+                :fetch-suggestions="querySearch"
+                placeholder="请输入内容"
+                @select="handleSelect">
+                <i
+                  class="el-icon-edit el-input__icon"
+                  slot="suffix"
+                  @click="handleIconClick">
+                </i>
+                <template slot-scope="{ item }">
+                  <div class="name">{{ item.value }}</div>
+                  <span class="addr">{{ item.address }}</span>
+                </template>
+              </el-autocomplete>
+            </el-form-item>
+            <el-form-item label="场景说明(关键字)">
+              <el-input v-model="autoTxt.topics" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="人物">
+              <el-select v-model="autoTxt.casting" multiple placeholder="请选择人物">
+                <el-option
+                  v-for="item in castingOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="对话长度">
+              <el-input v-model="autoTxt.script_size" auto-complete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="resetDialog">取 消</el-button>
+            <el-button type="primary" @click="submitDialog">确 定</el-button>
+          </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -86,10 +131,120 @@ export default{
             chaptername: '',
             chapterabstract: '',
             conntentVer: [],
-            chaptercontent: ''
+            chaptercontent: '',
+
+            //人工智能生成文本
+            autoTxt:{
+              title: "",
+              scence: "",
+              topics: "",
+              casting: [],
+              outline: "",
+              script_size: ""
+            },
+            dialogFormVisible: false,
+
+            restaurants: [],
+            state3: '',
+            castingOptions: [
+               {
+                  value: '人物一',
+                  label: '人物一'
+                },
+
+                {
+                  value: '人物二',
+                  label: '人物二'
+                },
+
+                {
+                  value: '人物三',
+                  label: '人物三'
+                },
+            ]
         }
     },
     methods: {
+      resetDialog(){
+        this.dialogFormVisible = false;
+        this.autoTxt = {
+              title: "",
+              scence: "",
+              topics: "",
+              casting: [],
+              outline: "",
+              script_size: ""
+        };
+      },
+      submitDialog(){
+        this.resetDialog();
+      },
+
+      querySearch(queryString, cb) {
+        var restaurants = this.restaurants;
+        var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+        cb(results);
+      },
+      createFilter(queryString) {
+        return (restaurant) => {
+          return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      loadAll() {
+        return [
+          { "value": "三全鲜食（北新泾店）"},
+          { "value": "Hot honey 首尔炸鸡（仙霞路）"},
+          { "value": "新旺角茶餐厅"},
+          { "value": "泷千家(天山西路店)"},
+          { "value": "胖仙女纸杯蛋糕（上海凌空店）"},
+          { "value": "贡茶"},
+          { "value": "豪大大香鸡排超级奶爸"},
+          { "value": "茶芝兰（奶茶，手抓饼）"},
+          { "value": "十二泷町"},
+          { "value": "星移浓缩咖啡"},
+          { "value": "阿姨奶茶/豪大大"},
+          { "value": "新麦甜四季甜品炸鸡"},
+          { "value": "Monica摩托主题咖啡店"},
+          { "value": "浮生若茶（凌空soho店）"},
+          { "value": "NONO JUICE  鲜榨果汁"},
+          { "value": "CoCo都可(北新泾店）"},
+          { "value": "快乐柠檬（神州智慧店）"},
+          { "value": "Merci Paul cafe"},
+          { "value": "猫山王（西郊百联店）"},
+          { "value": "枪会山"},
+          { "value": "纵食"},
+          { "value": "钱记"},
+          { "value": "壹杯加"},
+          { "value": "唦哇嘀咖"},
+          { "value": "爱茜茜里(西郊百联)"},
+          { "value": "爱茜茜里(近铁广场)"},
+          { "value": "鲜果榨汁（金沙江路和美广店）"},
+          { "value": "开心丽果（缤谷店）"},
+          { "value": "超级鸡车（丰庄路店）"},
+          { "value": "妙生活果园（北新泾店）"},
+          { "value": "香宜度麻辣香锅"},
+          { "value": "凡仔汉堡（老真北路店）"},
+          { "value": "港式小铺"},
+          { "value": "蜀香源麻辣香锅（剑河路店）"},
+          { "value": "北京饺子馆"},
+          { "value": "饭典*新简餐（凌空SOHO店）"},
+          { "value": "焦耳·川式快餐（金钟路店）"},
+          { "value": "动力鸡车"},
+          { "value": "浏阳蒸菜"},
+          { "value": "四海游龙（天山西路店）"},
+          { "value": "樱花食堂（凌空店）"},
+          { "value": "壹分米客家传统调制米粉(天山店)"},
+          { "value": "福荣祥烧腊（平溪路店）"}
+        ];
+      },
+      handleSelect(item) {
+        console.log(item);
+      },
+      handleIconClick(ev) {
+        console.log(ev);
+      },
+
+
       readRelation(){
         this.$router.push({
             path: '/d3show', 
@@ -291,6 +446,11 @@ export default{
         this.chaptercontent = this.autoContent;
         // tinyMCE.editors[0].setContent(this.autoContent);
       },
+      //弹出自动保存输入框
+      autoCreatBox(){
+
+      },
+
       changeBook(){
         this.$router.replace('/booklist');
       },
@@ -303,18 +463,36 @@ export default{
         Vue.set(this.conntentVer,this.conntentVer.length, newContent);
         this.chaptercontent = '';
         // tinyMCE.editors[0].setContent("");
+      },
+
+      getPeoples(){
+        this.$axios.post('http://203.93.173.179:8888/api/character/query',{
+            "bookid": this.bookid,
+        } ).then((res) => {
+            if(res.data.length>0){
+                var jsonObj = eval('(' + res.data[0]._source.charactersetting + ')');
+                console.log(jsonObj);
+            }
+        }).catch((err) => {
+        
+        })
+      },
+      delHistory(key){
+        this.conntentVer.splice(key,1);
       }
     },
     computed: {
-         user () {
+        user () {
             return this.$store.state.user;
-          }
+        }
     },
     components: {
         'v-header': Header
     },
     mounted(){
+      this.restaurants = this.loadAll();
       this.getParams();
+
       var preUrl = sessionStorage.getItem('url');
       if(preUrl=='login'){
         this.$axios.post('http://203.93.173.179:8888/api/work/detail',{
@@ -337,6 +515,9 @@ export default{
             }
             this.conntentVer = arr;
             this.currentEidSave();
+
+            //获取人物----人工智能
+            this.getPeoples();
           }else{
             this.$router.replace({ path: '/booklist' })
           }
@@ -351,6 +532,9 @@ export default{
         } ).then((res) => {
             this.chapternumber = res.data.next_chapter;
             this.setTimeSave();
+
+            //获取人物----人工智能
+            this.getPeoples();
         }).catch((err) => {
             
         })
@@ -372,10 +556,14 @@ export default{
           }
           this.conntentVer = arr;
           this.currentEidSave();
+
+          //获取人物----人工智能
+          this.getPeoples();
         }).catch((err) => {
             
         })
       }
+
     },
 } 
 </script>
@@ -490,6 +678,13 @@ export default{
   line-height:22px;
   padding-left: 20px;
 }
+.history h6 span:first-child{
+  font-size:13px;
+  color:rgba(0,34,87,1);
+}
+.history h6 span.del{
+  cursor: pointer;
+}
 .history div div{
   margin-left: 20px;
   padding:15px;
@@ -507,6 +702,14 @@ export default{
   float: left;   
   margin-left: -7px;
   margin-top: 4px;
+}
+
+.el-autocomplete{
+  width: 100%;
+}
+
+.el-form-item__content .el-select{
+  width: 100%;
 }
 </style>
 

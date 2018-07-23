@@ -12,58 +12,74 @@ import ShowRelation from '@/components/ShowRelation'
 
 Vue.use(Router)
 
-export default new Router({
+const routes = [
+  {
+    path: '/',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/booklist',
+    name: 'BookList',
+    component: BookList
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/edit',
+    name: 'Edit',
+    component: Edit
+  },
+  {
+    path: '/regiser',
+    name: 'Register',
+    component: Register
+  },
+  {
+    path: '/d3show',
+    name: 'D3Show',
+    component: D3Show
+  },
+  {
+    path: '/bookdirectory',
+    name: 'BookDirectory',
+    component: BookDirectory
+  },
+  {
+    path: '/story',
+    name: 'Story',
+    component: Story
+  },
+  {
+    path: '/showrelation',
+    name: 'ShowRelation',
+    component: ShowRelation
+  },
+  {
+    path: '/bookinfo',
+    name: 'BookInfo',
+    component: BookInfo
+  }
+];
+
+const router = new Router({
   // mode:'history',  没有后端配合，打包index.html页面为空
-  routes: [
-    {
-      path: '/',
-      name: 'Login',
-      component: Login
-    },
-    {
-      path: '/booklist',
-      name: 'BookList',
-      component: BookList
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login
-    },
-    {
-      path: '/edit',
-      name: 'Edit',
-      component: Edit
-    },
-    {
-      path: '/regiser',
-      name: 'Register',
-      component: Register
-    },
-    {
-      path: '/d3show',
-      name: 'D3Show',
-      component: D3Show
-    },
-    {
-      path: '/bookdirectory',
-      name: 'BookDirectory',
-      component: BookDirectory
-    },
-    {
-      path: '/story',
-      name: 'Story',
-      component: Story
-    },
-    {
-      path: '/showrelation',
-      name: 'ShowRelation',
-      component: ShowRelation
-    },
-    {
-      path: '/bookinfo',
-      name: 'BookInfo',
-      component: BookInfo
-    }
-  ]
+  routes: routes
 })
+
+/*router.beforeEach((to, from, next)=>{
+  let userid = window.sessionStorage.getItem('write-userid');
+  if(!userid || userid === null){
+    next({
+      path: '/login'
+    });
+  }else{
+    next();
+  }
+})*/
+
+
+export default  router

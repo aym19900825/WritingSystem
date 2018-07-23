@@ -52,6 +52,7 @@ import Header from './common/Header.vue'
                             if (res.data.code==1) {
                                 this.$store.dispatch('login', res.data).then(() => {
                                     sessionStorage.setItem('url','login');
+                                    sessionStorage.setItem('write-userid',res.data.userid);
                                     this.$router.replace('/edit');
                                 })
                             }else {

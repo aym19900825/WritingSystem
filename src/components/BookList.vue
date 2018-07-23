@@ -1,67 +1,63 @@
-<template>
+<template v-cloak>
     <div id="booklist">
         <v-header></v-header>
         <p class="navTxt">
             我的作品
-            <el-button type="primary" v-if="books.length != 0" @click="creatWork">创建作品</el-button>
+            <el-button type="primary" v-show="books.length != 0" @click="creatWork">创建作品</el-button>
         </p>
-        <template v-loading="loading" v-if="books.length == 0" v-cloak>
-            <div class="emptyContent" >
-                <img src="../assets/img/empty-bg.png" alt="">
-                <p>对不起，您还没有创建任何的作品哦！</p>
-                <el-button type="primary" @click="creatWork">创建作品</el-button>
-            </div>
-        </template>
-        <template v-else>
-            <div class="bookList">
-                <el-table :data="books" style="width: 85%;margin: 0 auto;">
-                    <el-table-column label="书名" width="200" prop="bookname">
-                    </el-table-column>
+        <div class="emptyContent" v-loading="loading" v-show="books.length == 0" v-cloak>
+            <img src="../assets/img/empty-bg.png" alt="">
+            <p>对不起，您还没有创建任何的作品哦！</p>
+            <el-button type="primary" @click="creatWork">创建作品</el-button>
+        </div>
+        <div class="bookList">
+            <el-table :data="books" style="width: 85%;margin: 0 auto;">
+                <el-table-column label="书名" width="200" prop="bookname">
+                </el-table-column>
 
-                    <!--
-                    <el-table-column label="最新章节" width="250">
-                        <template slot-scope="scope">
-                            <span style="display: block;color:#0064FF;">{{ scope.row.lastedChapter }}</span>
-                            <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
-                        </template>
-                    </el-table-column>
-                    -->
-                    
-                    <el-table-column label="作品类别" width="100" prop="category">
-                        <template slot-scope="scope">
-                            <span v-text="scope.row.category=='fiction'?'小说':'剧本'"></span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="状态" width="100" prop="bookstatus">
-                    </el-table-column>
-                    <el-table-column label="创建时间" width="250">
-                        <template slot-scope="scope">
-                            <i class="el-icon-time"></i>
-                            <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="操作">
-                        <template slot-scope="scope">
-                            <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success">写新章节</el-button>
-                            <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
-                            <el-button size="mini" type="primary" @click="readBook(scope.$index, scope.row)">编辑作品</el-button>
-                            <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <div align="right">
-                    <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes="[10, 20, 30, 40]"
-                        :page-size="pagesize"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="totalCount">
-                    </el-pagination>
-                </div>
+                <!--
+                <el-table-column label="最新章节" width="250">
+                    <template slot-scope="scope">
+                        <span style="display: block;color:#0064FF;">{{ scope.row.lastedChapter }}</span>
+                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
+                    </template>
+                </el-table-column>
+                -->
+                
+                <el-table-column label="作品类别" width="100" prop="category">
+                    <template slot-scope="scope">
+                        <span v-text="scope.row.category=='fiction'?'小说':'剧本'"></span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" width="100" prop="bookstatus">
+                </el-table-column>
+                <el-table-column label="创建时间" width="250">
+                    <template slot-scope="scope">
+                        <i class="el-icon-time"></i>
+                        <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success">写新章节</el-button>
+                        <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
+                        <el-button size="mini" type="primary" @click="readBook(scope.$index, scope.row)">编辑作品</el-button>
+                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div align="right">
+                <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes="[10, 20, 30, 40]"
+                    :page-size="pagesize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="totalCount">
+                </el-pagination>
             </div>
-         </template>
+        </div>
     </div>
 </template>
 
@@ -326,8 +322,5 @@
 .bookdirect{
     border:1px solid rgba(104,133,206,1);
     color:rgba(104,133,206,1);
-}
-[v-cloak] {
-    display: none !important;
 }
 </style>

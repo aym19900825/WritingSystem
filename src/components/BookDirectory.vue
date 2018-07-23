@@ -52,7 +52,7 @@
             <img src="../assets/img/img-book01.png" alt=""/>
             <div class="bookinfoTxt">
                 <h4>{{bookname}}</h4>
-                <p>作品简介：醒掌天下权，醉卧美人膝，五千年的风华烟雨!</p>
+                <p :title="bookdesc">作品简介：{{bookdesc}}}</p>
             </div>
 
         </div>
@@ -205,6 +205,7 @@
                             arr.push(tmpObj);
                         }
                         this.tableData = arr;
+                        this.bookdesc = res.data.description;
                     }else{
                         this.tableData = [];
                     }
@@ -226,11 +227,13 @@
                 bookid:1,
                 tableData: [],
                 bookname:"",
+                bookdesc:"",
 
                 //page信息
                 pagesize: 10,
                 totalCount: 100,
                 currentPage: 1,
+
             }
         },
         created(){
@@ -336,5 +339,12 @@ p.inputTip{
 .pagecontrol{
     padding-bottom: 100px;
     padding-top: 20px;
+}
+.bookinfoTxt p{
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis; 
 }
 </style>
