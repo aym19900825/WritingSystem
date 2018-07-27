@@ -27,6 +27,7 @@
 </template>
 
 <script>
+    import Config from '../config.js'
     export default {
         name: 'Register',
         methods: {
@@ -38,9 +39,10 @@
                 this.login();
             },
             register() {
+                var url = this.basic_url+'/api/register';
                 this.$refs.registerForm.validate((valid) => {
                     if (valid) {
-                        this.$axios.post('http://203.93.173.179:8888/api/register',{
+                        this.$axios.post(url,{
                             username: this.newUser.name,
                             password: this.newUser.pass,
                             phonenumber: parseInt(this.newUser.phoneNum),
@@ -102,6 +104,7 @@
                     phoneNum: '',
                     sex: ''
                 },
+                basic_url: Config.api,
 
                 dialogVisible: false,
 

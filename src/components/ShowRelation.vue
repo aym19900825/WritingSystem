@@ -13,6 +13,7 @@
     </div>
 </template>
 <script>
+    import Config from '../config.js'
     import axios  from 'axios' 
     import topNav from '@/components/common/TopNav';
     export default {
@@ -22,7 +23,7 @@
         },
         methods: {
             searchChart(eid){
-                this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,eid);
+                this.d3Init(this.basic_url+"/api/graph_search",this.search,eid);
             },
             d3Init(url,queryParam1,queryParam2){
                 var width = this.d3Params.width;
@@ -68,7 +69,7 @@
                                         })
                                         .on("click",function(d,i){
                                             console.log(d.eid);
-                                            axios.post("http://203.93.173.179:8888/api/news/detail",{
+                                            axios.post(_this.basic_url+"/api/news/detail",{
                                                 "eid": d.eid
                                             }).then((res) => {
                                                 $("#relationTxt h4").text(res.data.title);
@@ -154,14 +155,15 @@
                     img_h: 40
                 },
                 search: '',
-                eid: ''
+                eid: '',
+                basic_url: Config.api
             }        
         },
         mounted(){
             this.d3Params.width = $("#d3show").width();
             this.search = this.$route.query.search;
             this.eid = this.$route.query.eid;
-            this.d3Init("http://203.93.173.179:8888/api/graph_search",this.search,this.eid);
+            this.d3Init(this.basic_url+"/api/graph_search",this.search,this.eid);
         }
     }
 </script>

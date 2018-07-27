@@ -92,11 +92,11 @@
 </template>
 
 <script>
+    import Config from '../config.js'
     import Header from './common/Header.vue'
     export default {
         name: 'BookDirectory',
         methods: {
-
             returnPre(){
                 sessionStorage.setItem('url','login');
                 this.$router.push({
@@ -139,11 +139,12 @@
 
             //删除章节
             handleDelete(index,row){
+                var url = this.basic_url+'/api/chapter/delete';
                 this.$confirm('确定删除此章节吗？', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                     }).then(({ value }) => {
-                        this.$axios.post('http://203.93.173.179:8888/api/chapter/delete',{
+                        this.$axios.post(url,{
                             eid: row.eid
                         }).then((res)=>{
                             if(res.data.code==1){
@@ -188,7 +189,9 @@
                 console.log(bookname);
             },
             init(){
-                this.$axios.post('http://203.93.173.179:8888/api/chapter/list',{
+                var url = this.basic_url + '/api/chapter/list';
+                console.log(url);
+                this.$axios.post(url,{
                     bookid: this.bookid,
                     page_index: this.currentPage,
                     page_size: this.pagesize
@@ -228,6 +231,7 @@
                 tableData: [],
                 bookname:"",
                 bookdesc:"",
+                basic_url: Config.api,
 
                 //page信息
                 pagesize: 10,

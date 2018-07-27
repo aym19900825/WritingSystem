@@ -106,9 +106,13 @@
 <script>
 import Header from './common/Header.vue'
 import Vue from 'vue'
+import Qs from 'qs'
+import Config from '../config.js'
+var FormData = require('form-data');
 export default{
     data(){
         return {
+            basic_url: Config.api,
             isAutoSave: false,
             isFinish: false,
             chapternumber: 1,
@@ -144,24 +148,11 @@ export default{
             },
             dialogFormVisible: false,
 
-            restaurants: [],
+            scences: [],
             state3: '',
-            castingOptions: [
-               {
-                  value: '人物一',
-                  label: '人物一'
-                },
+            castingOptions: [],
 
-                {
-                  value: '人物二',
-                  label: '人物二'
-                },
-
-                {
-                  value: '人物三',
-                  label: '人物三'
-                },
-            ]
+            autoTxtId:""
         }
     },
     methods: {
@@ -177,65 +168,70 @@ export default{
         };
       },
       submitDialog(){
-        this.resetDialog();
+        var casting = this.autoTxt.casting;
+        var tmpArr = [];
+        for(var i=0;i<casting.length;i++){
+          for(var j=0;j<this.castingOptions.length;j++){
+            if(casting[i]==this.castingOptions[j].value){
+              var obj = {
+                name: this.castingOptions[j].value,
+                characters: this.castingOptions[j].characters
+              };
+              tmpArr.push(JSON.parse(JSON.stringify(obj)));
+            }
+          }
+        }
+        var submitData = {"title": this.chaptername,"scene":  this.autoTxt.scence,"casting": ["Rose","Jack"],"topics": this.autoTxt.topics.split("，"),"outline": this.chapterabstract,"script_size": parseInt(this.autoTxt.script_size)};
+
+        this.$axios({
+          method:"post",
+          url:"http://203.93.173.180:8868/speak",
+          data:'data='+JSON.stringify(submitData)
+        }).then((res)=>{
+            if(res.data.code == "100"){
+              this.autoTxtId = res.data.object;
+            }
+            
+        });
+       
       },
 
       querySearch(queryString, cb) {
-        var restaurants = this.restaurants;
-        var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+        var scences = this.scences;
+        var results = queryString ? scences.filter(this.createFilter(queryString)) : scences;
         cb(results);
       },
       createFilter(queryString) {
-        return (restaurant) => {
-          return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        return (scence) => {
+          return (scence.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
         };
       },
       loadAll() {
-        return [
-          { "value": "三全鲜食（北新泾店）"},
-          { "value": "Hot honey 首尔炸鸡（仙霞路）"},
-          { "value": "新旺角茶餐厅"},
-          { "value": "泷千家(天山西路店)"},
-          { "value": "胖仙女纸杯蛋糕（上海凌空店）"},
-          { "value": "贡茶"},
-          { "value": "豪大大香鸡排超级奶爸"},
-          { "value": "茶芝兰（奶茶，手抓饼）"},
-          { "value": "十二泷町"},
-          { "value": "星移浓缩咖啡"},
-          { "value": "阿姨奶茶/豪大大"},
-          { "value": "新麦甜四季甜品炸鸡"},
-          { "value": "Monica摩托主题咖啡店"},
-          { "value": "浮生若茶（凌空soho店）"},
-          { "value": "NONO JUICE  鲜榨果汁"},
-          { "value": "CoCo都可(北新泾店）"},
-          { "value": "快乐柠檬（神州智慧店）"},
-          { "value": "Merci Paul cafe"},
-          { "value": "猫山王（西郊百联店）"},
-          { "value": "枪会山"},
-          { "value": "纵食"},
-          { "value": "钱记"},
-          { "value": "壹杯加"},
-          { "value": "唦哇嘀咖"},
-          { "value": "爱茜茜里(西郊百联)"},
-          { "value": "爱茜茜里(近铁广场)"},
-          { "value": "鲜果榨汁（金沙江路和美广店）"},
-          { "value": "开心丽果（缤谷店）"},
-          { "value": "超级鸡车（丰庄路店）"},
-          { "value": "妙生活果园（北新泾店）"},
-          { "value": "香宜度麻辣香锅"},
-          { "value": "凡仔汉堡（老真北路店）"},
-          { "value": "港式小铺"},
-          { "value": "蜀香源麻辣香锅（剑河路店）"},
-          { "value": "北京饺子馆"},
-          { "value": "饭典*新简餐（凌空SOHO店）"},
-          { "value": "焦耳·川式快餐（金钟路店）"},
-          { "value": "动力鸡车"},
-          { "value": "浏阳蒸菜"},
-          { "value": "四海游龙（天山西路店）"},
-          { "value": "樱花食堂（凌空店）"},
-          { "value": "壹分米客家传统调制米粉(天山店)"},
-          { "value": "福荣祥烧腊（平溪路店）"}
-        ];
+         this.$axios.get('http://203.93.173.180:8868/modellist').then((res) => {
+            if(res.data.code=="100"){
+              var sences = res.data.object.scene;
+              for(var i=0;i<sences.length;i++){
+                var obj = {
+                  value: sences[i]
+                };
+                this.scences.push(JSON.parse(JSON.stringify(obj)));
+              }
+            }else{
+              this.$message({
+                type: 'error',
+                message: '网络错误，请重试',
+                showClose: true
+              })
+            }
+           
+        }).catch((err) => {
+            this.$message({
+                type: 'error',
+                message: '网络错误，请重试',
+                showClose: true
+            })
+        })
+        
       },
       handleSelect(item) {
         console.log(item);
@@ -280,7 +276,8 @@ export default{
        
       },
       currentEidSave(){
-        this.$axios.post('http://203.93.173.179:8888/api/work/save',{
+        var url = this.basic_url+'/api/work/save';
+        this.$axios.post(url,{
             "eid": this.eid,
             "userid": this.user.userid
           }).then((res) => {
@@ -295,7 +292,8 @@ export default{
       },
       add(){
         this.isFinish = false;
-        this.$axios.post('http://203.93.173.179:8888/api/chapter/count',{
+        var url = this.basic_url+'/api/chapter/count';
+        this.$axios.post(url,{
           "bookid": this.bookid,
         } ).then((res) => {
             this.eid='';
@@ -319,7 +317,8 @@ export default{
             versionName = "v"+eval(i+1);
             chapterversion[versionName] = this.conntentVer[i];
           }
-          this.$axios.post('http://203.93.173.179:8888/api/chapter/add',{
+          var url =this.basic_url + '/api/chapter/add';
+          this.$axios.post(url,{
               "chaptername": this.chaptername,
               "chapterabstract": this.chapterabstract,
               "chaptercontent": this.chaptercontent,
@@ -372,7 +371,8 @@ export default{
             "chapterversion": chapterversion,
             "chapternumber": this.chapternumber
         }
-        this.$axios.post('http://203.93.173.179:8888/api/chapter/edit',parma).then((res) => {
+        var url = this.basic_url+'/api/chapter/edit';
+        this.$axios.post(url,parma).then((res) => {
             if(res.data.code==1) {
               this.$message({
                 type: 'success',
@@ -408,7 +408,8 @@ export default{
             "chapterversion": {},
             "chapternumber": this.chapternumber
         }
-        this.$axios.post('http://203.93.173.179:8888/api/chapter/edit',parma).then((res) => {
+        var url = this.basic_url+'/api/chapter/edit';
+        this.$axios.post(url,parma).then((res) => {
             if(res.data.code==1) {
               this.isFinish = true;
               this.conntentVer = [];
@@ -466,12 +467,20 @@ export default{
       },
 
       getPeoples(){
-        this.$axios.post('http://203.93.173.179:8888/api/character/query',{
+        var url = this.basic_url+'/api/character/query';
+        this.$axios.post(url,{
             "bookid": this.bookid,
         } ).then((res) => {
             if(res.data.length>0){
                 var jsonObj = eval('(' + res.data[0]._source.charactersetting + ')');
-                console.log(jsonObj);
+                var obj = {};
+                var peoples = jsonObj.people;
+                for(var i=0;i<peoples.length;i++){
+                    obj.value = peoples[i].name;
+                    obj.label = peoples[i].name;
+                    obj.characters = peoples[i].characters;
+                    this.castingOptions.push(JSON.parse(JSON.stringify(obj)));
+                }
             }
         }).catch((err) => {
         
@@ -490,12 +499,14 @@ export default{
         'v-header': Header
     },
     mounted(){
-      this.restaurants = this.loadAll();
+      //获得场景接口
+      this.loadAll();
       this.getParams();
 
       var preUrl = sessionStorage.getItem('url');
+      var url = this.basic_url + '/api/work/detail';
       if(preUrl=='login'){
-        this.$axios.post('http://203.93.173.179:8888/api/work/detail',{
+        this.$axios.post(url,{
           "userid": this.user.userid,
         } ).then((res) => {
           if(res.data.code==1){
@@ -527,7 +538,7 @@ export default{
       };
 
       if(preUrl=='booklist'){
-        this.$axios.post('http://203.93.173.179:8888/api/chapter/count',{
+        this.$axios.post(this.basic_url+'/api/chapter/count',{
           "bookid": this.bookid,
         } ).then((res) => {
             this.chapternumber = res.data.next_chapter;
@@ -541,7 +552,7 @@ export default{
       }
 
       if(preUrl=='bookdirectory'){
-        this.$axios.post('http://203.93.173.179:8888/api/chapter/detail',{
+        this.$axios.post(this.basic_url+'/api/chapter/detail',{
           "eid": this.eid,
         } ).then((res) => {
           this.chaptername = res.data.chaptername;

@@ -80,6 +80,7 @@
     </div>
 </template>
 <script>
+    import Config from '../config.js'
     import Header from './common/Header.vue'
     import axios  from 'axios' 
     import topNav from '@/components/common/TopNav';
@@ -135,12 +136,13 @@
                 }
             },
             initChaptereid(){
-                this.$axios.post('http://203.93.173.179:8888/api/character/query',{
+                var url = this.basic_url+'/api/character/query';
+                this.$axios.post(url,{
                     "bookid": this.bookid,
                 } ).then((res) => {
                     if(res.data.length>0){
                         this.chaptereid = res.data[0]._id;
-                        this.initchapter("http://203.93.173.179:8888/api/char_graph_search",this.chaptereid);
+                        this.initchapter(this.basic_url+"/api/char_graph_search",this.chaptereid);
                     }
                 }).catch((err) => {
                 
@@ -195,7 +197,7 @@
                                             return d.type;
                                         })
                                         .on("click",function(d,i){
-                                            axios.post("http://203.93.173.179:8888/api/news/detail",{
+                                            axios.post(_this.basic_url+"/api/news/detail",{
                                                 "eid": d.eid
                                             }).then((res) => {
                                                 $("#relationTxt h4").text(res.data.title);
@@ -326,7 +328,7 @@
                 window.open(href, '_blank');
                 */
                
-               this.d3Init("http://203.93.173.179:8888/api/graph_search","chart",this.search,eid);
+               this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
                $("#relationTxt h4").text("");
                $("#relationTxt span").text("");
                $("#relationTxt p").text("");
@@ -337,7 +339,7 @@
             },
             requestData(){
                 var _this = this;
-                var url = "http://203.93.173.179:8888/api/search/list";
+                var url = _this.basic_url+"/api/search/list";
                 this.$axios.post(url,{
                             search_text: this.search,
                             page_index: this.currentPage,
@@ -346,7 +348,7 @@
                     this.listData = res.data.data;
                     this.totalCount = res.data.total;
                     if(_this.firstLoad){
-                        this.d3Init("http://203.93.173.179:8888/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
+                        this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
                         _this.firstLoad = false;
                     }
                 }).catch((err) => {
@@ -476,6 +478,7 @@
         },
         data () {
             return {
+                basic_url: Config.api,
                 peopleInfoVisible: false,
                 peopleInfo: {
                     name: '',

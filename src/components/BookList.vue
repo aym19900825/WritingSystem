@@ -3,12 +3,12 @@
         <v-header></v-header>
         <p class="navTxt">
             我的作品
-            <el-button type="primary" v-show="books.length != 0" @click="creatWork">创建作品</el-button>
+            <el-button type="primary" v-if="books" @click="creatWork">创建作品</el-button>
         </p>
-        <div class="emptyContent" v-loading="loading" v-show="books.length == 0" v-cloak>
-            <img src="../assets/img/empty-bg.png" alt="">
-            <p>对不起，您还没有创建任何的作品哦！</p>
-            <el-button type="primary" @click="creatWork">创建作品</el-button>
+        <div class="emptyContent" v-if="books.length == 0" v-cloak>
+            <img src="../assets/img/empty-bg.png" alt="" v-cloak>
+            <p v-cloak>对不起，您还没有创建任何的作品哦！</p>
+            <el-button type="primary" @click="creatWork" v-cloak>创建作品</el-button>
         </div>
         <div class="bookList">
             <el-table :data="books" style="width: 85%;margin: 0 auto;">
@@ -63,6 +63,7 @@
 
 <script>
     import Header from './common/Header.vue'
+    import Config from '../config.js'
     export default {
         data(){
             var validateWriting = (rule, value, callback) => {
@@ -83,6 +84,7 @@
             };
             return{
                 loading: false,
+                basic_url: Config.api,
 
                 //page信息
                 pagesize: 10,
@@ -229,7 +231,8 @@
                 this.upDateBookId = 1;
             },
             initBookList(){
-                this.$axios.post('http://203.93.173.179:8888/api/bookList',{
+                var url = this.basic_url+'/api/bookList';
+                this.$axios.post(url,{
                     userid: this.user.userid,
                     page_index: this.currentPage,
                     page_size: this.pagesize
@@ -322,5 +325,8 @@
 .bookdirect{
     border:1px solid rgba(104,133,206,1);
     color:rgba(104,133,206,1);
+}
+[v-cloak] {
+  display: none;
 }
 </style>

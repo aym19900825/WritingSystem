@@ -34,5 +34,8 @@ export default {
     min-height: 650px;
     padding:0px;
   }
+  [v-cloak] {
+    display: none;
+  }
 </style>
     

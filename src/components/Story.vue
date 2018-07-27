@@ -98,6 +98,7 @@
 
 <script>
     import Header from './common/Header.vue'
+    import Config from '../config.js'
     import Vue from 'vue'
     export default {
         name: 'Story',
@@ -121,7 +122,7 @@
                     peoples[i].relationship = arr;
                 }
                 obj.people = peoples;
-                this.$axios.post('http://203.93.173.179:8888/api/character/add',{
+                this.$axios.post(_this.basic_url+'/api/character/add',{
                     "bookid": _this.bookid,
                     "charactersetting": JSON.stringify(obj) 
                 }).then((res) => {
@@ -166,7 +167,7 @@
                     peoples[i].relationship = arr;
                 }
                 obj.people = peoples;
-                this.$axios.post('http://203.93.173.179:8888/api/character/edit',{
+                this.$axios.post(_this.basic_url+'/api/character/edit',{
                     "bookid": this.bookid,
                     "charactersetting": JSON.stringify(obj),
                     "eid":  this.peopleeid
@@ -194,7 +195,7 @@
             },
             addAbstract(){
                 var _this = this;
-                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
+                this.$axios.post(_this.basic_url+'/api/info/add',{
                     "bookid": this.bookid,
                     "bookabstract": this.bookabstract,
                 }).then((res) => {
@@ -218,7 +219,7 @@
             },
             editAbstract(){
                 var _this = this;
-                this.$axios.post('http://203.93.173.179:8888/api/info/edit',{
+                this.$axios.post(_this.basic_url+'/api/info/edit',{
                     "bookid": _this.bookid,
                     "bookabstract": _this.bookabstract,
                     "eid": _this.abstracteid
@@ -378,7 +379,7 @@
                 .send("POST", JSON.stringify({eid: queryParam}));
             },
             characterMap(){
-                this.d3Init("http://203.93.173.179:8888/api/char_graph_search",this.peopleeid);
+                this.d3Init(this.basic_url+"/api/char_graph_search",this.peopleeid);
                 this.isShowRelation = true;
             },
             returnBookList(){
@@ -404,7 +405,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://203.93.173.179:8888/api/info/edit',{
+                this.$axios.post(_this.basic_url+'/api/info/edit',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj),
@@ -483,7 +484,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://203.93.173.179:8888/api/info/add',{
+                this.$axios.post(this.basic_url+'/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -509,7 +510,7 @@
             $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
 
             this.getParams();
-            this.$axios.post('http://203.93.173.179:8888/api/info/query',{
+            this.$axios.post(this.basic_url+'/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
@@ -519,7 +520,7 @@
             }).catch((err) => {
             
             })
-            this.$axios.post('http://203.93.173.179:8888/api/character/query',{
+            this.$axios.post(this.basic_url+'/api/character/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
@@ -545,6 +546,7 @@
         },
         data () {
             return {
+                basic_url: Config.api,
                 isShowRelation: false,
                 abstracteid: '',
                 peopleeid:'',

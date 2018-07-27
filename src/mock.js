@@ -1,4 +1,5 @@
 //引入mock.js文件
+//引入mock.js文件
 const Mock = require('mockjs');
 //获取mock.random对象
 const Random = Mock.Random;

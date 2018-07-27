@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import Config from '../config.js'
 import Header from './common/Header.vue'
     export default {
         name: 'Login',
@@ -44,8 +45,9 @@ import Header from './common/Header.vue'
             },
             login() {
                 this.$refs.loginForm.validate((valid) => {
+                    var url = this.basic_url+'/api/login';
                     if (valid) {
-                        this.$axios.post('http://203.93.173.179:8888/api/login',{
+                        this.$axios.post(url,{
                             username: this.user.name,
                             password: this.user.pass
                         }).then((res) => {
@@ -82,6 +84,7 @@ import Header from './common/Header.vue'
         data () {
             return {
                 user: {},
+                basic_url: Config.api,
                 rules:  {
                     name:[
                         {

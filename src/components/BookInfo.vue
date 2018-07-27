@@ -45,6 +45,7 @@
 
 <script>
 import Header from './common/Header.vue'
+import Config from '../config.js'
 export default {
   name: 'BookInfo',
   data () {
@@ -65,6 +66,7 @@ export default {
         }
     };
     return {
+        basic_url: Config.api,
         userid: 0,
         bookid: '',
         innerVisible: false,
@@ -106,7 +108,8 @@ export default {
   },
   methods:{
   	editBook(){
-        this.$axios.post('http://203.93.173.179:8888/api/editBook',{
+        var url = this.basic_url+'/api/editBook';
+        this.$axios.post(url,{
             bookid: this.bookid,
             bookname: this.newBook.bookname,
             category: this.newBook.category,
@@ -140,7 +143,8 @@ export default {
         })
     },
     addBook() {
-        this.$axios.post('http://203.93.173.179:8888/api/addBook',{
+        var url = this.basic_url+'/api/addBook';
+        this.$axios.post(url,{
             bookname: this.newBook.bookname,
             category: this.newBook.category,
             label: this.newBook.label,
