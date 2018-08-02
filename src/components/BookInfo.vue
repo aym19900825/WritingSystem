@@ -19,7 +19,8 @@
                         <el-form-item label="作品体裁" prop="category">
                             <el-select v-model="newBook.category"  placeholder="请选择作品体裁">
                                 <el-option label="小说" value="fiction"></el-option>
-                                <el-option label="剧本" value="scripts"></el-option>
+                                <!--<el-option label="电影剧本" value="scripts"></el-option>-->
+                                <el-option label="电视剧剧本" value="soapopera"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -29,11 +30,13 @@
                     </el-input>
                     <p class="inputTip">10~1000字</p>
                 </el-form-item>
+                <!--
                 <el-form-item label="扉页寄语" prop="writing">
                     <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6}"  placeholder="希望大家喜欢这本书，并支持正版阅读！"  v-model="newBook.writing">
                     </el-input>
                     <p class="inputTip">0~500字</p>
                 </el-form-item>
+                 -->
             </el-form>            
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="addBook" v-if="bookid==''">创建作品</el-button>
@@ -119,15 +122,6 @@ export default {
             bookstatus: 0
         }).then((res)=>{
             if(res.data.code==1){
-                /*
-                this.$message({
-                  type: 'success',
-                  message: '修改成功',
-                  showClose: true
-                }) 
-                this.initBookList();
-                this.reset();
-                */
                 this.$router.push({
                     path: '/booklist'
                 })
@@ -176,7 +170,6 @@ export default {
             this.bookid = this.$route.query.bookid;
             this.newBook = JSON.parse(JSON.stringify(this.$route.query.bookInfo));
         }else{
-            console.log(this.$route.query.userid);
             this.userid = this.$route.query.userid;
         }
     }

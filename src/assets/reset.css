@@ -47,3 +47,6 @@ clear: both;
 a:hover{
 text-decoration: none;
 }
+[v-cloak] {
+  display: none !important;
+}

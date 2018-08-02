@@ -51,12 +51,12 @@ import Header from './common/Header.vue'
                             username: this.user.name,
                             password: this.user.pass
                         }).then((res) => {
+                            console.log(res.data.code==1);
                             if (res.data.code==1) {
-                                this.$store.dispatch('login', res.data).then(() => {
-                                    sessionStorage.setItem('url','login');
-                                    sessionStorage.setItem('write-userid',res.data.userid);
-                                    this.$router.replace('/edit');
-                                })
+                                sessionStorage.setItem('url','login');
+                                sessionStorage.setItem('userid',res.data.userid);
+                                sessionStorage.setItem('username',res.data.username);
+                                this.$router.replace('/edit');
                             }else {
                                 this.$message({
                                     type: 'error',

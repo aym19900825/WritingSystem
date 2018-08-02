@@ -5,28 +5,18 @@
             我的作品
             <el-button type="primary" v-if="books" @click="creatWork">创建作品</el-button>
         </p>
-        <div class="emptyContent" v-if="books.length == 0" v-cloak>
-            <img src="../assets/img/empty-bg.png" alt="" v-cloak>
-            <p v-cloak>对不起，您还没有创建任何的作品哦！</p>
-            <el-button type="primary" @click="creatWork" v-cloak>创建作品</el-button>
+        <div class="emptyContent" style="display:none;">
+            <img src="../assets/img/empty-bg.png" alt="">
+            <p>对不起，您还没有创建任何的作品哦！</p>
+            <el-button type="primary" @click="creatWork">创建作品</el-button>
         </div>
-        <div class="bookList">
+        <div class="bookList" v-if="books.length > 0">
             <el-table :data="books" style="width: 85%;margin: 0 auto;">
                 <el-table-column label="书名" width="200" prop="bookname">
                 </el-table-column>
-
-                <!--
-                <el-table-column label="最新章节" width="250">
-                    <template slot-scope="scope">
-                        <span style="display: block;color:#0064FF;">{{ scope.row.lastedChapter }}</span>
-                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
-                    </template>
-                </el-table-column>
-                -->
-                
                 <el-table-column label="作品类别" width="100" prop="category">
                     <template slot-scope="scope">
-                        <span v-text="scope.row.category=='fiction'?'小说':'剧本'"></span>
+                        <span v-text="scope.row.category"></span>
                     </template>
                 </el-table-column>
                 <el-table-column label="状态" width="100" prop="bookstatus">
@@ -39,10 +29,13 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success">写新章节</el-button>
+                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category=='小说'">写新章节</el-button>
+                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category!='小说'">写新场次</el-button>
                         <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
                         <el-button size="mini" type="primary" @click="readBook(scope.$index, scope.row)">编辑作品</el-button>
-                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect">查看目录</el-button>
+                        <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect" v-if="scope.row.category=='小说'">查看目录</el-button>
+                        <el-button size="mini" @click="soapDirect(scope.$index, scope.row)" class="bookdirect" v-if="scope.row.category!='小说'">查看目录</el-button>
+                        <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -83,6 +76,8 @@
                 }
             };
             return{
+
+                userid: 0,
                 loading: false,
                 basic_url: Config.api,
 
@@ -142,18 +137,36 @@
 
             }
         },
-        computed: {
-            user () {
-                return this.$store.state.user
-            }
-        },
         methods: {
+            handleDelete(index,row){
+                this.$confirm('确定删除此作品吗？', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                    }).then(({ value }) => {
+                        var url = this.basic_url+'/api/deleteBook';
+                        this.$axios.post(url,{
+                            bookid: row.bookid
+                        }).then((res)=>{
+                           this.initBookList();
+                        }).catch((err)=>{
+                            this.$message({
+                                type: 'error',
+                                message: '网络错误，请重试',
+                                showClose: true
+                            })
+                        })
+                        
+                    }).catch(() => {
+
+                });
+                
+            },
             creatWork(){
                 this.$router.push({
                     path: '/bookinfo', 
                     query: { 
                         bookid: '',
-                        userid: this.user.userid
+                        userid: this.userid
                     }
                 })
             },
@@ -196,18 +209,39 @@
             },
             addChapter(index,row){
                 sessionStorage.setItem('url','booklist');
-                this.$router.push({
-                    path: '/edit', 
-                    query: { 
-                        bookid: row.bookid,
-                        bookname: row.bookname,
-                        isNew: true
-                    }
-                })
+                if(row.category=="小说"){
+                    this.$router.push({
+                        path: '/edit', 
+                        query: { 
+                            bookid: row.bookid,
+                            bookname: row.bookname,
+                            isNew: true
+                        }
+                    })
+                }else{
+                    this.$router.push({
+                        path: '/editsoap', 
+                        query: { 
+                            bookid: row.bookid,
+                            bookname: row.bookname,
+                            isNew: true
+                        }
+                    })
+                }
+                
             },
             bookDirect(index,row){
                 this.$router.push({
                     path: '/bookdirectory', 
+                    query: { 
+                        bookid: row.bookid,
+                        bookname: row.bookname,
+                    }
+                })
+            },
+            soapDirect(index,row){
+                this.$router.push({
+                    path: '/bookrootdir', 
                     query: { 
                         bookid: row.bookid,
                         bookname: row.bookname,
@@ -233,22 +267,28 @@
             initBookList(){
                 var url = this.basic_url+'/api/bookList';
                 this.$axios.post(url,{
-                    userid: this.user.userid,
+                    userid: this.userid,
                     page_index: this.currentPage,
                     page_size: this.pagesize
                 }).then((res)=>{
                     if (res.data) {
-                        this.doingWorks  = res.data.books["未完成"];
-                        this.doneWorks  = res.data.books["已完成"];
-                        if(this.doneWorks ==undefined){
-                            this.books = res.data.books["未完成"];
-                        }else if(this.doingWorks ==undefined){
-                            this.books = res.data.books["已完成"];
+                        if(res.data.total>0){
+                            this.doingWorks  = res.data.books["未完成"];
+                            this.doneWorks  = res.data.books["已完成"];
+                            if(this.doneWorks ==undefined){
+                                this.books = res.data.books["未完成"];
+                            }else if(this.doingWorks ==undefined){
+                                this.books = res.data.books["已完成"];
+                            }else{
+                                this.books = res.data.books["已完成"].concat(res.data.books["未完成"]);
+                            }
+                            this.totalCount = res.data.total;
+                            this.loading = true;
                         }else{
-                            this.books = res.data.books["已完成"].concat(res.data.books["未完成"]);
+                            this.books = [];
+                            $(".emptyContent").show();
                         }
-                        this.totalCount = res.data.total;
-                        this.loading = true;
+                        
                     }else {
                         this.$message({
                             type: 'error',
@@ -270,6 +310,7 @@
             }
         },
         created(){
+           this.userid = sessionStorage.getItem('userid')
            this.initBookList();
         },
         components: {
@@ -327,6 +368,6 @@
     color:rgba(104,133,206,1);
 }
 [v-cloak] {
-  display: none;
+  display: none !important;
 }
 </style>

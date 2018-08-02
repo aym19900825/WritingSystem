@@ -195,29 +195,8 @@
                                         .attr("class","linetext")
                                         .text(function(d){
                                             return d.type;
-                                        })
-                                        .on("click",function(d,i){
-                                            axios.post(_this.basic_url+"/api/news/detail",{
-                                                "eid": d.eid
-                                            }).then((res) => {
-                                                $("#relationTxt h4").text(res.data.title);
-                                                $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
-                                                $("#relationTxt span").text(res.data.create_date);
-                                                $("#relationTxt div").text(res.data.content);
-
-                                                //设置d3show的高度
-                                                var txtHeight = $("#relationTxt div").height()+700;
-                                                console.log(txtHeight);
-                                                $("#d3show").height(txtHeight+"px");
-
-                                            }).catch((err) => {
-                                                this.$message({
-                                                    type: 'error',
-                                                    message: '网络错误，请重试',
-                                                    showClose: true
-                                                })
-                                            })
                                         });
+                                       
                     
                                         
                     var nodes_img = svg.selectAll("image")
@@ -254,6 +233,13 @@
                                                   return _this.date;
                                                 }
 
+                                        })
+                                        .on("click",function(d,i){
+                                            _this.search = d.name;
+                                            _this.currentPage = 1;
+                                            _this.pagesize = 10;
+                                            _this.firstLoad = true;
+                                            _this.requestData();
                                         })
                                         .call(force.drag);
                     
@@ -329,10 +315,34 @@
                 */
                
                this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
+               this.newsDetail(eid);
                $("#relationTxt h4").text("");
                $("#relationTxt span").text("");
                $("#relationTxt p").text("");
                $("#relationTxt div").text("");
+            },
+            newsDetail(eid){
+                var _this = this;
+                axios.post(_this.basic_url+"/api/news/detail",{
+                    "eid": eid
+                }).then((res) => {
+                    $("#relationTxt h4").text(res.data.title);
+                    $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
+                    $("#relationTxt span").text(res.data.create_date);
+                    $("#relationTxt div").text(res.data.content);
+
+                    //设置d3show的高度
+                    var txtHeight = $("#relationTxt div").height()+700;
+                    console.log(txtHeight);
+                    $("#d3show").height(txtHeight+"px");
+
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络错误，请重试',
+                        showClose: true
+                    })
+                })
             },
             searchRelation(){
                 this.requestData();
@@ -348,7 +358,8 @@
                     this.listData = res.data.data;
                     this.totalCount = res.data.total;
                     if(_this.firstLoad){
-                        this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
+                        _this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
+                        _this.newsDetail(this.listData[0]['_source'].eid);
                         _this.firstLoad = false;
                     }
                 }).catch((err) => {

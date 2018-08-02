@@ -23,7 +23,7 @@ export default {
     background-color: #409EFF;
     color: white;
   }
-  .header h3,p{
+  .header h3{
     text-align:center;
   }
   #app{
@@ -35,7 +35,7 @@ export default {
     padding:0px;
   }
   [v-cloak] {
-    display: none;
+    display: none !important;
   }
 </style>
     

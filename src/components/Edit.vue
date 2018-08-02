@@ -33,9 +33,10 @@
               <div class="line"></div>
             </el-col>
             <el-col :span="18">
-              <p style="width: 50%;display: block;float: left;">章节正文</p>
-              <el-button type="success" class="aibtn" @click="dialogFormVisible=true">人工智能生成</el-button>
-              <textarea id="content" placeholder="请填写内容" v-model="chaptercontent"></textarea>
+              <p style="width: 50%;display: block;">章节正文</p>
+              <el-button type="success" class="aibtn" @click="submitDialog">人工智能生成</el-button>
+              <editor class="editor" :value="chaptercontent"  :setting="editorSetting" @input="(chaptercontent)=> chaptercontent = chaptercontent"></editor>
+              <!--<textarea id="content" placeholder="请填写内容" v-model="chaptercontent"></textarea>-->
             </el-col>
           </el-row>
           <el-row :gutter="20" class="history-box" style="margin-left: 10px;    padding-bottom: 20px;">
@@ -52,54 +53,11 @@
                   <span>历史版本{{key+1}}</span>
                   <span class="el-icon-delete del" @click="delHistory(key)"></span>
                 </h6>
-                <div>
-                    {{item}}
+                <div v-html="item">
                 </div>
               </div>
           </div>
         </div>
-        <el-dialog title="人工智能参数" :visible.sync="dialogFormVisible"  :before-close="resetDialog">
-          <el-form :model="autoTxt" ref="autoForm">
-            <el-form-item label="场景">
-              <el-autocomplete
-                popper-class="my-autocomplete"
-                v-model="autoTxt.scence"
-                :fetch-suggestions="querySearch"
-                placeholder="请输入内容"
-                @select="handleSelect">
-                <i
-                  class="el-icon-edit el-input__icon"
-                  slot="suffix"
-                  @click="handleIconClick">
-                </i>
-                <template slot-scope="{ item }">
-                  <div class="name">{{ item.value }}</div>
-                  <span class="addr">{{ item.address }}</span>
-                </template>
-              </el-autocomplete>
-            </el-form-item>
-            <el-form-item label="场景说明(关键字)">
-              <el-input v-model="autoTxt.topics" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="人物">
-              <el-select v-model="autoTxt.casting" multiple placeholder="请选择人物">
-                <el-option
-                  v-for="item in castingOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="对话长度">
-              <el-input v-model="autoTxt.script_size" auto-complete="off"></el-input>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button @click="resetDialog">取 消</el-button>
-            <el-button type="primary" @click="submitDialog">确 定</el-button>
-          </div>
-        </el-dialog>
     </div>
 </template>
 
@@ -108,10 +66,22 @@ import Header from './common/Header.vue'
 import Vue from 'vue'
 import Qs from 'qs'
 import Config from '../config.js'
-var FormData = require('form-data');
+
+import Editor from './Tinymce.vue'
 export default{
     data(){
         return {
+
+            userid: 0,
+
+            editorSetting:{
+                language:'../../static/tinymce/zh_CN.js',
+                height:553,
+                menubar: false,
+                toolbar: 'formatselect | bold italic backcolor  | alignleft aligncenter alignright'
+            },
+
+
             basic_url: Config.api,
             isAutoSave: false,
             isFinish: false,
@@ -119,18 +89,13 @@ export default{
             isNew: false,
             bookid: 1,
             bookname: "",
-            eid:'',            
-            options1: {
-              language_url: '../../static/tinymce/zh_CN.js',
-              height: 500,
-              menubar: false
-            },
+            eid:'', 
 
             isMenuShow: false,
 
             isNewChapter: false,
 
-            autoContent: "夕阳西下，彩霞满天。何以琛站在十楼办公室的落地窗前，奇怪自己怎么会有了欣赏夕阳的心情。也许，因为她回来了。美婷推开门，就看到何律师背对着她站在窗前，手里夹着烟，一身落寞的样子……落寞？美婷简直怀疑自己的眼睛了，这个词能用在从来都是自信沉着的何律师身上吗？以琛听到开门声，转过身问：“什么事？”“哦。”美婷这才从自己的迷思中惊醒，快速地说，“何律师，红远公司的张副总来了。“请他进来。”以琛收起杂乱的思绪，全身心地投入到工作中去。瞥了一眼壁上的钟——五点，她还没来。好不容易送走了张副总，以琛疲惫地靠在椅子上闭目养神，猛的一只巨掌拍下来，以琛无奈地睁开眼：“老袁。”",
+            autoContent: "",
 
             chaptername: '',
             chapterabstract: '',
@@ -152,50 +117,86 @@ export default{
             state3: '',
             castingOptions: [],
 
-            autoTxtId:""
+            autoTxtId:"",
+
+            websock: null,
+
+            timeQuery: null
         }
     },
     methods: {
-      resetDialog(){
-        this.dialogFormVisible = false;
-        this.autoTxt = {
-              title: "",
-              scence: "",
-              topics: "",
-              casting: [],
-              outline: "",
-              script_size: ""
-        };
-      },
-      submitDialog(){
-        var casting = this.autoTxt.casting;
-        var tmpArr = [];
-        for(var i=0;i<casting.length;i++){
-          for(var j=0;j<this.castingOptions.length;j++){
-            if(casting[i]==this.castingOptions[j].value){
-              var obj = {
-                name: this.castingOptions[j].value,
-                characters: this.castingOptions[j].characters
-              };
-              tmpArr.push(JSON.parse(JSON.stringify(obj)));
-            }
+      threadPoxi(){  // 实际调用的方法
+          const agentData = this.autoTxtId;
+          if (this.websock.readyState === this.websock.OPEN) {
+              console.log("已经发送"+agentData);
+              this.websocketsend(agentData)
           }
-        }
-        var submitData = {"title": this.chaptername,"scene":  this.autoTxt.scence,"casting": ["Rose","Jack"],"topics": this.autoTxt.topics.split("，"),"outline": this.chapterabstract,"script_size": parseInt(this.autoTxt.script_size)};
-
-        this.$axios({
-          method:"post",
-          url:"http://203.93.173.180:8868/speak",
-          data:'data='+JSON.stringify(submitData)
-        }).then((res)=>{
-            if(res.data.code == "100"){
-              this.autoTxtId = res.data.object;
-            }
-            
-        });
-       
+          else if (this.websock.readyState === this.websock.CONNECTING) {
+              let that = this;
+              setTimeout(function () {
+                  console.log("已经发送"+agentData);
+                  that.websocketsend(agentData)
+              },300);
+          }
+          else {
+              this.initWebSocket();
+              let that = this;
+              setTimeout(function () {
+                  console.log("已经发送"+agentData);
+                  that.websocketsend(agentData)
+              },500);
+          }
+      },
+      initWebSocket(){ //初始化weosocket
+          //ws地址
+          const wsuri = "ws://203.93.173.180:9001";
+          this.websock = new WebSocket(wsuri);
+          this.websock.onmessage = this.websocketonmessage;
+          this.websock.onclose = this.websocketclose;
+      },
+      websocketonmessage(e){ //数据接收
+        console.log(e.data);
+        this.chaptercontent += e.data;
+        tinyMCE.editors[0].setContent(this.chaptercontent);
+      },
+      websocketsend(agentData){//数据发送
+        this.websock.send(agentData);
+      },
+      websocketclose(e){  //关闭
+        console.log("connection closed (" + e.code + ")");
       },
 
+      submitDialog(){
+        var keywords = [];
+        var peoples = [];
+        this.$axios.post("http://spark2:8888/api/ai",{
+          "bookid": this.bookid,
+          "chapterabstract": this.chapterabstract
+        }).then((res) => {
+           keywords = res.data.keywords;
+           peoples = res.data.peoples;
+
+           var submitData = {"title": this.chaptername,"scene":  "on ship","casting": ["Rose","Jack"],"topics": keywords,"outline": this.chapterabstract,"script_size": 50};
+
+            this.$axios({
+              method:"post",
+              url:"http://203.93.173.180:8868/speak",
+              data:'data='+JSON.stringify(submitData)
+            }).then((res)=>{
+                if(res.data.code == "100"){
+                  this.autoTxtId = res.data.object;
+
+                  this.initWebSocket();
+                  this.threadPoxi();
+                }
+                
+            });
+
+        }).catch((err) => {
+            
+        })
+      },
+     
       querySearch(queryString, cb) {
         var scences = this.scences;
         var results = queryString ? scences.filter(this.createFilter(queryString)) : scences;
@@ -264,22 +265,11 @@ export default{
               this.$router.replace('/login')
           })
       },
-      setTimeSave(){
-        var data = {};
-        var self = this;
-        console.log(this.eid);
-        if(this.eid==""||this.eid==undefined){
-          data = self.addChapter("自动保存成功","自动保存失败");
-        }else{
-          self.updateChapter("自动保存成功","自动保存失败");
-        }
-       
-      },
       currentEidSave(){
         var url = this.basic_url+'/api/work/save';
         this.$axios.post(url,{
             "eid": this.eid,
-            "userid": this.user.userid
+            "userid": this.userid
           }).then((res) => {
             console.log("save sussess");
         }).catch((err) => {
@@ -301,9 +291,8 @@ export default{
             this.chaptername = "";
             this.chapterabstract = "";
             this.chaptercontent = "";
-            // tinyMCE.editors[0].setContent(this.chaptercontent);
+            tinyMCE.editors[0].setContent(this.chaptercontent);
             this.conntentVer = [];
-            this.setTimeSave();
             this.currentEidSave();
         }).catch((err) => {
             
@@ -312,7 +301,7 @@ export default{
       addChapter(successMsg,erroMsg){
           var chapterversion = {};
           var versionName = "";
-          // this.chaptercontent = tinyMCE.editors[0].getContent();
+          this.chaptercontent = tinyMCE.editors[0].getContent();
           for(var i=0;i<this.conntentVer.length;i++){
             versionName = "v"+eval(i+1);
             chapterversion[versionName] = this.conntentVer[i];
@@ -328,11 +317,7 @@ export default{
               "chapternumber": this.chapternumber
             }).then((res) => {
                if(res.data.code==1) {
-                this.$message({
-                  type: 'success',
-                  message: successMsg,
-                  showClose: true
-                })
+                console.log(successMsg);
                 this.eid = res.data.eid;
                 this.currentEidSave();
               }else{
@@ -356,7 +341,7 @@ export default{
       updateChapter(successMsg,erroMsg){
         var chapterversion = {};
         var versionName = "";
-        // this.chaptercontent = tinyMCE.editors[0].getContent();
+        this.chaptercontent = tinyMCE.editors[0].getContent();
         for(var i=0;i<this.conntentVer.length;i++){
           versionName = "v"+eval(i+1);
           chapterversion[versionName] = this.conntentVer[i];
@@ -374,11 +359,7 @@ export default{
         var url = this.basic_url+'/api/chapter/edit';
         this.$axios.post(url,parma).then((res) => {
             if(res.data.code==1) {
-              this.$message({
-                type: 'success',
-                message: successMsg,
-                showClose: true
-              })                
+              console.log(successMsg);
             }else{
                 this.$message({
                   type: 'error',
@@ -443,14 +424,6 @@ export default{
             }
         })
       },
-      autoCreat(){
-        this.chaptercontent = this.autoContent;
-        // tinyMCE.editors[0].setContent(this.autoContent);
-      },
-      //弹出自动保存输入框
-      autoCreatBox(){
-
-      },
 
       changeBook(){
         this.$router.replace('/booklist');
@@ -459,35 +432,16 @@ export default{
         this.$router.replace('/d3show');
       },
       newContent(){
-        var newContent = this.chaptercontent; 
-        this.chaptercontent = this.autoContent;
+        var newContent = tinyMCE.editors[0].getContent(); 
+        console.log(this.chaptercontent);
         Vue.set(this.conntentVer,this.conntentVer.length, newContent);
         this.chaptercontent = '';
-        // tinyMCE.editors[0].setContent("");
+        tinyMCE.editors[0].setContent("");
       },
 
-      getPeoples(){
-        var url = this.basic_url+'/api/character/query';
-        this.$axios.post(url,{
-            "bookid": this.bookid,
-        } ).then((res) => {
-            if(res.data.length>0){
-                var jsonObj = eval('(' + res.data[0]._source.charactersetting + ')');
-                var obj = {};
-                var peoples = jsonObj.people;
-                for(var i=0;i<peoples.length;i++){
-                    obj.value = peoples[i].name;
-                    obj.label = peoples[i].name;
-                    obj.characters = peoples[i].characters;
-                    this.castingOptions.push(JSON.parse(JSON.stringify(obj)));
-                }
-            }
-        }).catch((err) => {
-        
-        })
-      },
       delHistory(key){
         this.conntentVer.splice(key,1);
+        this.updateChapter();
       }
     },
     computed: {
@@ -496,39 +450,47 @@ export default{
         }
     },
     components: {
-        'v-header': Header
+        'v-header': Header,
+        'editor':Editor
     },
     mounted(){
+     
       //获得场景接口
       this.loadAll();
       this.getParams();
-
+      this.userid = sessionStorage.getItem('userid');
       var preUrl = sessionStorage.getItem('url');
       var url = this.basic_url + '/api/work/detail';
       if(preUrl=='login'){
         this.$axios.post(url,{
-          "userid": this.user.userid,
+          "userid": this.userid,
         } ).then((res) => {
-          if(res.data.code==1){
-            var data = res.data.chapter;
-            this.bookid = data.bookid;
-            this.bookname = data.bookname;
-            this.eid = res.data.eid;
-            this.chaptername = data.chaptername;
-            this.chapterabstract = data.chapterabstract;
-            this.chaptercontent = data.chaptercontent;
-            this.chapternumber = data.chapternumber;
-            // tinyMCE.editors[0].setContent(this.chaptercontent);
-            var jsonObj = eval('(' + data.chapterversion + ')');
-            var arr = []
-            for (var i in jsonObj) {
-                arr.push(jsonObj[i]); //属性
-            }
-            this.conntentVer = arr;
-            this.currentEidSave();
 
-            //获取人物----人工智能
-            this.getPeoples();
+          if(res.data.code==1){
+
+            if(res.data.category=="soapopera"){
+              this.$router.push({
+                  path: '/editsoap', 
+              })
+            }else{
+              var data = res.data.chapter;
+              this.bookid = data.bookid;
+              this.bookname = data.bookname;
+              this.eid = res.data.eid;
+              this.chaptername = data.chaptername;
+              this.chapterabstract = data.chapterabstract;
+              this.chaptercontent = data.chaptercontent;
+              this.chapternumber = data.chapternumber;
+              tinyMCE.editors[0].setContent(this.chaptercontent);
+              var jsonObj = eval('(' + data.chapterversion + ')');
+              
+              var arr = []
+              for (var i in jsonObj) {
+                  arr.push(jsonObj[i]); //属性
+              }
+              this.conntentVer = arr;
+              this.currentEidSave();
+            }
           }else{
             this.$router.replace({ path: '/booklist' })
           }
@@ -542,10 +504,7 @@ export default{
           "bookid": this.bookid,
         } ).then((res) => {
             this.chapternumber = res.data.next_chapter;
-            this.setTimeSave();
-
-            //获取人物----人工智能
-            this.getPeoples();
+            this.addChapter("新增成功","新增失败");
         }).catch((err) => {
             
         })
@@ -567,15 +526,15 @@ export default{
           }
           this.conntentVer = arr;
           this.currentEidSave();
-
-          //获取人物----人工智能
-          this.getPeoples();
         }).catch((err) => {
             
         })
       }
-
     },
+    destroyed: function() { 
+      //this.timeQuery = window.clearInterval(this.timeQuery);   
+      this.websocketclose();
+    }
 } 
 </script>
 <style scoped>
@@ -655,7 +614,9 @@ export default{
   box-sizing: border-box;
 }
 .aibtn{
-  float:right;
+  position: absolute;
+  right: 0px;
+  top: 0px;
 }
 #contentTip{
   margin-right: 15px;

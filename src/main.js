@@ -1,5 +1,6 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import './assets/reset.css' 
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -12,7 +13,7 @@ import store from './vuex'
 
 import tinymce from 'vue-tinymce-editor'
 import axios  from 'axios' 
-import './assets/reset.css' 
+
 import './assets/icon/iconfont.css' 
 import './assets/icomoon/style.css' 
 import './axios'

@@ -1,51 +1,9 @@
 <template>
-    <!--
-    <div class="bookdirectory">
-        
-        <h2>{{bookname}}</h2>
-        <el-row class="bookFront">    
-            <h3>目录</h3>
-            <el-button type="primary" class="btnRight" @click="returnPre" plain style="margin-left:10px;">返回</el-button>
-            <el-button type="primary" class="btnRight" @click="addChapter">新增章节</el-button>
-        </el-row>
-        <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
-            <el-table-column prop="chapternumber" label="章节" width="80"></el-table-column>
-            <el-table-column prop="chaptername" label="标题" width="200" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="chapterabstract" label="章节大纲" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column label="完成时间" width="200">
-                <template slot-scope="scope">
-                    <i class="el-icon-time"></i>
-                    <span style="margin-left: 10px">{{ scope.row.edit_date }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column label="操作" width="200">
-              <template scope="scope">
-                <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-              </template>
-            </el-table-column>
-        </el-table>
-       
-        <div align="right">
-            <el-pagination
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-                :current-page="currentPage"
-                :page-sizes="[10, 20, 30, 40]"
-                :page-size="pagesize"
-                layout="total, sizes, prev, pager, next, jumper"
-                :total="totalCount">
-            </el-pagination>
-        </div>
-      
-    </div>
-    -->
-    
     <div id="bookdirectory">
         <v-header></v-header>
         <p class="navTxt">
             章节目录
-            <span class="returnList"><router-link :to="{path:'/booklist'}">返回我的作品</router-link></span>
+            <span class="returnList" @click="returnRoot" style="color: #00BAFC;font-size: 13px;cursor: pointer;">返回集数</span>
             <i class="icon-back" @click="returnPre"></i>
         </p>
         <div class="bookinfo">
@@ -57,12 +15,12 @@
 
         </div>
         <el-row>
-            <el-button type="success" class="newChapter" @click="addChapter">写新章节</el-button>
+            <el-button type="success" class="newChapter" @click="addChapter">写新场次</el-button>
         </el-row>
         <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
-            <el-table-column prop="chapternumber" label="章节" width="80"></el-table-column>
-            <el-table-column prop="chaptername" label="标题" width="200" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="chapterabstract" label="章节大纲" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="scenenumber" label="场次" width="80"></el-table-column>
+            <el-table-column prop="scenename" label="名称" width="200" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="chapterabstract" label="场次大纲" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column label="完成时间" width="200">
                 <template slot-scope="scope">
                     <i class="el-icon-time"></i>
@@ -124,23 +82,25 @@
 
             //编辑
             handleEdit(index,row){
+                console.log("eid"+row.eid);
                 sessionStorage.setItem('url','bookdirectory');
                 this.$router.push({
-                    path: '/edit', 
-                    name: 'Edit',
+                    path: '/editsoap', 
+                    name: 'EditSoap',
                     query: { 
+                        bookid: this.bookid,
+                        bookname: this.bookname,
+                        episodeid: this.episodeid,
                         eid: row.eid,
-                        bookid: row.bookid,
-                        bookname: row.bookname,
-                        isNew: false
+                        isNew: true
                     }
                 })
             },
 
             //删除章节
             handleDelete(index,row){
-                var url = this.basic_url+'/api/chapter/delete';
-                this.$confirm('确定删除此章节吗？', '提示', {
+                var url = this.basic_url+'/api/scene/delete';
+                this.$confirm('确定删除此场次吗？', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                     }).then(({ value }) => {
@@ -156,23 +116,15 @@
 
                 });
             }, 
-            //修改章节号码
-            editNum(index,row){
-                console.log(row);
-            },
-
-            //增加分卷
-            addPart(){
-
-            },
             addChapter(){
                 sessionStorage.setItem('url','booklist');
                 this.$router.push({
-                    path: '/edit', 
-                    name: 'Edit',
+                    path: '/editsoap', 
+                    name: 'EditSoap',
                     query: { 
                         bookid: this.bookid,
                         bookname: this.bookname,
+                        episodeid: this.episodeid,
                         isNew: true
                     }
                 })
@@ -180,34 +132,45 @@
             getParams () {
                 let bookid = this.$route.query.bookid;
                 let bookname = this.$route.query.bookname;
+                let episodeid = this.$route.query.episodeid;
+
                 this.bookid = bookid;
                 this.bookname = bookname;
-                console.log(bookid);
-                console.log(bookname);
+                this.episodeid = episodeid;
+            },
+            returnRoot(){
+                this.$router.push({
+                    path: '/bookrootdir', 
+                    name: 'BookRootDir',
+                    query: { 
+                        bookid: this.bookid,
+                    }
+                })
             },
             init(){
-                var url = this.basic_url + '/api/chapter/list';
-                console.log(url);
+                var url = this.basic_url + '/api/scene/list';
                 this.$axios.post(url,{
                     bookid: this.bookid,
                     page_index: this.currentPage,
-                    page_size: this.pagesize
+                    page_size: this.pagesize,
+                    episodeid: this.episodeid
                 }).then((res)=>{
                     if(res.data.total>0){
                         this.totalCount = res.data.total;
                         var arr = [];
                         var tmpData = res.data.data;
-                        console.log(res.data);
                         var tmpObj = {};
                         for(let i=0,len=tmpData.length;i<len;i++){
                             tmpObj = tmpData[i]._source;
                             tmpObj.eid = tmpData[i]._id;
                             arr.push(tmpObj);
+                            console.log(tmpObj);
                         }
                         this.tableData = arr;
                         this.bookdesc = res.data.description;
                     }else{
                         this.tableData = [];
+                        this.totalCount = 0;
                     }
                 }).catch((err)=>{
                     

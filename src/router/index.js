@@ -9,6 +9,9 @@ import BookDirectory from '@/components/BookDirectory'
 import BookInfo from '@/components/BookInfo'
 import Story from '@/components/Story'
 import ShowRelation from '@/components/ShowRelation'
+import EditSoap from '@/components/EditSoap'
+import BookRootDir from '@/components/BookRootDir'
+import BookDir from '@/components/BookDir'
 
 Vue.use(Router)
 
@@ -62,6 +65,21 @@ const routes = [
     path: '/bookinfo',
     name: 'BookInfo',
     component: BookInfo
+  },
+  {
+    path: '/editsoap',
+    name: 'EditSoap',
+    component: EditSoap
+  },
+  {
+    path: '/bookrootdir',
+    name: 'BookRootDir',
+    component: BookRootDir
+  },
+  {
+    path: '/bookdir',
+    name: 'BookDir',
+    component: BookDir
   }
 ];
 

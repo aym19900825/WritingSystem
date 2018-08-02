@@ -4,16 +4,16 @@
   			<header>
 				<img src="../../assets/img/logo.png" alt="" />
 				<ul class="login_list">
-					<li v-if="!user">
+					<li v-if="userid==0||userid=='null'">
 						<router-link :to="{ path: '/login' }">登录</router-link>
 					</li>
-					<li v-if="!user">
+					<li v-if="userid==0||userid=='null'">
 						<router-link :to="{ path: '/regiser' }">注册</router-link>
 					</li>
-					<li v-if="user"> 
+					<li v-if="userid!=0"> 
 						<el-dropdown>
 						    <span class="el-dropdown-link">
-						        {{user.username}}<i class="el-icon-arrow-down el-icon--right"></i>
+						        {{username}}<i class="el-icon-arrow-down el-icon--right"></i>
 						    </span>
 						    <el-dropdown-menu slot="dropdown">
 						        <el-dropdown-item>
@@ -33,21 +33,23 @@ export default {
     name: 'Header',
     data () {
     	return {
-        
+        	userid:0,
+        	username: ""
     	}
   	},
   	methods:{
 	  	logout () {
-	        this.$store.dispatch('logout').then(() => {
-	            this.$router.replace('/login')
-	        })
+	  		sessionStorage.removeItem("userid");
+	  		sessionStorage.removeItem("username");
+	  		console.log("logout");
+	  		this.$router.replace('/login');
 	    },
   	},
-    computed: {
-        user () {
-            return this.$store.state.user;
-        }
-    },
+    mounted(){
+    	this.userid = sessionStorage.getItem("userid")?sessionStorage.getItem("userid"):0;
+    	console.log(this.userid);
+    	this.username = sessionStorage.getItem("username");
+    }
 }
 </script>
 
