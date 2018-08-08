@@ -14,8 +14,7 @@
             <el-table-column prop="chapterabstract" label="章节大纲" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column label="完成时间" width="200">
                 <template slot-scope="scope">
-                    <i class="el-icon-time"></i>
-                    <span style="margin-left: 10px">{{ scope.row.edit_date }}</span>
+                    <span>{{ scope.row.edit_date }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="200">
@@ -197,7 +196,6 @@
                         this.totalCount = res.data.total;
                         var arr = [];
                         var tmpData = res.data.data;
-                        console.log(res.data);
                         var tmpObj = {};
                         for(let i=0,len=tmpData.length;i<len;i++){
                             tmpObj = tmpData[i]._source;
@@ -208,6 +206,8 @@
                         this.bookdesc = res.data.description;
                     }else{
                         this.tableData = [];
+                        this.totalCount = res.data.total;
+                        this.bookdesc = res.data.description;
                     }
                 }).catch((err)=>{
                     

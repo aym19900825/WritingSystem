@@ -10,7 +10,8 @@
         <div class="tit">
           <el-row>
             <span>{{bookname}}</span>
-            <el-button type="primary" plain size="small" @click="readDirect">查看目录</el-button>
+            <el-button type="primary" plain size="small" @click="readDirect">查看剧集</el-button>
+             <el-button type="primary" plain size="small" @click="readDirSon">查看场次</el-button>
             <el-button type="success" plain style="margin-left: 20px;" size="small" @click="readRelation">查看作品图谱</el-button>
           </el-row>
           <el-row>
@@ -167,6 +168,57 @@ export default{
         }
     },
     methods: {
+      querySearch(queryString, cb) {
+        var scences = this.scences;
+        var results = queryString ? scences.filter(this.createFilter(queryString)) : scences;
+        cb(results);
+      },
+      createFilter(queryString) {
+        return (scence) => {
+          return (scence.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        };
+      },
+      loadAll() {
+         this.$axios.get('http://203.93.173.180:8868/modellist').then((res) => {
+            if(res.data.code=="100"){
+              var sences = res.data.object.scene;
+              for(var i=0;i<sences.length;i++){
+                var obj = {
+                  value: sences[i]
+                };
+                this.scences.push(JSON.parse(JSON.stringify(obj)));
+              }
+            }else{
+              this.$message({
+                type: 'error',
+                message: '网络错误，请重试',
+                showClose: true
+              })
+            }
+           
+        }).catch((err) => {
+            this.$message({
+                type: 'error',
+                message: '网络错误，请重试',
+                showClose: true
+            })
+        })
+        
+      },
+
+      readDirSon(){
+        this.$router.push({
+            path: '/bookdir', 
+            name: 'BookDir',
+            query: { 
+                bookid: this.bookid,
+                episodeid: this.selepisodeid,
+                bookname: this.bookname
+            }
+        })
+
+      },
+
       threadPoxi(){  // 实际调用的方法
           const agentData = this.autoTxtId;
           if (this.websock.readyState === this.websock.OPEN) {
@@ -218,7 +270,7 @@ export default{
         }else{
             var keywords = [];
             var peoples = [];
-            this.$axios.post("http://spark2:8888/api/ai",{
+            this.$axios.post(this.basic_url+"/api/ai",{
               "bookid": this.bookid,
               "chapterabstract": this.chapterabstract
             }).then((res) => {
@@ -284,9 +336,9 @@ export default{
         })
       },
       updateSave(){
-        this.updateChapter("更新成功","更新失败");
+        this.updateChapter("更新成功","更新失败",true);
       },
-      updateChapter(successMsg,erroMsg){
+      updateChapter(successMsg,erroMsg,isShowMsg){
         var chapterversion = {};
         var versionName = "";
         this.chaptercontent = tinyMCE.editors[0].getContent();
@@ -309,6 +361,13 @@ export default{
         var url = this.basic_url+'/api/scene/edit';
         this.$axios.post(url,parma).then((res) => {
             if(res.data.code==1) {
+              if(isShowMsg){
+                this.$message({
+                  type: 'success',
+                  message: "保存成功",
+                  showClose: true
+                })  
+              }
               console.log(successMsg);
             }else{
                 this.$message({
@@ -355,7 +414,7 @@ export default{
           "charactersetting": this.charactersetting,
           "scenenumber": this.chapternumber,
           "bookname": this.bookname,
-          "episodeid": selepisodeid,
+          "episodeid": this.selepisodeid,
           "eid": this.eid
         }
         var url = this.basic_url+'/api/scene/edit';
@@ -430,6 +489,14 @@ export default{
 
       },
 
+      timeInterval(){
+        var _this = this;
+        this.timeQuery = setInterval(()=>{
+           _this.updateChapter("更新成功","更新失败",false);
+           console.log("自动保存");
+        },600000);
+      },
+
       addEpisode(){
           var url = this.basic_url + '/api/episode/add';
           this.$axios.post(url,{
@@ -481,7 +548,6 @@ export default{
         } ).then((res) => {
             this.eid='';
             this.chapternumber = res.data.next_scene;
-            this.selepisodeid = res.data.episode.episodeid;
             this.charactersetting = "";
             this.chaptername = "";
             this.chapterabstract = "";
@@ -556,7 +622,6 @@ export default{
           "episodeid": this.episodeid?this.episodeid:0
         }).then((res) => {
           this.chapternumber = res.data.next_scene;
-          this.selepisodeid = res.data.episode.episodeid;
           this.getDirList();
           this.addChapter("新增成功","新增失败");
         }).catch((err) => {
@@ -594,9 +659,11 @@ export default{
         })
       }
 
+      this.timeInterval();
       
     },
-    destroyed: function() { 
+    beforeDestroy: function() { 
+      clearInterval(this.timeQuery);   
       this.websocketclose();
     }
 } 

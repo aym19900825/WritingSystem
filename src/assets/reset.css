@@ -18,6 +18,7 @@ text-decoration:underline;
 }
 em{
 font-style:normal;
+color:red;
 }
 li{
 list-style:none;

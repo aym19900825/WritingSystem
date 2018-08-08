@@ -2,7 +2,7 @@
     <div id="bookdirectory">
         <v-header></v-header>
         <p class="navTxt">
-            章节目录
+            剧集目录
             <span class="returnList"><router-link :to="{path:'/booklist'}">返回我的作品</router-link></span>
             <i class="icon-back" @click="returnPre"></i>
         </p>
@@ -15,11 +15,17 @@
 
         </div>
         <el-row>
-            <el-button type="success" class="newChapter" @click="addChapter">写新场次</el-button>
-            <el-button type="success" class="newChapter" style="margin-right:10px;" @click="showAddEpisode">写新的集</el-button>
+            <!--
+                <el-button type="success" class="newChapter" @click="addChapter">写新场次</el-button>
+            -->
+            <el-button type="success" class="newChapter" @click="showAddEpisode">写新的集</el-button>
         </el-row>
         <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
-            <el-table-column prop="episodenumber" label="集" width="80"></el-table-column>
+            <el-table-column label="剧集" width="80">
+                <template slot-scope="scope">
+                    <span>第{{ scope.row.episodenumber }}集</span>
+                </template>
+            </el-table-column>
             <el-table-column prop="episodename" label="名称" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column label="操作" width="300">
               <template scope="scope">
@@ -155,6 +161,10 @@
                 }).then((res)=>{
                     if(res.data.total > 0){
                         this.tableData = res.data.episodes;
+                        this.bookdesc = res.data.description;
+                    }else{
+                        this.tableData = [];
+                        this.bookdesc = res.data.description;
                     }
                     this.totalCount = res.data.total;
                 }).catch((err)=>{

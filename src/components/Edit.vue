@@ -155,8 +155,7 @@ export default{
           this.websock.onclose = this.websocketclose;
       },
       websocketonmessage(e){ //数据接收
-        console.log(e.data);
-        this.chaptercontent += e.data;
+        this.chaptercontent += '<p>'+e.data+'</p>';
         tinyMCE.editors[0].setContent(this.chaptercontent);
       },
       websocketsend(agentData){//数据发送
@@ -169,7 +168,8 @@ export default{
       submitDialog(){
         var keywords = [];
         var peoples = [];
-        this.$axios.post("http://spark2:8888/api/ai",{
+
+        this.$axios.post(this.basic_url+"/api/ai",{
           "bookid": this.bookid,
           "chapterabstract": this.chapterabstract
         }).then((res) => {
@@ -338,7 +338,7 @@ export default{
       newChapter(){
         this.addChapter("新增成功","新增失败");
       },
-      updateChapter(successMsg,erroMsg){
+      updateChapter(successMsg,erroMsg,isShowMsg){
         var chapterversion = {};
         var versionName = "";
         this.chaptercontent = tinyMCE.editors[0].getContent();
@@ -359,7 +359,13 @@ export default{
         var url = this.basic_url+'/api/chapter/edit';
         this.$axios.post(url,parma).then((res) => {
             if(res.data.code==1) {
-              console.log(successMsg);
+              if(isShowMsg){
+                this.$message({
+                  type: 'success',
+                  message: "保存成功",
+                  showClose: true
+                })  
+              }
             }else{
                 this.$message({
                   type: 'error',
@@ -374,7 +380,7 @@ export default{
 
       //保存
       updateSave(){
-        this.updateChapter("更新成功","更新失败");
+        this.updateChapter("更新成功","更新失败",true);
       },
 
       //完成保存
@@ -423,6 +429,14 @@ export default{
                 bookname: this.bookname,
             }
         })
+      },
+
+      timeInterval(){
+        var _this = this;
+        this.timeQuery = setInterval(()=>{
+           _this.updateChapter("更新成功","更新失败",false);
+           console.log("自动保存");
+        },10000);
       },
 
       changeBook(){
@@ -530,9 +544,11 @@ export default{
             
         })
       }
+
+      this.timeInterval();
     },
-    destroyed: function() { 
-      //this.timeQuery = window.clearInterval(this.timeQuery);   
+    beforeDestroy: function() { 
+      clearInterval(this.timeQuery);   
       this.websocketclose();
     }
 } 

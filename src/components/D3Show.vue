@@ -8,11 +8,13 @@
                     <ul class="tabList">
                         <li @click="tabChang('first')">图谱</li>
                         <li @click="tabChang('second')">小说人物图谱</li>
+                        <li @click="tabChang('third')">评论</li>
                     </ul>
                     <span class="returnList" @click="returnPre">返回</span>
                     <i class="icon-back"></i>
                 </p>
                 <div class="tabContent">
+                    <!--图谱-->
                     <div id="first">
                         <el-row>
                             <div id="chart"></div>
@@ -26,6 +28,8 @@
                             </div>
                         </el-row>
                     </div>
+
+                    <!--小说人物图谱-->
                     <div id="second" style="position: relative;">
                        <div v-show="chaptereid==''">
                             <p style="width:100%;font-size:24px;text-align:center;margin-top:200px;">您还没有人物图谱</p>
@@ -47,6 +51,33 @@
                             </el-form>
                         </div>
                     </div>
+
+                    <!--评论显示区-->
+                    <div id="third" style="display:none;">
+                        <el-row>
+                            <div class="comment">
+                                <el-input placeholder="请输入搜索关键字" v-model="commentSearch" class="input-with-select" @keydown="comSearch($event)">
+                                    <el-button type="primary" slot="append" icon="el-icon-search" @click="comSearch"></el-button>
+                                 </el-input>
+                            </div>
+                            <div class="commentContent">
+                                <div class="commentResult" v-for = "item in commentList">
+                                    <p v-html="item.highlight.content[0]"></p>
+                                    <p>{{item._source.create_date}}</p>
+                                </div>
+                                <div align="right" style="margin-top: 20px;margin-bottom: 40px;">
+                                    <el-pagination
+                                        @size-change="handleSizeChange1"
+                                        @current-change="handleCurrentChange1"
+                                        :current-page="currentPage1"
+                                        :page-size="pagesize1"
+                                        layout="total, prev, pager, next"
+                                        :total="totalCount1">
+                                    </el-pagination>
+                                </div>
+                            </div>
+                        </el-row>
+                    </div>
                 </div>
                 <span class="cirle icon-arrow2-right" @click="showHide" v-show="isRelation"></span>
             </el-col>
@@ -67,7 +98,6 @@
                             @size-change="handleSizeChange"
                             @current-change="handleCurrentChange"
                             :current-page="currentPage"
-                            :pager-count="3"
                             :page-size="pagesize"
                             layout="total, prev, pager, next"
                             :total="totalCount">
@@ -90,6 +120,26 @@
             'v-header': Header
         },
         methods: {
+            comSearch(){
+                var _this = this;
+                var url = _this.basic_url+"/api/comment/search";
+                this.$axios.post(url,{
+                    "word": this.commentSearch,
+                    "page_index": this.currentPage1,
+                    "page_size":this.pagesize1
+                }).then((res) => {
+                    this.commentList = res.data.data;
+                    $(".comment").css("marginTop","40px");
+                    $(".comment").css("marginBottom","10px");
+                    this.totalCount1 = res.data.total;
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络错误，请重试',
+                        showClose: true
+                    })
+                })
+            },
             closePeople(){
                 this.peopleInfoVisible = false;
             },
@@ -108,9 +158,10 @@
             tabChang(tabname){
                 if(tabname=="first"){
                     $("#first").show();
+                    $("#third").hide();
                     $("#second").hide();
+                    $("ul.tabList li").css("background","#F3F6FA");
                     $("ul.tabList li:nth-child(1)").css("background","#fff");
-                    $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
 
                     //人物图谱样式设置
                     this.isRelation = true;
@@ -118,10 +169,12 @@
                     $(".main").width("66.66%");
                     $(".cirle").removeClass("icon-arrow2-left");
                     $(".cirle").addClass("icon-arrow2-right");
-                }else{
+                }
+                if(tabname=="second"){
                     $("#second").show();
                     $("#first").hide();
-                    $("ul.tabList li:nth-child(1)").css("background","#F3F6FA");
+                    $("#third").hide();
+                    $("ul.tabList li").css("background","#F3F6FA");
                     $("ul.tabList li:nth-child(2)").css("background","#fff");
 
                     //人物图谱样式设置
@@ -133,6 +186,17 @@
                     if(this.chaptereid==""){
                         this.initChaptereid();
                     }
+                }
+                if(tabname=="third"){
+                    $("#third").show();
+                    $("#first").hide();
+                    $("#second").hide();
+                    $("ul.tabList li").css("background","#F3F6FA");
+                    $("ul.tabList li:nth-child(3)").css("background","#fff");
+
+                    this.isRelation = false;
+                    this.isSearch = false;
+                    $(".main").width("100%");
                 }
             },
             initChaptereid(){
@@ -378,6 +442,14 @@
                 this.currentPage = val;
                 this.requestData();
             },
+            handleSizeChange1(val) {
+                this.pagesize1 = val;
+                this.comSearch();
+            },
+            handleCurrentChange1(val) {
+                this.currentPage1 = val;
+                this.comSearch();
+            },
             initchapter(url,queryParam){
                 var _this = this;
                 var width = 600;
@@ -489,6 +561,12 @@
         },
         data () {
             return {
+                commentSearch: "",
+                currentPage1: 1,
+                pagesize1: 10,
+                totalCount1: 0 ,
+                commentList: [],
+
                 basic_url: Config.api,
                 peopleInfoVisible: false,
                 peopleInfo: {
@@ -761,5 +839,25 @@ text.shadow {
     margin-top: -20px;
     margin-bottom: 10px;
     cursor: pointer;
+}
+.comment{
+    width: 50%;
+    margin: 80px auto;
+}
+.commentResult p em{
+    color: red;
+    font-weight: bold;
+}
+.commentResult{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+.commentResult p:nth-child(1){
+    font-size: 14px;
+    line-height: 24px;
+}
+.commentResult p:nth-child(2){
+    padding-top: 5px;   
 }
 </style>

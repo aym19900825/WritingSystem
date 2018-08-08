@@ -2,7 +2,7 @@
     <div id="bookdirectory">
         <v-header></v-header>
         <p class="navTxt">
-            章节目录
+            场次目录
             <span class="returnList" @click="returnRoot" style="color: #00BAFC;font-size: 13px;cursor: pointer;">返回集数</span>
             <i class="icon-back" @click="returnPre"></i>
         </p>
@@ -12,19 +12,21 @@
                 <h4>{{bookname}}</h4>
                 <p :title="bookdesc">作品简介：{{bookdesc}}</p>
             </div>
-
         </div>
         <el-row>
             <el-button type="success" class="newChapter" @click="addChapter">写新场次</el-button>
         </el-row>
         <el-table :data="tableData" style="width: 85%;margin: 0 auto;">
-            <el-table-column prop="scenenumber" label="场次" width="80"></el-table-column>
+            <el-table-column label="场次" width="80">
+                <template slot-scope="scope">
+                    <span>第{{ scope.row.scenenumber }}场</span>
+                </template>
+            </el-table-column>
             <el-table-column prop="scenename" label="名称" width="200" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="chapterabstract" label="场次大纲" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column label="完成时间" width="200">
                 <template slot-scope="scope">
-                    <i class="el-icon-time"></i>
-                    <span style="margin-left: 10px">{{ scope.row.edit_date }}</span>
+                    <span>{{ scope.row.edit_date }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="200">
@@ -82,7 +84,6 @@
 
             //编辑
             handleEdit(index,row){
-                console.log("eid"+row.eid);
                 sessionStorage.setItem('url','bookdirectory');
                 this.$router.push({
                     path: '/editsoap', 
@@ -107,7 +108,20 @@
                         this.$axios.post(url,{
                             eid: row.eid
                         }).then((res)=>{
-                            this.init();
+                            if(res.data.code==1){
+                                setTimeout(()=>{
+                                    this.init();
+                                },3000);
+                                
+                            }
+                            else{
+                                this.$message({
+                                    type: 'error',
+                                    message: '网络错误，请重试',
+                                    showClose: true
+                                })
+                            }
+                            
                         }).catch((err)=>{
                             
                         })
@@ -118,6 +132,7 @@
             }, 
             addChapter(){
                 sessionStorage.setItem('url','booklist');
+                console.log(this.episodeid);
                 this.$router.push({
                     path: '/editsoap', 
                     name: 'EditSoap',
@@ -144,6 +159,7 @@
                     name: 'BookRootDir',
                     query: { 
                         bookid: this.bookid,
+                        bookname: this.bookname
                     }
                 })
             },
@@ -171,6 +187,7 @@
                     }else{
                         this.tableData = [];
                         this.totalCount = 0;
+                        this.bookdesc = res.data.description;
                     }
                 }).catch((err)=>{
                     

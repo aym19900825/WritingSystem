@@ -12,25 +12,37 @@
         </div>
         <div class="bookList" v-if="books.length > 0">
             <el-table :data="books" style="width: 85%;margin: 0 auto;">
-                <el-table-column label="书名" width="200" prop="bookname">
+                <el-table-column label="书名" width="200" prop="bookname" :show-overflow-tooltip="true">
                 </el-table-column>
-                <el-table-column label="作品类别" width="100" prop="category">
+                <el-table-column label="作品类别" width="100">
                     <template slot-scope="scope">
                         <span v-text="scope.row.category"></span>
                     </template>
                 </el-table-column>
-                <el-table-column label="状态" width="100" prop="bookstatus">
-                </el-table-column>
-                <el-table-column label="创建时间" width="250">
+                <el-table-column label="最新编辑章节/场次" width="220" :show-overflow-tooltip="true">
                     <template slot-scope="scope">
-                        <i class="el-icon-time"></i>
-                        <span style="margin-left: 10px">{{ scope.row.createtime }}</span>
+                        <span style='color: #409EFF;cursor: pointer;'' v-if="scope.row.scenenumber&&scope.row.category=='电视剧剧本'"  @click="editNew(scope.$index, scope.row)">第{{scope.row.episodenumber}}第{{scope.row.scenenumber}}场：{{scope.row.currentedit}}
+                        </span>
+                        <span style='color: #409EFF;cursor: pointer;' v-if="scope.row.scenenumber&&scope.row.category=='小说'" @click="editNew(scope.$index, scope.row)">第{{scope.row.scenenumber}}章：{{scope.row.currentedit}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" width="80" prop="bookstatus">
+                </el-table-column>
+                <el-table-column label="创建时间" width="180">
+                    <template slot-scope="scope">
+                        <span>{{ scope.row.createtime }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category=='小说'">写新章节</el-button>
-                        <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category!='小说'">写新场次</el-button>
+                        <!--
+                            <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category=='小说'">写新章节</el-button>
+                        -->
+                        
+                        <!--
+                            <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category!='小说'">写新场次</el-button>
+                        -->
                         <el-button size="mini" @click="readStory(scope.$index, scope.row)">故事大纲</el-button>
                         <el-button size="mini" type="primary" @click="readBook(scope.$index, scope.row)">编辑作品</el-button>
                         <el-button size="mini" @click="bookDirect(scope.$index, scope.row)" class="bookdirect" v-if="scope.row.category=='小说'">查看目录</el-button>
@@ -138,6 +150,33 @@
             }
         },
         methods: {
+            editNew(index,row){
+                sessionStorage.setItem('url','bookdirectory');
+                if(row.category=='小说'){
+                    this.$router.push({
+                        path: '/edit', 
+                        name: 'Edit',
+                        query: { 
+                            bookid: row.bookid,
+                            bookname: row.bookname,
+                            eid: row.eid
+                        }
+                    })
+                }else{
+                    this.$router.push({
+                        path: '/editsoap', 
+                        name: 'EditSoap',
+                        query: { 
+                            bookid: row.bookid,
+                            bookname: row.bookname,
+                            eid: row.eid
+                        }
+                    })
+                }
+                
+                
+            },
+
             handleDelete(index,row){
                 this.$confirm('确定删除此作品吗？', '提示', {
                         confirmButtonText: '确定',

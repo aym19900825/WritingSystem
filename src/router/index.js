@@ -12,6 +12,7 @@ import ShowRelation from '@/components/ShowRelation'
 import EditSoap from '@/components/EditSoap'
 import BookRootDir from '@/components/BookRootDir'
 import BookDir from '@/components/BookDir'
+import ComAnnotation from '@/components/ComAnnotation'
 
 Vue.use(Router)
 
@@ -80,6 +81,11 @@ const routes = [
     path: '/bookdir',
     name: 'BookDir',
     component: BookDir
+  },
+  {
+    path: '/comannotation',
+    name: 'ComAnnotation',
+    component: ComAnnotation
   }
 ];
 

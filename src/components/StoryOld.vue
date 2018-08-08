@@ -1,161 +1,259 @@
 <template>
-     <div class="main">
-        <el-button class="returnPre el-icon-arrow-left el-icon--left" @click="returnPre">返回图书列表</el-button>
-        <el-steps :active="active" finish-status="success">
-            <el-step title="故事简介"></el-step>
-            <el-step title="人物设定"></el-step>
-            <el-step title="事件设定"></el-step>
-        </el-steps>
-        <el-tabs v-model="activeName"  @tab-click="handleClick">
+    <div class="main">
+        <v-header></v-header>
+        <p class="navTxt">
+            <span class="tit">故事大纲</span>
+            <ul class="tabList">
+                <li @click="tabChang('first')">故事简介</li>
+                <li @click="tabChang('second')">人物设定</li>
+            </ul>
+            <span class="returnList" @click="returnPre">返回我的作品</span>
+            <i class="icon-back"></i>
+        </p>
+         <div class="tabContent">
+            <div id="first">
+               <div class="abstract">
+                    <p>故事简介</p>
+                    <textarea style="padding: 10px;" v-model="bookabstract"></textarea>
+                    <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;" @click="addAbstract" v-if="abstracteid==''">保存</el-button>
+                    <el-button type="primary" style="margin: 0 auto;position: relative;left: 50%;margin-left: -100px;padding: 15px 50px;margin-top: 50px;" @click="editAbstract" v-else>更新</el-button>
+                </div>
+            </div>
+            <div id="second">
+               <div class="person">
+                    <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;" @click="dialogFormVisible = true">添加人物</el-button>
+                    <el-table :data="peoples" style="width: 85%;margin: 0 auto;">
+                        <el-table-column label="序号" width="100">
+                            <template slot-scope="scope">
+                                <span class="index-box">{{scope.$index+1}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="姓名/性格特点" width="250" >
+                            <template slot-scope="scope">
+                                <p class="title">{{ scope.row.name }}</p>
+                                <p class="charact">{{ scope.row.characters }}</p>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="身份特征" prop="titles"></el-table-column>
+                        <el-table-column label="人物关系" width="180" prop="relationship"></el-table-column>
+                        <el-table-column label="操作" width="180">
+                            <template slot-scope="scope">
+                                <el-button type="success" icon="edit" size="mini" @click="editPeople(scope.row,scope.$index)">编辑</el-button>
+                                <el-button type="danger" icon="delete" size="mini" @click="delPeople(scope.row,scope.$index)">删除</el-button>
+                            </template>
+                         </el-table-column>
+                   </el-table>
+                   <el-row style="text-align: center;margin-top: 30px;position: relative;">
+                        <el-button type="primary" @click="addPeoples" v-if="peopleeid==''">保存</el-button>
+                        <el-button type="primary" @click="editPeoples"  v-else>更新</el-button>
+                        <el-button type="primary"  @click="characterMap" plain v-if="peopleeid!=''">人物图谱</el-button>
 
-            <!--故事简介-->
-            <el-tab-pane name="first">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="16">
-                        <span class="bookAbstract">故事简介：</span>
-                        <textarea rows="20" cols="120" v-model="bookabstract">
-                            在w3school，你可以找到你所需要的所有的网站建设教程。
-                        </textarea>
-                        <el-footer class="btndiv">
-                            <el-button size="medium" @click="resetStory">重置</el-button>
-                            <el-button type="primary" size="medium" @click="next">下一步</el-button>
-                        </el-footer>
-                    </el-col>
-                </el-row>
-            </el-tab-pane>
-
-            <!--人物设定-->
-            <el-tab-pane name="second">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="24">
-                        <el-card :body-style="{ padding: '0px' }">
-                            <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogFormVisible = true">
-                                +
-                            </div>
-                        </el-card>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in peoples" :key="item">
-                    <div class="peopleInfo" >{{item.name}},{{item.titles}},{{item.characters}},({{item.relationship}})
-                        <div class="itembtn">
-                        <el-button type="success" icon="edit" size="mini" @click="editPeople(item,index)">编辑</el-button>
-                        <el-button type="danger" icon="delete" size="mini" @click="delPeople(item,index)">删除</el-button>
-                    </div>
-                    </div> 
-                    
-                </el-row>
-                <el-footer class="btndiv">
-                    <el-button size="medium" @click="pre">上一步</el-button>
-                    <el-button type="primary" size="medium" @click="characterMap"  v-show="updateBook">人物图谱</el-button>
-                    <el-button type="primary" size="medium" @click="next">下一步</el-button>
-                </el-footer>
-                <el-row type="flex" justify="center" v-show="updateBook">
-                    <div id="chart"></div>
-                </el-row>
-            </el-tab-pane>
-
-            <!--事件设定-->
-            <el-tab-pane name="third">
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-col :span="24">
-                        <el-card :body-style="{ padding: '0px' }">
-                            <div style="width: 100%;height: 40px;font-size: 20px;font-weight: normal;color: #ccc;text-align: center;line-height: 40px;" @click="dialogSthVisible = true">
-                                +
-                            </div>
-                        </el-card>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" class="row-bg" justify="center" v-for="(item,index) in things" :key="item">
-                    <div class="peopleInfo" >{{item.name}},{{item.times}},{{item.position}},({{item.people}})
-                        <div class="itembtn">
-                            <el-button type="success" icon="edit" size="mini" @click="editSth(item,index)">编辑</el-button>
-                            <el-button type="danger" icon="delete" size="mini" @click="delSth(item,index)">删除</el-button>
+                        <!--图谱点击的人物卡-->
+                        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
+                            <i class="el-icon-close" @click="closePeople"></i>
+                            <el-form ref="form" :model="peopleInfo" label-width="80px">
+                              <el-form-item label="姓名" prop="name">
+                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="身份特征" prop="titles">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                              <el-form-item label="性格特点" prop="characters">
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+                              </el-form-item>
+                            </el-form>
                         </div>
-                    </div> 
-
-                </el-row>
-                <el-footer class="btndiv">
-                    <el-button type="primary" size="medium" @click="finish" v-show="!updateBook">完成</el-button>
-                    <el-button type="primary" size="medium" @click="update" v-show="updateBook">更新</el-button>
-                    <el-button size="medium" @click="pre">上一步</el-button>
-                </el-footer>
-            </el-tab-pane>
-        </el-tabs>
-
-        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose">
-            <el-form ref="form" :model="newPeople" label-width="80px">
-              <el-form-item label="姓名" prop="name">
-                <el-input  v-model="newPeople.name"></el-input>
-              </el-form-item>
-              <el-form-item label="身份特征" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
-              </el-form-item>
-              <el-form-item label="性格特点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
-              </el-form-item>
-              <el-form-item label="人物关系" prop="relationship">
-                <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                <p class="tip">人物关系格式如下：父亲，XXX；母亲，XXX；</p>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">立即创建</el-button>
-                <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
-                <el-button @click="resetPeople">取消</el-button>
-              </el-form-item>
-            </el-form>
-        </el-dialog>
-
-        <el-dialog title="事件信息" :visible.sync="dialogSthVisible"  :rules="rules1" :before-close="resetSth">
-            <el-form ref="sthForm" :model="newSth" label-width="80px">
-              <el-form-item label="事件名称" prop="name">
-                <el-input  v-model="newSth.name"></el-input>
-              </el-form-item>
-              <el-form-item label="时间" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="newSth.times"  placeholder="请输入事件发生的时间"></el-input>
-              </el-form-item>
-              <el-form-item label="地点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="newSth.position"  placeholder="请输入事件发生的地点"></el-input>
-              </el-form-item>
-              <el-form-item label="相关人物" prop="relationship">
-                <el-input type="textarea" :rows="2" v-model="newSth.people"  placeholder="请输入相关人物"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="addSth" v-show="!isupdateSth">立即创建</el-button>
-                <el-button type="primary" @click="updateSth" v-show="isupdateSth">更新</el-button>
-                <el-button @click="resetSth">取消</el-button>
-              </el-form-item>
-            </el-form>
-        </el-dialog>
-
-        <el-dialog  width="30%"  title="创建成功" :visible.sync="innerVisible" :before-close="handleCloseStory"  append-to-body>
-            <P class="congratulation" v-show="!updateBook">恭喜您！创建成功！</P>
-            <P class="congratulation" v-show="updateBook">恭喜您！更新成功！</P>
-            <el-button type="primary" @click="returnBookList" style="margin-left: 130px;margin-top: 20px;">返回图书列表</el-button>
-        </el-dialog>
-
-        <!--图谱点击的人物卡-->
-        <div class="d3PeopleInfo" v-show="peopleInfoVisible">
-            <i class="el-icon-close" @click="closePeople"></i>
-            <el-form ref="form" :model="peopleInfo" label-width="80px">
-              <el-form-item label="姓名" prop="name">
-                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
-              </el-form-item>
-              <el-form-item label="身份特征" prop="titles">
-                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
-              </el-form-item>
-              <el-form-item label="性格特点" prop="characters">
-                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
-              </el-form-item>
-            </el-form>
+                   </el-row>
+                   <el-row type="flex" justify="center" v-show="isShowRelation">
+                        <div id="chart"></div>
+                   </el-row>
+                </div>
+            </div>
         </div>
+        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%" id="peopleDialog">
+            <el-form ref="form" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
+                <el-form-item label="姓名" prop="name">
+                     <el-input  v-model="newPeople.name"></el-input>
+                 </el-form-item>
+                <el-form-item label="身份特征" prop="titles">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.titles"  placeholder="请输入人物身份特征"></el-input>
+                </el-form-item>
+                <el-form-item label="性格特点" prop="characters">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
+                </el-form-item>
+                <el-form-item label="人物关系" prop="relationship">
+                    <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
+                     <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
+                </el-form-item>
+                <el-form-item class="btnGrounp">
+                    <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">添加</el-button>
+                    <el-button type="primary" @click="updatePeople" v-show="isupdatePeople">更新</el-button>
+                    <el-button @click="resetPeople" type="info">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+
     </div>
 </template>
 
 <script>
+    import Header from './common/Header.vue'
+    import Config from '../config.js'
     import Vue from 'vue'
     export default {
         name: 'Story',
         methods: {
+            addPeoples(){
+                var _this = this;
+                var obj = {
+                    people: []
+                };
+                var peoples = JSON.parse(JSON.stringify(this.peoples));
+                for(var i=0;i<peoples.length;i++){
+                    var arr = [];
+                    var tmp =  peoples[i].relationship;
+                    var tmparr = tmp.split("；");
+                    for(var j=0;j<tmparr.length-1;j++){
+                        var tmpObj = {};
+                        tmpObj.realtion = tmparr[j].split("，")[0]
+                        tmpObj.being = tmparr[j].split("，")[1]
+                        arr.push(tmpObj);
+                    }
+                    peoples[i].relationship = arr;
+                }
+                obj.people = peoples;
+                this.$axios.post(_this.basic_url+'/api/character/add',{
+                    "bookid": _this.bookid,
+                    "charactersetting": JSON.stringify(obj) 
+                }).then((res) => {
+                    if(res.data.code==1){
+                        _this.peopleeid = res.data.eid;
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络异常',
+                        showClose: true
+                    })
+                })
+            },
+            editPeoples(){
+                var _this = this;
+                var obj = {
+                    people: []
+                };
+                var peoples = JSON.parse(JSON.stringify(this.peoples));
+                for(var i=0;i<peoples.length;i++){
+                    var arr = [];
+                    var tmp =  peoples[i].relationship;
+                    var tmparr = tmp.split("；");
+                    for(var j=0;j<tmparr.length-1;j++){
+                        var tmpObj = {};
+                        tmpObj.realtion = tmparr[j].split("，")[0]
+                        tmpObj.being = tmparr[j].split("，")[1]
+                        arr.push(tmpObj);
+                    }
+                    peoples[i].relationship = arr;
+                }
+                obj.people = peoples;
+                this.$axios.post(_this.basic_url+'/api/character/edit',{
+                    "bookid": this.bookid,
+                    "charactersetting": JSON.stringify(obj),
+                    "eid":  this.peopleeid
+                } ).then((res) => {
+                    if(res.data.code==1){
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络异常',
+                        showClose: true
+                    })
+                })
+            },
+            addAbstract(){
+                var _this = this;
+                this.$axios.post(_this.basic_url+'/api/info/add',{
+                    "bookid": this.bookid,
+                    "bookabstract": this.bookabstract,
+                }).then((res) => {
+                    if(res.data.code==1){
+                        _this.abstracteid = res.data.eid;
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    
+                })
+            },
+            editAbstract(){
+                var _this = this;
+                this.$axios.post(_this.basic_url+'/api/info/edit',{
+                    "bookid": _this.bookid,
+                    "bookabstract": _this.bookabstract,
+                    "eid": _this.abstracteid
+                }).then((res) => {
+                    if(res.data.code==1){
+                        this.$message({
+                            type: 'success',
+                            message: '保存成功',
+                            showClose: true
+                        })
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: '保存失败',
+                            showClose: true
+                        })
+                    }
+                }).catch((err) => {
+                    
+                })
+            },
+            tabChang(tabname){
+                if(tabname=="first"){
+                    $("#first").show();
+                    $("#second").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#fff");
+                    $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
+                }else{
+                    $("#second").show();
+                    $("#first").hide();
+                    $("ul.tabList li:nth-child(1)").css("background","#F3F6FA");
+                    $("ul.tabList li:nth-child(2)").css("background","#fff");
+                }
+            },
             handleCloseStory(){
                 this.returnBookList();
             },
@@ -173,128 +271,116 @@
                 this.bookid = bookid;
             },
             d3Init(url,queryParam){
-                var width = 400;
+                var _this = this;
+                var width = 700;
                 var height = 400;
                 var img_w = 20;
                 var img_h = 20;
                 var _this = this;
                 d3.select("svg").remove();
 
-                var svg = d3.select("#chart").append("svg")
+                var svg = d3.select("#chart").append("svg:svg")
                                 .attr("width",width)
                                 .attr("height",height);
+
 
                 d3.json(url,function(error,root){
                     if( error ){
                         console.log(error);
                     }
-                    console.log(root);
-                    
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
                                     .links(root.edges)
                                     .size([width,height])
                                     .linkDistance(200)
                                     .charge(-1500)
+                                    .on("tick", tick)
                                     .start();
                                     
-                                    
-                    var edges_line = svg.selectAll("line")
-                                        .data(root.edges)
-                                        .enter()
-                                        .append("line")
-                                        .style("stroke","#ccc")
-                                        .style("stroke-width",1);
-                                        
-                                        
-                    var edges_text = svg.selectAll(".linetext")
-                                        .data(root.edges)
-                                        .enter()
-                                        .append("text")
-                                        .attr("class","linetext")
-                                        .text(function(d){
-                                            return d.type;
-                                        })
-                                        .on("click",function(d,i){
-                                            console.log(d.eid);
-                                            axios.post("http://192.168.1.168:8888/api/news/detail",{
-                                                "eid": d.eid
-                                            }).then((res) => {
-                                                $("#relationTxt h4").text(res.data.title);
-                                                $("#relationTxt p").html("信息链接地址：<a href='"+res.data.url+"' target='_blank'>"+res.data.url+" </a>");
-                                                $("#relationTxt span").text(res.data.create_date);
-                                                $("#relationTxt div").text(res.data.content);
-                                            }).catch((err) => {
-                                                this.$message({
-                                                    type: 'error',
-                                                    message: '网络错误，请重试',
-                                                    showClose: true
-                                                })
-                                            })
-                                        });
                     
-                                        
-                    var nodes_img = svg.selectAll("image")
+                    svg.append("svg:defs")
+                        .append("svg:marker")
+                        .attr("id", "resolved")
+                        .attr("viewBox", "0 -5 10 10")
+                        .attr("refX", 15)
+                        .attr("refY", -1.5)
+                        .attr("markerWidth", 6)
+                        .attr("markerHeight", 6)
+                        .attr('fill','#ccc')
+                        .attr("orient", "auto")
+                        .append("svg:path")
+                        .attr("d", "M0,-5L10,0L0,5");
+                    //(2)根据连线类型引用上面创建的标记
+                    var path = svg.append("svg:g").selectAll("path")
+                        .data(root.edges)
+                        .enter().append("svg:path")
+                        .attr('fill','none')
+                        .attr('stroke','#ccc')
+                        .attr('stroke-width',2)
+                        .attr("marker-end", "url(#resolved)");
+
+                    var nodes_img = svg.append("svg:g").selectAll("image")
                                         .data(root.nodes)
                                         .enter()
                                         .append("image")
                                         .attr("width",img_w)
                                         .attr("height",img_h)
                                         .attr("xlink:href",function(d){
-                                            console.log(d.image.toLowerCase());
-                                            return "/static/"+d.image.toLowerCase();
+                                            return _this.person;
+                                        })
+                                        .on("click",function(d,i){
+                                            _this.peopleInfo = JSON.parse(JSON.stringify(d));
+                                            $(".d3PeopleInfo").css("left",d.px-100);
+                                            $(".d3PeopleInfo").css("top",d.py);
+                                            _this.peopleInfoVisible = true;
                                         })
                                         .call(force.drag);
-                    
-                    var text_dx = -20;
+                     
+                    var text = svg.append("svg:g").selectAll("g")
+                        .data(root.nodes)
+                        .enter().append("svg:g");
+
+                    var text_dx = -40;
                     var text_dy = 20;
-                    
-                    var nodes_text = svg.selectAll(".nodetext")
-                                        .data(root.nodes)
-                                        .enter()
-                                        .append("text")
-                                        .attr("class","nodetext")
-                                        .attr("dx",text_dx)
-                                        .attr("dy",text_dy)
-                                        .text(function(d){
-                                            return d.name;
-                                        });
-                    
-                                        
-                    force.on("tick", function(){
-                        
-                        //限制结点的边界
-                        root.nodes.forEach(function(d,i){
-                            d.x = d.x - img_w/2 < 0     ? img_w/2 : d.x ;
-                            d.x = d.x + img_w/2 > width ? width - img_w/2 : d.x ;
-                            d.y = d.y - img_h/2 < 0      ? img_h/2 : d.y ;
-                            d.y = d.y + img_h/2 + text_dy > height ? height - img_h/2 - text_dy : d.y ;
-                        });
-                    
-                        //更新连接线的位置
-                         edges_line.attr("x1",function(d){ return d.source.x; });
-                         edges_line.attr("y1",function(d){ return d.source.y; });
-                         edges_line.attr("x2",function(d){ return d.target.x; });
-                         edges_line.attr("y2",function(d){ return d.target.y; });
-                         
-                         //更新连接线上文字的位置
-                         edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; });
-                         edges_text.attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
-                         
-                         
-                         //更新结点图片和文字
-                         nodes_img.attr("x",function(d){ return d.x - img_w/2; });
-                         nodes_img.attr("y",function(d){ return d.y - img_h/2; });
-                         
-                         nodes_text.attr("x",function(d){ return d.x });
-                         nodes_text.attr("y",function(d){ return d.y + img_w/2; });
-                    });
+                     
+                    // A copy of the text with a thick white stroke for legibility.
+                    text.append("svg:text")
+                        .attr("x", text_dx)
+                        .attr("y", text_dy)
+                        .attr("class", "shadow")
+                        .text(function(d) { return d.name; });
+                     
+                    text.append("svg:text")
+                        .attr("x", text_dx)
+                        .attr("y", text_dy)
+                        .text(function(d) { return d.name; });
+                     
+                    function tick() {
+                      path.attr("d", function(d) {
+                        var dx = d.target.x - d.source.x,//增量
+                            dy = d.target.y - d.source.y,
+                            dr = Math.sqrt(dx * dx + dy * dy);
+                        return "M" + d.source.x + "," 
+                        + d.source.y + "A" + dr + "," 
+                        + dr + " 0 0,1 " + d.target.x + "," 
+                        + d.target.y;
+                      });
+                     
+                      nodes_img.attr("transform", function(d) {
+                        return "translate(" + d.x + "," + d.y + ")";
+                      });
+                     
+                      text.attr("transform", function(d) {
+                        return "translate(" + d.x + "," + d.y + ")";
+                      });
+                    }
                 })
                 .header("Content-Type","application/json")
                 .send("POST", JSON.stringify({eid: queryParam}));
             },
             characterMap(){
-                this.d3Init("http://192.168.1.168:8888/api/char_graph_search",this.eid);
+                this.d3Init(this.basic_url+"/api/char_graph_search",this.peopleeid);
+                this.isShowRelation = true;
             },
             returnBookList(){
                 this.$router.push({
@@ -319,7 +405,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://192.168.1.168:8888/api/info/edit',{
+                this.$axios.post(_this.basic_url+'/api/info/edit',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj),
@@ -351,8 +437,34 @@
                 this.dialogFormVisible = true;
                 this.isupdatePeople = true;
             },
+            delPeople(item,index){
+                this.peoples.splice(index,1);
+            },
             resetNewPeople(){
                 this.$refs["form"].resetFields();
+            },
+            addSth(){
+                Vue.set(this.things,this.things.length, JSON.parse(JSON.stringify(this.newSth)));
+                this.resetSth();
+            },
+            resetSth(){
+                this.$refs["sthForm"].resetFields();
+                this.dialogSthVisible = false;
+                this.isupdateSth = false;
+            },
+            editSth(item,index){
+                this.upDateSthIndex = index;
+                this.newSth = JSON.parse(JSON.stringify(item));
+                this.dialogSthVisible = true;
+                this.isupdateSth = true;
+            },
+            updateSth(){
+                Vue.set(this.things,this.upDateSthIndex,JSON.parse(JSON.stringify(this.newSth)));
+                this.resetSth();
+                this.isupdatePeople = false;
+            },
+            delSth(item,index){
+                this.things.splice(index,1);
             },
             finish(){
                 var _this = this;
@@ -372,7 +484,7 @@
                     this.peoples[i].relationship = arr;
                 }
                 obj.people = this.peoples;
-                this.$axios.post('http://192.168.1.168:8888/api/info/add',{
+                this.$axios.post(this.basic_url+'/api/info/add',{
                     "bookid": this.bookid,
                     "chapterabstract": this.bookabstract,
                     "charactersetting": JSON.stringify(obj) 
@@ -387,46 +499,31 @@
                     
                 })
             },
-            handleClick(tab, event) {
-                console.log(tab, event);
-            },
-            next() {
-                if (this.active++ > 2) this.active = 0;
-                switch(this.active)
-                    {
-                    case 0:
-                        this.activeName = 'first';
-                        break;
-                    case 1:
-                        this.activeName = 'second';
-                        break;
-                    default:
-                        this.activeName = 'third';
-                    }
-            },
-            pre() {
-                this.active = this.active-1;
-                if ( this.active < 0 ) this.active = 0;
-                switch(this.active)
-                    {
-                    case 0:
-                        this.activeName = 'first';
-                        break;
-                    case 1:
-                        this.activeName = 'second';
-                        break;
-                    default:
-                        this.activeName = 'third';
-                    }
-            },
+            closePeople(){
+                this.peopleInfoVisible = false;
+            }
         },
         mounted(){
+            $("#first").show();
+            $("#second").hide();
+            $("ul.tabList li:nth-child(1)").css("background","#fff");
+            $("ul.tabList li:nth-child(2)").css("background","#F3F6FA");
+
             this.getParams();
-            this.$axios.post('http://192.168.1.168:8888/api/info/query',{
+            this.$axios.post(this.basic_url+'/api/info/query',{
                 "bookid": this.bookid,
             } ).then((res) => {
                 if(res.data.length>0){
-                    this.bookabstract = res.data[0]._source.chapterabstract;
+                    this.bookabstract = res.data[0]._source.bookabstract;
+                    this.abstracteid = res.data[0]._id;
+                }
+            }).catch((err) => {
+            
+            })
+            this.$axios.post(this.basic_url+'/api/character/query',{
+                "bookid": this.bookid,
+            } ).then((res) => {
+                if(res.data.length>0){
                     var jsonObj = eval('(' + res.data[0]._source.charactersetting + ')');
                     if(!jsonObj.people){
                         this.peoples = [];
@@ -441,11 +538,7 @@
                         }
                         this.peoples = jsonObj.people;
                     }
-                    this.eid = res.data[0]._id;
-                    this.updateBook = true;
-                    console.log(this.updateBook);
-                }else{
-                    this.updateBook = false;
+                    this.peopleeid = res.data[0]._id;
                 }
             }).catch((err) => {
             
@@ -453,6 +546,23 @@
         },
         data () {
             return {
+                basic_url: Config.api,
+                isShowRelation: false,
+                abstracteid: '',
+                peopleeid:'',
+                //事件设定
+                person: require('../assets/img/person.png'),
+                dialogSthVisible: false,
+                newSth:{
+                    name:'',
+                    times:'',
+                    position:'',
+                    people:''
+                },
+                things:[],
+                isupdateSth: false,
+                upDateSthIndex: 1,
+
                 isupdatePeople: false,
                 bookid: 1,
                 updateBook: false,
@@ -467,6 +577,13 @@
                 ],
                 dialogFormVisible: false,
                 innerVisible: false,
+                peopleInfoVisible: false,
+                peopleInfo: {
+                    name: '',
+                    relationship: '',
+                    character: '',
+                    title: '',
+                },
                 newPeople: {
                     name: '',
                     relationship: '',
@@ -479,6 +596,9 @@
                     ],
                 }
             }
+        },
+        components: {
+            'v-header': Header
         }
     }
 </script>
@@ -515,13 +635,178 @@
     padding-left: 5px;
     padding-right: 5px;
 }
-.main{
-    width: 85%;
-    margin: 0 auto;
-}
 .tip{
     text-align: left;
     font-size: 8px;
     margin-top: -10px;
+}
+
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+circle {
+  fill: #ccc;
+  stroke: #333;
+  stroke-width: 1.5px;
+}
+ 
+text {
+  font: 10px sans-serif;
+  pointer-events: none;
+}
+ 
+text.shadow {
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-opacity: .8;
+}
+.d3PeopleInfo{
+    width: 350px;
+    border: 2px solid #ccc;
+    padding: 10px;
+    padding-top: 30px;
+    background: #fff;
+    position: absolute;
+    z-index: 1000;
+}
+.el-icon-close{
+    float: right;
+    display: block;
+    margin-top: -20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.itembtn{
+    float: right;
+}
+.itembtn i{
+    font-size: 18px;
+    coursor: pointer;
+}
+.tabBox{
+    width: 100%;
+}
+.tabBox .el-tabs__nav-wrap{
+    padding-left: 100px; 
+    padding-top: 30px; 
+    padding-right: 100px; 
+    box-sizing: box-border; 
+}
+.abstract{
+    padding-left: 100px;
+    padding-right: 100px;
+    box-sizing: box-border;
+}
+.abstract p{
+    text-align: left;
+    height:22px;
+    font-size:13px;
+    color:rgba(151,163,180,1);
+    line-height:22px;
+    margin-top: 60px;
+    margin-bottom: 20px;
+}
+.abstract textarea{
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+}
+.person{
+    min-height: 500px;
+}
+.index-box{
+    width: 32px;
+    height: 32px;
+    border: 1px solid #0064FF;
+    text-align: center;
+    color: #0064FF;
+    font-size: 15px;
+    display: block;
+    line-height: 32px;
+}
+p.title{
+    height:20px;
+    font-size:15px;
+    color:rgba(0,34,87,1);
+    line-height:21px;
+    text-align: left;
+}
+p.charact{
+    height:20px;
+    font-size:13px;
+    color:rgba(151,163,180,1);
+    line-height:22px;
+    text-align: left;
+}
+.btnGrounp{
+    text-align: center;
+}
+.btnGrounp button{
+    padding-left: 87px;
+    padding-right: 87px;
+}
+.navTxt{
+    width: 100%;
+    height: 65px;
+    background:rgba(243,246,250,1);
+    padding-left: 100px;
+    padding-right: 100px;
+    box-sizing: border-box;
+}
+.navTxt .tabList,.navTxt .tit{
+    display: block;
+    float: left;
+}
+.navTxt .tit{
+    height:25px;
+    font-size:18px;
+    color:rgba(170,178,192,1);
+    line-height:25px;
+    margin-top: 25px;
+}
+.navTxt .tabList{
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    margin-top: 25px;
+    margin-left: 50px;
+}
+.navTxt .tabList li{
+    height: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #000;
+    display: block;
+    float: left;
+    backgound: #fff;
+    font-size:15px;
+    color:rgba(91,99,113,1);
+    line-height: 40px;
+    cursor: pointer;
+    border-radius: 8px 8px 0px 0px;
+}
+.navTxt .tabList li:hover{
+    color: #0083FF;
+    background: #fff;
+}
+.navTxt .returnList,.navTxt i{
+    display: block;
+    float: right;
+    color:rgba(0,186,252,1);
+    font-size: 14px;
+    margin-top: 38px;
+    cursor: pointer;
+}
+.navTxt .returnList{
+    margin-left: 5px;
+    margin-right: 20px;
+}
+.tabContent{
+    box-sizing: border-box;
+    padding-left: 100px;
+    padding-right: 100px;
+    min-height: 500px;
 }
 </style>
