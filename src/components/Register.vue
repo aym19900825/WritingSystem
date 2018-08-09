@@ -142,18 +142,6 @@
     }
 </script>
 <style scoped>
-<!--
-.registe_box{
-    width: 640px;
-    height: 700px;
-}
-.registe_container{
-    padding: 160px;
-}
-.registe_container{
-    font-size: 27px;
-}
--->
 #registe{
     width: 100%;
     height: 100%

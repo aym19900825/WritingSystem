@@ -126,7 +126,8 @@
                 this.$axios.post(url,{
                     "word": this.commentSearch,
                     "page_index": this.currentPage1,
-                    "page_size":this.pagesize1
+                    "page_size":this.pagesize1,
+                    "userid": this.userid
                 }).then((res) => {
                     this.commentList = res.data.data;
                     $(".comment").css("marginTop","40px");
@@ -416,6 +417,7 @@
                 var url = _this.basic_url+"/api/search/list";
                 this.$axios.post(url,{
                             search_text: this.search,
+                            userid: this.userid,
                             page_index: this.currentPage,
                             page_size: this.pagesize
                 }).then((res) => {
@@ -561,6 +563,8 @@
         },
         data () {
             return {
+                userid: 0,
+
                 commentSearch: "",
                 currentPage1: 1,
                 pagesize1: 10,
@@ -614,6 +618,7 @@
         mounted(){
             this.bookname = this.$route.query.bookname;
             this.bookid = this.$route.query.bookid;
+            this.userid = sessionStorage.getItem('userid');
 
             $("#first").show();
             $("#second").hide();

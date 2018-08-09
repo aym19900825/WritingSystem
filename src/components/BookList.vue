@@ -63,6 +63,11 @@
                 </el-pagination>
             </div>
         </div>
+        <el-dialog title="提示" :visible.sync="dialogPerson" width="30%"
+          :before-close="handleClosePerson">
+            <p class="warn">您的个人信息尚未完善，无法创建作品</p>
+            <p class="tip"><router-link :to="{path:'/personinfo'}">马上完善个人信息</router-link></p>
+        </el-dialog>
     </div>
 </template>
 
@@ -88,6 +93,7 @@
                 }
             };
             return{
+                dialogPerson: false,
 
                 userid: 0,
                 loading: false,
@@ -150,6 +156,9 @@
             }
         },
         methods: {
+            handleClosePerson(){
+                this.dialogPerson = false;
+            },
             editNew(index,row){
                 sessionStorage.setItem('url','bookdirectory');
                 if(row.category=='小说'){
@@ -201,13 +210,31 @@
                 
             },
             creatWork(){
-                this.$router.push({
-                    path: '/bookinfo', 
-                    query: { 
-                        bookid: '',
-                        userid: this.userid
+                var url = this.basic_url+'/api/validUser';
+                this.$axios.post(url,{
+                    userid: this.userid
+                }).then((res)=>{
+                    if(res.data.code==1){
+                        this.$router.push({
+                            path: '/bookinfo', 
+                            query: { 
+                                bookid: '',
+                                userid: this.userid
+                            }
+                        })
                     }
+                    if(res.data.code==0){
+                        this.dialogPerson = true;
+                    }
+                }).catch((err)=>{
+                    this.$message({
+                        type: 'error',
+                        message: '网络错误，请重试',
+                        showClose: true
+                    })
                 })
+
+                
             },
             handleCloseBookInfo(){
                 this.reset();
@@ -408,5 +435,16 @@
 }
 [v-cloak] {
   display: none !important;
+}
+p.warn{
+    font-size: 16px;
+}
+.tip{
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: right;
+}
+.tip a{
+    color: rgb(64, 158, 255);
 }
 </style>

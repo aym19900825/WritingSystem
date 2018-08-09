@@ -13,6 +13,7 @@ import EditSoap from '@/components/EditSoap'
 import BookRootDir from '@/components/BookRootDir'
 import BookDir from '@/components/BookDir'
 import ComAnnotation from '@/components/ComAnnotation'
+import PersonInfo from '@/components/PersonInfo'
 
 Vue.use(Router)
 
@@ -86,6 +87,11 @@ const routes = [
     path: '/comannotation',
     name: 'ComAnnotation',
     component: ComAnnotation
+  },
+  {
+    path: '/personinfo',
+    name: 'PersonInfo',
+    component: PersonInfo
   }
 ];
 

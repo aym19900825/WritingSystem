@@ -319,14 +319,14 @@
                         .attr('stroke-width',2)
                         .attr("marker-end", "url(#resolved)");
 
-                    var nodes_img = svg.append("svg:g").selectAll("image")
+                    var nodes_img = svg.append("svg:g").selectAll("circle")
                                         .data(root.nodes)
                                         .enter()
-                                        .append("image")
-                                        .attr("width",img_w)
-                                        .attr("height",img_h)
-                                        .attr("xlink:href",function(d){
-                                            return _this.person;
+                                        .append("circle")
+                                        .attr("cx",function(d){ return d.dx; })
+                                        .attr("cy",function(d){ return d.dy; })
+                                        .attr("r",function(){
+                                            return 10;
                                         })
                                         .on("click",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
