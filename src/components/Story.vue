@@ -272,8 +272,8 @@
             },
             d3Init(url,queryParam){
                 var _this = this;
-                var width = 700;
-                var height = 400;
+                var width = $(".person").width();
+                var height = 600;
                 var img_w = 20;
                 var img_h = 20;
                 var _this = this;
@@ -297,12 +297,19 @@
                                     .on("tick", tick)
                                     .start();
                                     
-                    
+                    function drag(){//拖拽函数
+                        return force.drag()
+                                    .on("dragstart",function(d){
+                                        d3.event.sourceEvent.stopPropagation(); //取消默认事件
+                                        d.fixed = true;    //拖拽开始后设定被拖拽对象为固定
+                                    });
+                         
+                    }
                     svg.append("svg:defs")
                         .append("svg:marker")
                         .attr("id", "resolved")
                         .attr("viewBox", "0 -5 10 10")
-                        .attr("refX", 15)
+                        .attr("refX", 34)
                         .attr("refY", -1.5)
                         .attr("markerWidth", 6)
                         .attr("markerHeight", 6)
@@ -317,7 +324,25 @@
                         .attr('fill','none')
                         .attr('stroke','#ccc')
                         .attr('stroke-width',2)
+                        .attr('id',function(d,i){
+                            return "path"+i;
+                        })
                         .attr("marker-end", "url(#resolved)");
+                    svg.append("svg:g").selectAll("text")
+                        .data(root.edges)
+                        .enter().append('svg:text')
+                        .attr('x', function(d,i){
+                            console.log(d.source.px);
+                            console.log(d.target.px);
+                            return 100;
+                        })
+                        .attr('y', 20)
+                        .style('font-size', '12px')
+                        .append('textPath').attr(
+                            'xlink:href',function(d,i){
+                                return '#path'+i;
+                        })
+                        .text(function(d) { return d.type; });
 
                     var nodes_img = svg.append("svg:g").selectAll("circle")
                                         .data(root.nodes)
@@ -326,24 +351,24 @@
                                         .attr("cx",function(d){ return d.dx; })
                                         .attr("cy",function(d){ return d.dy; })
                                         .attr("r",function(){
-                                            return 10;
+                                            return 30;
                                         })
-                                        .on("click",function(d,i){
+                                        .style("fill","#6DCE9E")
+                                        .on("dblclick",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
-                                            $(".d3PeopleInfo").css("left",d.px-100);
+                                            $(".d3PeopleInfo").css("left",d.px-400);
                                             $(".d3PeopleInfo").css("top",d.py);
                                             _this.peopleInfoVisible = true;
                                         })
-                                        .call(force.drag);
-                     
+                                        .call(drag());
+
                     var text = svg.append("svg:g").selectAll("g")
                         .data(root.nodes)
                         .enter().append("svg:g");
 
-                    var text_dx = -40;
-                    var text_dy = 20;
+                    var text_dx = -15;
+                    var text_dy = 5;
                      
-                    // A copy of the text with a thick white stroke for legibility.
                     text.append("svg:text")
                         .attr("x", text_dx)
                         .attr("y", text_dy)
@@ -366,11 +391,11 @@
                         + d.target.y;
                       });
                      
-                      nodes_img.attr("transform", function(d) {
+                    nodes_img.attr("transform", function(d) {
                         return "translate(" + d.x + "," + d.y + ")";
                       });
                      
-                      text.attr("transform", function(d) {
+                    text.attr("transform", function(d) {
                         return "translate(" + d.x + "," + d.y + ")";
                       });
                     }
@@ -603,10 +628,6 @@
     }
 </script>
 <style scoped>
-#chart{
-    width: 500px;
-    height: 500px;
-}
 .bookAbstract{
     display: block;
     font-size: 18px;

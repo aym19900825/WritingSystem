@@ -19,7 +19,7 @@
                         <span v-text="scope.row.category"></span>
                     </template>
                 </el-table-column>
-                <el-table-column label="最新编辑章节/场次" width="220" :show-overflow-tooltip="true">
+                <el-table-column label="最新编辑章节/场次" :show-overflow-tooltip="true">
                     <template slot-scope="scope">
                         <span style='color: #409EFF;cursor: pointer;'' v-if="scope.row.scenenumber&&scope.row.category=='电视剧剧本'"  @click="editNew(scope.$index, scope.row)">第{{scope.row.episodenumber}}第{{scope.row.scenenumber}}场：{{scope.row.currentedit}}
                         </span>
@@ -34,12 +34,11 @@
                         <span>{{ scope.row.createtime }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="操作" width="480">
                     <template slot-scope="scope">
                         <!--
                             <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category=='小说'">写新章节</el-button>
                         -->
-                        
                         <!--
                             <el-button size="mini" @click="addChapter(scope.$index, scope.row)" type="success" v-if="scope.row.category!='小说'">写新场次</el-button>
                         -->

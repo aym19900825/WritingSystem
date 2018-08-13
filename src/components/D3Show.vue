@@ -17,6 +17,17 @@
                     <!--图谱-->
                     <div id="first">
                         <el-row>
+                            <el-badge :value="cur_com_total" :max="20" class="item">
+                                 <el-button size="small">评论</el-button>
+                            </el-badge>
+                            <div class="cur_comment">
+                                <div class="commentResult" v-for = "item in cur_commentList">
+                                    <p v-html="item.highlight.content[0]"></p>
+                                    <p>{{item._source.create_date}}</p>
+                                </div>
+                            </div>
+                        </el-row>
+                        <el-row>
                             <div id="chart"></div>
                         </el-row>
                         <el-row>
@@ -215,7 +226,7 @@
             },
             d3Init(url,svgdom,queryParam1,queryParam2){
                 var _this = this;
-                var width = this.d3Params.width;
+                var width = $("#chart").width();
                 var height = this.d3Params.height;
                 var img_w = this.d3Params.img_w;
                 var img_h = this.d3Params.img_h;
@@ -244,6 +255,15 @@
                                     .linkDistance(200)
                                     .charge(-1500)
                                     .start();
+
+                    function drag(){//拖拽函数
+                        return force.drag()
+                                    .on("dragstart",function(d){
+                                        d3.event.sourceEvent.stopPropagation(); //取消默认事件
+                                        d.fixed = true;    //拖拽开始后设定被拖拽对象为固定
+                                    });
+                         
+                    }
                                     
                     var edges_line = svg.selectAll("line")
                                         .data(root.edges)
@@ -299,14 +319,14 @@
                                                 }
 
                                         })
-                                        .on("click",function(d,i){
+                                        .on("dblclick",function(d,i){
                                             _this.search = d.name;
                                             _this.currentPage = 1;
                                             _this.pagesize = 10;
                                             _this.firstLoad = true;
                                             _this.requestData();
                                         })
-                                        .call(force.drag);
+                                        .call(drag());
                     
                     var text_dx = -20;
                     var text_dy = 20;
@@ -379,12 +399,30 @@
                 window.open(href, '_blank');
                 */
                
-               this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
-               this.newsDetail(eid);
-               $("#relationTxt h4").text("");
-               $("#relationTxt span").text("");
-               $("#relationTxt p").text("");
-               $("#relationTxt div").text("");
+                this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
+                this.newsDetail(eid);
+                this.current_com();
+                $("#relationTxt h4").text("");
+                $("#relationTxt span").text("");
+                $("#relationTxt p").text("");
+                $("#relationTxt div").text("");
+            },
+            current_com(){
+                var _this = this;
+                axios.post(_this.basic_url+"/api/comment/title",{
+                    "title": "转会风云：考神恐离队 沃克小卡或被交易",
+                    "page_index": this.cur_currentPage,
+                    "page_size": this.cur_pagesize
+                }).then((res) => {
+                   this.cur_com_total = res.data.total;
+
+                }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: '网络错误，请重试',
+                        showClose: true
+                    })
+                })
             },
             newsDetail(eid){
                 var _this = this;
@@ -397,8 +435,7 @@
                     $("#relationTxt div").text(res.data.content);
 
                     //设置d3show的高度
-                    var txtHeight = $("#relationTxt div").height()+700;
-                    console.log(txtHeight);
+                    var txtHeight = $("#relationTxt div").height()+400+this.d3Params.height;
                     $("#d3show").height(txtHeight+"px");
 
                 }).catch((err) => {
@@ -426,6 +463,7 @@
                     if(_this.firstLoad){
                         _this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
                         _this.newsDetail(this.listData[0]['_source'].eid);
+                        _this.current_com();
                         _this.firstLoad = false;
                     }
                 }).catch((err) => {
@@ -510,7 +548,7 @@
                                         .attr("xlink:href",function(d){
                                             return _this.person;
                                         })
-                                        .on("click",function(d,i){
+                                        .on("dblclick",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
                                             $(".d3PeopleInfo").css("left",d.px-100);
                                             $(".d3PeopleInfo").css("top",d.py);
@@ -565,6 +603,11 @@
             return {
                 userid: 0,
 
+                cur_com_total: 0,
+                cur_commentList: [],
+                cur_pagesize: 20,
+                cur_currentPage: 1,
+
                 commentSearch: "",
                 currentPage1: 1,
                 pagesize1: 10,
@@ -589,7 +632,7 @@
                 country: require('../assets/img/country.png'),
                 d3Params: {
                     width: 600,
-                    height: 300,
+                    height: 450,
                     img_w: 30,
                     img_h: 40
                 },
@@ -664,7 +707,6 @@ text.shadow {
 #chart{
     width: 100%;
     height:400;
-    padding-top: 50px;
     padding-bottom: 50px;
     margin: 0 auto;
 }
@@ -864,5 +906,9 @@ text.shadow {
 }
 .commentResult p:nth-child(2){
     padding-top: 5px;   
+}
+.item{
+    float: right;
+    margin-top: 10px;
 }
 </style>
