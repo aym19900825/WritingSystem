@@ -765,8 +765,7 @@ p.charact{
     text-align: center;
 }
 .btnGrounp button{
-    padding-left: 87px;
-    padding-right: 87px;
+    width: 45%;
 }
 .navTxt{
     width: 100%;

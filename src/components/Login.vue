@@ -34,6 +34,7 @@
 
 <script>
 import Config from '../config.js'
+import Encrypt from '../cryptojs.js'
 import Header from './common/Header.vue'
     export default {
         name: 'Login',
@@ -47,9 +48,11 @@ import Header from './common/Header.vue'
                 this.$refs.loginForm.validate((valid) => {
                     var url = this.basic_url+'/api/login';
                     if (valid) {
+                        var str = Encrypt(this.user.pass);
+                        console.log(str);
                         this.$axios.post(url,{
                             username: this.user.name,
-                            password: this.user.pass
+                            password: str
                         }).then((res) => {
                             console.log(res.data.code==1);
                             if (res.data.code==1) {

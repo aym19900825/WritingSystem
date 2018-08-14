@@ -17,15 +17,9 @@
                     <!--图谱-->
                     <div id="first">
                         <el-row>
-                            <el-badge :value="cur_com_total" :max="20" class="item">
-                                 <el-button size="small">评论</el-button>
+                            <el-badge :value="cur_com_total" :max="20" class="item" v-if="!!cur_com_total">
+                                 <el-button size="small"  @click="curComShow">评论</el-button>
                             </el-badge>
-                            <div class="cur_comment">
-                                <div class="commentResult" v-for = "item in cur_commentList">
-                                    <p v-html="item.highlight.content[0]"></p>
-                                    <p>{{item._source.create_date}}</p>
-                                </div>
-                            </div>
                         </el-row>
                         <el-row>
                             <div id="chart"></div>
@@ -117,7 +111,17 @@
                 </div>
             </el-col>
         </el-row>
-
+        <div class="mask" v-show="isMask">
+            <i class="el-icon-close closeMask" @click="closeMask"></i>
+            <div class="cur_comment">
+                <div class="commentResult" v-for = "item in cur_commentList">
+                    <p>{{item._source.content}}</p>
+                    <p>{{item._source.create_date}}</p>
+                </div>
+                <p class="loadMore" @click="loadMore" v-show="cur_commentList.length<cur_com_total">加载更多...</p>
+                <p class="loadMore" v-show="cur_commentList.length>=cur_com_total">已经没有更多了</p>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -131,6 +135,28 @@
             'v-header': Header
         },
         methods: {
+            closeMask(){
+                this.cur_currentPage = 1;
+                this.cur_commentList = [];
+                this.isMask = !this.isMask;
+                $('body').css({ 
+                　　"overflow-y":"auto" 
+                });
+            },
+            loadMore(){
+                ++this.cur_currentPage;
+                this.current_com();
+            },
+            curComShow(){
+                this.isMask = !this.isMask;
+                $('body').css({ 
+                　　"overflow-y":"hidden" 
+                });
+                console.log(this.cur_commentList);
+                if(!!this.cur_commentList){
+                     this.current_com();
+                }
+            },
             comSearch(){
                 var _this = this;
                 var url = _this.basic_url+"/api/comment/search";
@@ -414,8 +440,12 @@
                     "page_index": this.cur_currentPage,
                     "page_size": this.cur_pagesize
                 }).then((res) => {
-                   this.cur_com_total = res.data.total;
-
+                    this.cur_com_total = res.data.total;
+                    if(this.cur_commentList.length>0){
+                        this.cur_commentList = this.cur_commentList.concat(res.data.data);
+                    }else{
+                        this.cur_commentList = res.data.data;
+                    }
                 }).catch((err) => {
                     this.$message({
                         type: 'error',
@@ -607,6 +637,7 @@
                 cur_commentList: [],
                 cur_pagesize: 20,
                 cur_currentPage: 1,
+                isMask: false,
 
                 commentSearch: "",
                 currentPage1: 1,
@@ -910,5 +941,44 @@ text.shadow {
 .item{
     float: right;
     margin-top: 10px;
+}
+.mask{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity:0.8;
+    z-index: 10001;
+    padding-top: 1px;
+}
+.cur_comment{
+    position: relative;
+    top: 100px;
+    width: 80%;
+    height: 500px;
+    margin: 0 auto;
+    color: #fff;
+    overflow-y: scroll;
+}
+.loadMore{
+    text-align: center;
+    cursor: pointer;
+    margin-top: 50px;
+}
+.closeMask{
+    float: right;
+    display: block;
+    margin-top: -20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    color: #fff;
+    right: 50px;
+    top: 50px;
+    font-size: 24px;
 }
 </style>
