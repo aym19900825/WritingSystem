@@ -129,8 +129,8 @@
                     name: 'Edit',
                     query: { 
                         eid: row.eid,
-                        bookid: row.bookid,
-                        bookname: row.bookname,
+                        bookid: this.bookid,
+                        bookname: this.bookname,
                         isNew: false
                     }
                 })

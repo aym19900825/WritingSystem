@@ -101,7 +101,8 @@
                     query: { 
                         bookid: row.bookid,
                         episodeid: row.episodeid,
-                        bookname: this.bookname
+                        bookname: this.bookname,
+                        episodenumber: row.episodenumber
                     }
                 })
             },

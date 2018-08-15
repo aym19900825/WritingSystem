@@ -99,7 +99,7 @@ import Vue from 'vue'
 import Qs from 'qs'
 import Config from '../config.js'
 
-import Editor from './Tinymce.vue'
+import Editor from './plugin/Tinymce.vue'
 export default{
     data(){
         return {
@@ -494,7 +494,7 @@ export default{
         this.timeQuery = setInterval(()=>{
            _this.updateChapter("更新成功","更新失败",false);
            console.log("自动保存");
-        },600000);
+        },10000);
       },
 
       addEpisode(){
@@ -534,7 +534,8 @@ export default{
             path: '/d3show', 
             query: { 
                 bookid: this.bookid,
-                bookname: this.bookname
+                bookname: this.bookname,
+                eid: this.eid
             }
         })
       },
@@ -554,7 +555,6 @@ export default{
             this.chaptercontent = "";
             tinyMCE.editors[0].setContent(this.chaptercontent);
             this.conntentVer = [];
-
             this.addChapter("新增成功","新增失败");
         }).catch((err) => {
             

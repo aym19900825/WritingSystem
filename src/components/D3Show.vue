@@ -9,6 +9,7 @@
                         <li @click="tabChang('first')">图谱</li>
                         <li @click="tabChang('second')">小说人物图谱</li>
                         <li @click="tabChang('third')">评论</li>
+                        <li @click="tabChang('four')">章节/场次图谱</li>
                     </ul>
                     <span class="returnList" @click="returnPre">返回</span>
                     <i class="icon-back"></i>
@@ -58,7 +59,7 @@
                     </div>
 
                     <!--评论显示区-->
-                    <div id="third" style="display:none;">
+                    <div id="third" style="display: none;">
                         <el-row>
                             <div class="comment">
                                 <el-input placeholder="请输入搜索关键字" v-model="commentSearch" class="input-with-select" @keydown="comSearch($event)">
@@ -83,6 +84,11 @@
                             </div>
                         </el-row>
                     </div>
+
+                    
+                    <div id="four" style="display: none;">
+                        <div id="cur_chart"></div>
+                    </div>
                 </div>
                 <span class="cirle icon-arrow2-right" @click="showHide" v-show="isRelation"></span>
             </el-col>
@@ -95,7 +101,7 @@
                     </p>
                     <div class="searchResult">
                         <ul>
-                           <li @click="searchChart(item._source.eid)" v-for="item in listData" :title="item._source.title">{{item._source.title}}</li>
+                           <li @click="searchChart(item._source.eid,item._source.title)" v-for="item in listData" :title="item._source.title">{{item._source.title}}</li>
                         </ul>
                     </div>
                     <div align="right">
@@ -106,6 +112,38 @@
                             :page-size="pagesize"
                             layout="total, prev, pager, next"
                             :total="totalCount">
+                        </el-pagination>
+                    </div>
+                </div>
+            </el-col>
+            <!--本章节/场次目录显示区-->
+            <el-col :span="8" v-show="isBookDir">
+                <div class="search-div">
+                    <p class="search-box">
+                        <span>目录</span>
+                    </p>
+                    <div class="searchResult">
+                        <ul>
+                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)">
+                                第{{item._source.chapternumber}}章：{{item._source.chaptername}}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="searchResult" v-show="isRootDir">
+                        <ul>
+                            <li  v-for="item in dirRootData" :title="item._source.chaptername">
+                                第{{item._source.chapternumber}}集：{{item._source.chaptername}}
+                            </li>
+                        </ul>
+                    </div>
+                    <div align="right">
+                        <el-pagination
+                            @size-change="bookDir_handleSizeChange"
+                            @current-change="bookDir_handleCurrentChange"
+                            :current-page="bookDir_currentPage"
+                            :page-size="bookDir_pagesize"
+                            layout="total, prev, pager, next"
+                            :total="bookDir_totalCount">
                         </el-pagination>
                     </div>
                 </div>
@@ -152,8 +190,7 @@
                 $('body').css({ 
                 　　"overflow-y":"hidden" 
                 });
-                console.log(this.cur_commentList);
-                if(!!this.cur_commentList){
+                if(this.cur_commentList.length==0){
                      this.current_com();
                 }
             },
@@ -182,42 +219,61 @@
                 this.peopleInfoVisible = false;
             },
             showHide(){
-                if(this.isSearch){
-                    $(".main").width("100%");
-                    $(".cirle").removeClass("icon-arrow2-right");
-                    $(".cirle").addClass("icon-arrow2-left");
-                }else{
-                    $(".main").width("66.66%");
-                    $(".cirle").removeClass("icon-arrow2-left");
-                    $(".cirle").addClass("icon-arrow2-right");
+                if($("#first").css("display")=="block"){
+                    if(this.isSearch){
+                        $(".main").width("100%");
+                        $(".cirle").removeClass("icon-arrow2-right");
+                        $(".cirle").addClass("icon-arrow2-left");
+
+                        var tmpH = $(window).height()-125;
+                        $(".tabContent").height(tmpH);
+                    }else{
+                        $(".main").width("66.66%");
+                        $(".cirle").removeClass("icon-arrow2-left");
+                        $(".cirle").addClass("icon-arrow2-right");
+                    }
+                    this.isSearch = !this.isSearch;
                 }
-                this.isSearch = !this.isSearch;
+                if($("#four").css("display")=="block"){
+                    if(this.isBookDir){
+                        $(".main").width("100%");
+                        $(".cirle").removeClass("icon-arrow2-right");
+                        $(".cirle").addClass("icon-arrow2-left");
+
+                        var tmpH = $(window).height()-125;
+                        $(".tabContent").height(tmpH);
+                    }else{
+                        $(".main").width("66.66%");
+                        $(".cirle").removeClass("icon-arrow2-left");
+                        $(".cirle").addClass("icon-arrow2-right");
+                    }
+                    this.isBookDir = !this.isBookDir;
+                }
+                
             },
             tabChang(tabname){
                 if(tabname=="first"){
-                    $("#first").show();
-                    $("#third").hide();
-                    $("#second").hide();
+                    $("#first").show().siblings("div").hide();
                     $("ul.tabList li").css("background","#F3F6FA");
                     $("ul.tabList li:nth-child(1)").css("background","#fff");
 
                     //人物图谱样式设置
                     this.isRelation = true;
                     this.isSearch = true;
+                    this.isBookDir = false;
                     $(".main").width("66.66%");
                     $(".cirle").removeClass("icon-arrow2-left");
                     $(".cirle").addClass("icon-arrow2-right");
                 }
                 if(tabname=="second"){
-                    $("#second").show();
-                    $("#first").hide();
-                    $("#third").hide();
+                    $("#second").show().siblings("div").hide();
                     $("ul.tabList li").css("background","#F3F6FA");
                     $("ul.tabList li:nth-child(2)").css("background","#fff");
 
                     //人物图谱样式设置
                     this.isRelation = false;
                     this.isSearch = false;
+                    this.isBookDir = false;
                     $(".main").width("100%");
 
                     //首次点击人物图谱加载数据
@@ -226,16 +282,57 @@
                     }
                 }
                 if(tabname=="third"){
-                    $("#third").show();
-                    $("#first").hide();
-                    $("#second").hide();
+                    $("#third").show().siblings("div").hide();
                     $("ul.tabList li").css("background","#F3F6FA");
                     $("ul.tabList li:nth-child(3)").css("background","#fff");
 
                     this.isRelation = false;
                     this.isSearch = false;
+                    this.isBookDir = false;
                     $(".main").width("100%");
                 }
+                if(tabname=="four"){
+                    $("#four").show().siblings("div").hide();
+                    $("ul.tabList li").css("background","#F3F6FA");
+                    $("ul.tabList li:nth-child(4)").css("background","#fff");
+
+                    this.isRelation = true;
+                    this.isSearch = false;
+                    this.isBookDir = true;
+
+                    $(".main").width("66.66%");
+                    $(".cirle").removeClass("icon-arrow2-left");
+                    $(".cirle").addClass("icon-arrow2-right");
+
+                    if($("#four svg").length == 0){
+                        this.requireDir();
+                    }
+                }
+            },
+            generateMap(eid){
+                this.d3Init(this.basic_url+"/api/chapter_scene/show","cur_chart",eid);
+            },
+            requireDir(){
+                var url = this.basic_url + '/api/chapter/list';
+                this.$axios.post(url,{
+                    bookid: this.bookid,
+                    page_index: this.bookDir_currentPage,
+                    page_size: this.bookDir_pagesize
+                }).then((res)=>{
+                    if(res.data.total>0){
+                       this.dirData = res.data.data;
+                       this.bookDir_totalCount = res.data.total;
+                       this.d3Init(this.basic_url+"/api/chapter_scene/show","cur_chart",res.data.data[0]._id);
+                    }else{
+                        this.$message({
+                            type: 'success',
+                            message: '暂无数据',
+                            showClose: true
+                        })
+                    }
+                }).catch((err)=>{
+                    
+                })
             },
             initChaptereid(){
                 var url = this.basic_url+'/api/character/query';
@@ -252,13 +349,13 @@
             },
             d3Init(url,svgdom,queryParam1,queryParam2){
                 var _this = this;
-                var width = $("#chart").width();
+                var svgdom = '#'+svgdom;
+                var width = $(svgdom).width();
                 var height = this.d3Params.height;
                 var img_w = this.d3Params.img_w;
                 var img_h = this.d3Params.img_h;
                 var _this = this;
-                d3.select("svg").remove();
-                var svgdom = '#'+svgdom;
+                d3.select(svgdom+" svg").remove();
                 var param = '';
                 if(queryParam2){
                     param = JSON.stringify({search_text: queryParam1,eid:queryParam2});
@@ -344,15 +441,20 @@
                                                   return _this.date;
                                                 }
 
-                                        })
-                                        .on("dblclick",function(d,i){
-                                            _this.search = d.name;
-                                            _this.currentPage = 1;
-                                            _this.pagesize = 10;
-                                            _this.firstLoad = true;
-                                            _this.requestData();
-                                        })
+                                        }) 
                                         .call(drag());
+
+                    if(svgdom=="#chart"){
+                        nodes_img .on("dblclick",function(d,i){
+                            _this.search = d.name;
+                            _this.currentPage = 1;
+                            _this.pagesize = 10;
+                            _this.firstLoad = true;
+                            _this.requestData();
+                        });
+                    }
+                                       
+                                      
                     
                     var text_dx = -20;
                     var text_dy = 20;
@@ -413,7 +515,7 @@
                     this.searchRelation();
                  }
             },
-            searchChart(eid){
+            searchChart(eid,tit){
                 /*
                 const {href} = this.$router.resolve({
                                     path: "/showrelation",
@@ -427,6 +529,9 @@
                
                 this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
                 this.newsDetail(eid);
+                this.curComTit = tit;
+
+                this.cur_commentList = [];
                 this.current_com();
                 $("#relationTxt h4").text("");
                 $("#relationTxt span").text("");
@@ -436,7 +541,7 @@
             current_com(){
                 var _this = this;
                 axios.post(_this.basic_url+"/api/comment/title",{
-                    "title": "转会风云：考神恐离队 沃克小卡或被交易",
+                    "title": this.curComTit,
                     "page_index": this.cur_currentPage,
                     "page_size": this.cur_pagesize
                 }).then((res) => {
@@ -488,14 +593,24 @@
                             page_index: this.currentPage,
                             page_size: this.pagesize
                 }).then((res) => {
-                    this.listData = res.data.data;
-                    this.totalCount = res.data.total;
-                    if(_this.firstLoad){
-                        _this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
-                        _this.newsDetail(this.listData[0]['_source'].eid);
-                        _this.current_com();
-                        _this.firstLoad = false;
+                    if(res.data.total >0){
+                        this.listData = res.data.data;
+                        this.totalCount = res.data.total;
+                        if(_this.firstLoad){
+                            _this.d3Init(_this.basic_url+"/api/graph_search","chart",this.search,this.listData[0]['_source'].eid);
+                            _this.newsDetail(this.listData[0]['_source'].eid);
+                            _this.curComTit = this.listData[0]['_source'].title;
+                            _this.current_com();
+                            _this.firstLoad = false;
+                        }
+                    }else{
+                        this.$message({
+                            type: 'success',
+                            message: '暂无数据',
+                            showClose: true
+                        })
                     }
+                    
                 }).catch((err) => {
                     this.$message({
                         type: 'error',
@@ -511,6 +626,14 @@
             handleCurrentChange(val) {
                 this.currentPage = val;
                 this.requestData();
+            },
+            bookDir_handleSizeChange(val) {
+                this.bookDir_pagesize = val;
+                this.requireDir();
+            },
+            bookDir_handleCurrentChange(val) {
+                this.bookDir_currentPage = val;
+                this.requireDir();
             },
             handleSizeChange1(val) {
                 this.pagesize1 = val;
@@ -638,6 +761,13 @@
                 cur_pagesize: 20,
                 cur_currentPage: 1,
                 isMask: false,
+                curComTit: '',
+
+                dirData:[],
+                bookDir_currentPage: 1,
+                bookDir_pagesize: 10,
+                bookDir_totalCount: 0,
+                isBookDir: false,
 
                 commentSearch: "",
                 currentPage1: 1,
@@ -693,6 +823,7 @@
             this.bookname = this.$route.query.bookname;
             this.bookid = this.$route.query.bookid;
             this.userid = sessionStorage.getItem('userid');
+            this.chapterEid = this.$route.query.eid;
 
             $("#first").show();
             $("#second").hide();
@@ -843,7 +974,7 @@ text.shadow {
     box-shadow:-3px 0px 5px 0px rgba(0,0,0,0.1);
     border:1px solid rgba(225,232,238,1);
     border-bottom: none;
-    min-height: 700px;
+    min-height: 600px;
     position: relative;
 }
 .search-div p{
@@ -943,7 +1074,7 @@ text.shadow {
     margin-top: 10px;
 }
 .mask{
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
@@ -980,5 +1111,35 @@ text.shadow {
     right: 50px;
     top: 50px;
     font-size: 24px;
+}
+#four #cur_chart{
+    padding-top: 50px;
+}
+.search-div .search-box span{
+    display: block;
+    height: 65px;
+    line-height: 65px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+.cur_comment::-webkit-scrollbar{
+    width:4px;
+    height:4px;
+}
+.cur_comment::-webkit-scrollbar-track{
+    background: #f6f6f6;
+    border-radius:2px;
+}
+.cur_comment::-webkit-scrollbar-thumb{
+    background: #aaa;
+    border-radius:2px;
+}
+.cur_comment::-webkit-scrollbar-thumb:hover{
+    background: #747474;
+}
+.cur_comment::-webkit-scrollbar-corner{
+    background: #f6f6f6;
 }
 </style>

@@ -2,7 +2,7 @@
     <div id="bookdirectory">
         <v-header></v-header>
         <p class="navTxt">
-            场次目录
+            场次目录----第{{episodenumber}}集
             <span class="returnList" @click="returnRoot" style="color: #00BAFC;font-size: 13px;cursor: pointer;">返回集数</span>
             <i class="icon-back" @click="returnPre"></i>
         </p>
@@ -148,10 +148,12 @@
                 let bookid = this.$route.query.bookid;
                 let bookname = this.$route.query.bookname;
                 let episodeid = this.$route.query.episodeid;
+                let episodenumber = this.$route.query.episodenumber;
 
                 this.bookid = bookid;
                 this.bookname = bookname;
                 this.episodeid = episodeid;
+                this.episodenumber = episodenumber;
             },
             returnRoot(){
                 this.$router.push({
@@ -214,6 +216,8 @@
                 pagesize: 10,
                 totalCount: 100,
                 currentPage: 1,
+
+                episodenumber: 1
 
             }
         },

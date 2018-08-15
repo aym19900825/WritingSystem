@@ -63,11 +63,11 @@
 
 <script>
 import Header from './common/Header.vue'
+import Editor from './plugin/Tinymce.vue'
 import Vue from 'vue'
 import Qs from 'qs'
 import Config from '../config.js'
 
-import Editor from './Tinymce.vue'
 export default{
     data(){
         return {
@@ -247,7 +247,8 @@ export default{
             path: '/d3show', 
             query: { 
                 bookid: this.bookid,
-                bookname: this.bookname
+                bookname: this.bookname,
+                eid: this.eid
             }
         })
       },
@@ -293,7 +294,7 @@ export default{
             this.chaptercontent = "";
             tinyMCE.editors[0].setContent(this.chaptercontent);
             this.conntentVer = [];
-            this.currentEidSave();
+            this.addChapter();
         }).catch((err) => {
             
         })
@@ -381,6 +382,21 @@ export default{
       //保存
       updateSave(){
         this.updateChapter("更新成功","更新失败",true);
+        this.generateMap();
+      },
+      //生成图谱做准备
+      generateMap(){
+        var parma = {
+            "eid": this.eid,
+            "title": this.chaptername,
+            "content": this.chaptercontent,
+        }
+        var url = this.basic_url+'/api/chapter_scene/graph';
+        this.$axios.post(url,parma).then((res) => {
+            
+        }).catch((err) => {
+            
+        })
       },
 
       //完成保存
@@ -479,9 +495,7 @@ export default{
         this.$axios.post(url,{
           "userid": this.userid,
         } ).then((res) => {
-
           if(res.data.code==1){
-
             if(res.data.category=="soapopera"){
               this.$router.push({
                   path: '/editsoap', 
