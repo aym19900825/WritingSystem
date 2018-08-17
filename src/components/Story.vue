@@ -71,7 +71,7 @@
             </div>
         </div>
         <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%" id="peopleDialog">
-            <el-form ref="form" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
+            <el-form ref="peopleform" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
                 <el-form-item label="姓名" prop="name">
                      <el-input  v-model="newPeople.name"></el-input>
                  </el-form-item>
@@ -466,7 +466,15 @@
                 this.peoples.splice(index,1);
             },
             resetNewPeople(){
-                this.$refs["form"].resetFields();
+                this.newPeople = {
+                    name: '',
+                    relationship: '',
+                    characters: '',
+                    titles: '',
+                };
+                console.log("resetNewPeople");
+                console.log(this);
+                this.$refs["peopleform"].resetFields();
             },
             addSth(){
                 Vue.set(this.things,this.things.length, JSON.parse(JSON.stringify(this.newSth)));

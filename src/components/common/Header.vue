@@ -55,6 +55,7 @@
 
 <script>
 import Config from '../../config.js'
+import Encrypt from '../../cryptojs.js'
 export default {
     name: 'Header',
     data () {
@@ -121,8 +122,8 @@ export default {
                 if (valid) {
                     this.$axios.post(url,{
                         userid: this.userid,
-                        password: this.pwdInfo.pwd,
-                        newpassword: this.pwdInfo.newPwd,
+                        password: Encrypt(this.pwdInfo.pwd),
+                        newpassword: Encrypt(this.pwdInfo.newPwd),
                     }).then((res) => {
                         if(res.data.code==1){
                         	this.$router.push({

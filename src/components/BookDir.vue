@@ -23,7 +23,7 @@
                 </template>
             </el-table-column>
             <el-table-column prop="scenename" label="名称" width="200" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="chapterabstract" label="场次大纲" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="sceneabstract" label="场次大纲" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column label="完成时间" width="200">
                 <template slot-scope="scope">
                     <span>{{ scope.row.edit_date }}</span>
@@ -150,6 +150,8 @@
                 let episodeid = this.$route.query.episodeid;
                 let episodenumber = this.$route.query.episodenumber;
 
+                console.log(episodenumber);
+
                 this.bookid = bookid;
                 this.bookname = bookname;
                 this.episodeid = episodeid;
@@ -182,7 +184,6 @@
                             tmpObj = tmpData[i]._source;
                             tmpObj.eid = tmpData[i]._id;
                             arr.push(tmpObj);
-                            console.log(tmpObj);
                         }
                         this.tableData = arr;
                         this.bookdesc = res.data.description;

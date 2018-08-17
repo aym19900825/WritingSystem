@@ -18,7 +18,7 @@
                     <!--图谱-->
                     <div id="first">
                         <el-row>
-                            <el-badge :value="cur_com_total" :max="20" class="item" v-if="!!cur_com_total">
+                            <el-badge :value="cur_com_total" class="item" v-if="!!cur_com_total">
                                  <el-button size="small"  @click="curComShow">评论</el-button>
                             </el-badge>
                         </el-row>
@@ -62,9 +62,9 @@
                     <div id="third" style="display: none;">
                         <el-row>
                             <div class="comment">
-                                <el-input placeholder="请输入搜索关键字" v-model="commentSearch" class="input-with-select" @keydown="comSearch($event)">
-                                    <el-button type="primary" slot="append" icon="el-icon-search" @click="comSearch"></el-button>
-                                 </el-input>
+                                <el-input placeholder="请输入搜索关键字" v-model="commentSearch" class="input-with-select" @keydown="comSearchS($event)">
+                                    <el-button type="primary" slot="append" icon="el-icon-search" @click="comSearchS"></el-button>
+                                </el-input>
                             </div>
                             <div class="commentContent">
                                 <div class="commentResult" v-for = "item in commentList">
@@ -121,18 +121,23 @@
                 <div class="search-div">
                     <p class="search-box">
                         <span>目录</span>
+                        <span class="returnList" @click="returnRoot" v-show="!isRootDir&&this.bookCat == '电视剧剧本'">返回剧集</span>
+                        <i class="icon-back" v-show="!isRootDir&&this.bookCat == '电视剧剧本'"></i>
                     </p>
-                    <div class="searchResult">
+                    <div class="searchResult" v-show="!isRootDir">
                         <ul>
-                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)">
+                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)" v-if="bookCat=='小说'">
                                 第{{item._source.chapternumber}}章：{{item._source.chaptername}}
+                            </li>
+                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)" v-if="bookCat=='电视剧剧本'">
+                                第{{item._source.chapternumber}}场：{{item._source.chaptername}}
                             </li>
                         </ul>
                     </div>
                     <div class="searchResult" v-show="isRootDir">
                         <ul>
-                            <li  v-for="item in dirRootData" :title="item._source.chaptername">
-                                第{{item._source.chapternumber}}集：{{item._source.chaptername}}
+                            <li  v-for="item in dirRootData" :title="item.episodename" @click="sonDirClick(item.episodeid)">
+                                第{{item.episodenumber}}集：{{item.episodename}}
                             </li>
                         </ul>
                     </div>
@@ -193,6 +198,10 @@
                 if(this.cur_commentList.length==0){
                      this.current_com();
                 }
+            },
+            comSearchS(){
+                this.currentPage1 = 1;
+                this.comSearch();
             },
             comSearch(){
                 var _this = this;
@@ -304,10 +313,100 @@
                     $(".cirle").removeClass("icon-arrow2-left");
                     $(".cirle").addClass("icon-arrow2-right");
 
-                    if($("#four svg").length == 0){
+                    if($("#four svg").length == 0 && this.bookCat == "小说"){
                         this.requireDir();
                     }
+                    if($("#four svg").length == 0 && this.bookCat == "电视剧剧本"){
+                        console.log("电视剧剧本");
+                        this.requireRoot();
+                    }
                 }
+            },
+            getCat(){
+                this.$axios.post(this.basic_url+"/api/bookCategory",{
+                    bookid: this.bookid,
+                }).then((res)=>{
+                    console.log(res.data.category);
+                    this.bookCat = res.data.category;
+                    console.log(this.bookCat);
+                }).catch((err)=>{
+                    
+                })
+            },
+            sonDirClick(episodeid){
+                this.bookDir_currentPage = 1;
+                this.bookDir_pagesize = 10;
+                this.selEpisodeid = episodeid;
+                this.requireSonDir();
+            },
+            requireSonDir(){
+                var url = this.basic_url + '/api/scene/list';
+                this.$axios.post(url,{
+                    bookid: this.bookid,
+                    page_index: this.bookDir_currentPage,
+                    page_size: this.bookDir_pagesize,
+                    episodeid: this.selEpisodeid
+                }).then((res)=>{
+                    if(res.data.total>0){
+                        var datas = res.data.data;
+                        var arr = [];
+                        var obj = {
+                            _id: '',
+                            _source: {
+                                chaptername: '',
+                                chapternumber: '',
+                            }
+                        }
+                        for(var i=0;i<datas.length;i++){
+                            obj._id = datas[i]._id;
+                            obj._source.chaptername = datas[i]._source.scenename;
+                            obj._source.chapternumber = datas[i]._source.scenenumber;
+                            arr.push( JSON.parse(JSON.stringify(obj)));
+                        }
+                        this.dirData = arr;
+                        this.bookDir_totalCount = res.data.total;
+                        this.d3Init(this.basic_url+"/api/chapter_scene/show","cur_chart",res.data.data[0]._id);
+                        this.isRootDir = false;
+                    }else{
+                        this.$message({
+                            type: 'success',
+                            message: '暂无数据',
+                            showClose: true
+                        });
+                        this.dirData = [];
+                        this.bookDir_totalCount = 0;
+                        this.isRootDir = false;
+                    }
+                }).catch((err)=>{
+                    
+                })
+            },
+            returnRoot(){
+                this.bookDir_currentPage = 1;
+                this.bookDir_pagesize = 10;
+                this.requireRoot();
+            },
+            requireRoot(){
+                this.$axios.post(this.basic_url+"/api/episode/list",{
+                    bookid: this.bookid,
+                    page_index: this.bookDir_currentPage,
+                    page_size: this.bookDir_pagesize
+                }).then((res)=>{
+                    if(res.data.total>0){
+                        this.dirRootData = res.data.episodes;
+                        this.bookDir_totalCount = res.data.total;
+                        this.isRootDir = true;
+                    }else{
+                        this.$message({
+                            type: 'success',
+                            message: '暂无数据',
+                            showClose: true
+                        })
+                        this.bookDir_totalCount = 0;
+                    }
+                }).catch((err)=>{
+                    
+                })
             },
             generateMap(eid){
                 this.d3Init(this.basic_url+"/api/chapter_scene/show","cur_chart",eid);
@@ -370,6 +469,15 @@
                 d3.json(url,function(error,root){
                     if( error ){
                         console.log(error);
+                    }
+
+                    if(root.nodes.length==0){
+                        console.log("暂无图谱");
+                        _this.$message({
+                            type: 'success',
+                            message: '暂无图谱',
+                            showClose: true
+                        })
                     }
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
@@ -582,6 +690,8 @@
                 })
             },
             searchRelation(){
+                this.currentPage = 1;
+                console.log(this.currentPage);
                 this.requestData();
             },
             requestData(){
@@ -629,11 +739,28 @@
             },
             bookDir_handleSizeChange(val) {
                 this.bookDir_pagesize = val;
-                this.requireDir();
+                if(this.bookCat == "小说"){
+                    this.requireDir();
+                }else{
+                    if(this.isRootDir){
+                        this.requireRoot();
+                    }else{
+                        this.requireSonDir();
+                    }
+                }
+                
             },
             bookDir_handleCurrentChange(val) {
                 this.bookDir_currentPage = val;
-                this.requireDir();
+                if(this.bookCat == "小说"){
+                    this.requireDir();
+                }else{
+                    if(this.isRootDir){
+                        this.requireRoot();
+                    }else{
+                        this.requireSonDir();
+                    }
+                }
             },
             handleSizeChange1(val) {
                 this.pagesize1 = val;
@@ -645,22 +772,22 @@
             },
             initchapter(url,queryParam){
                 var _this = this;
-                var width = 600;
-                var height = 400;
+                var width = $("#chapterchart").width();
+                var height = 600;
                 var img_w = 20;
                 var img_h = 20;
                 var _this = this;
-                d3.select("svg").remove();
 
                 var svg = d3.select("#chapterchart").append("svg:svg")
-                                .attr("width",width)
-                                .attr("height",height);
+                            .attr("width",width)
+                            .attr("height",height);
 
 
                 d3.json(url,function(error,root){
                     if( error ){
                         console.log(error);
                     }
+                    
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
                                     .links(root.edges)
@@ -670,12 +797,19 @@
                                     .on("tick", tick)
                                     .start();
                                     
-                    
+                    function drag(){//拖拽函数
+                        return force.drag()
+                                    .on("dragstart",function(d){
+                                        d3.event.sourceEvent.stopPropagation(); //取消默认事件
+                                        d.fixed = true;    //拖拽开始后设定被拖拽对象为固定
+                                    });
+                         
+                    }
                     svg.append("svg:defs")
                         .append("svg:marker")
                         .attr("id", "resolved")
                         .attr("viewBox", "0 -5 10 10")
-                        .attr("refX", 15)
+                        .attr("refX", 34)
                         .attr("refY", -1.5)
                         .attr("markerWidth", 6)
                         .attr("markerHeight", 6)
@@ -690,33 +824,51 @@
                         .attr('fill','none')
                         .attr('stroke','#ccc')
                         .attr('stroke-width',2)
+                        .attr('id',function(d,i){
+                            return "path"+i;
+                        })
                         .attr("marker-end", "url(#resolved)");
+                    svg.append("svg:g").selectAll("text")
+                        .data(root.edges)
+                        .enter().append('svg:text')
+                        .attr('x', function(d,i){
+                            console.log(d.source.px);
+                            console.log(d.target.px);
+                            return 100;
+                        })
+                        .attr('y', 20)
+                        .style('font-size', '12px')
+                        .append('textPath').attr(
+                            'xlink:href',function(d,i){
+                                return '#path'+i;
+                        })
+                        .text(function(d) { return d.type; });
 
-                    var nodes_img = svg.append("svg:g").selectAll("image")
+                    var nodes_img = svg.append("svg:g").selectAll("circle")
                                         .data(root.nodes)
                                         .enter()
-                                        .append("image")
-                                        .attr("width",img_w)
-                                        .attr("height",img_h)
-                                        .attr("xlink:href",function(d){
-                                            return _this.person;
+                                        .append("circle")
+                                        .attr("cx",function(d){ return d.dx; })
+                                        .attr("cy",function(d){ return d.dy; })
+                                        .attr("r",function(){
+                                            return 30;
                                         })
+                                        .style("fill","#6DCE9E")
                                         .on("dblclick",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
-                                            $(".d3PeopleInfo").css("left",d.px-100);
+                                            $(".d3PeopleInfo").css("left",d.px-300);
                                             $(".d3PeopleInfo").css("top",d.py);
                                             _this.peopleInfoVisible = true;
                                         })
-                                        .call(force.drag);
-                     
+                                        .call(drag());
+
                     var text = svg.append("svg:g").selectAll("g")
                         .data(root.nodes)
                         .enter().append("svg:g");
 
-                    var text_dx = -40;
-                    var text_dy = 20;
+                    var text_dx = -15;
+                    var text_dy = 5;
                      
-                    // A copy of the text with a thick white stroke for legibility.
                     text.append("svg:text")
                         .attr("x", text_dx)
                         .attr("y", text_dy)
@@ -739,11 +891,11 @@
                         + d.target.y;
                       });
                      
-                      nodes_img.attr("transform", function(d) {
+                    nodes_img.attr("transform", function(d) {
                         return "translate(" + d.x + "," + d.y + ")";
                       });
                      
-                      text.attr("transform", function(d) {
+                    text.attr("transform", function(d) {
                         return "translate(" + d.x + "," + d.y + ")";
                       });
                     }
@@ -754,6 +906,8 @@
         },
         data () {
             return {
+
+                bookCat: "",
                 userid: 0,
 
                 cur_com_total: 0,
@@ -768,6 +922,10 @@
                 bookDir_pagesize: 10,
                 bookDir_totalCount: 0,
                 isBookDir: false,
+
+                isRootDir: false,
+                dirRootData: [],
+                selEpisodeid: '',
 
                 commentSearch: "",
                 currentPage1: 1,
@@ -824,6 +982,8 @@
             this.bookid = this.$route.query.bookid;
             this.userid = sessionStorage.getItem('userid');
             this.chapterEid = this.$route.query.eid;
+
+            this.getCat();
 
             $("#first").show();
             $("#second").hide();
@@ -1030,7 +1190,7 @@ text.shadow {
     border-right: none;
 }
 #chapterchart{
-    width: 600px;
+    width: 80%;
     height: 400px;
     margin: 0 auto;
 }
@@ -1121,6 +1281,20 @@ text.shadow {
     line-height: 65px;
     font-size: 16px;
     font-weight: bold;
+    float: left;
+}
+.search-div .search-box span.returnList{
+    font-weight: normal;
+    float: right;
+    color: rgba(0,186,252,1);
+    cursor: pointer;
+}
+.search-div .search-box i{
+    color: rgba(0,186,252,1);
+    margin-top: 25px;
+    margin-right: 4px;
+    cursor: pointer;
+    float: right;
 }
 
 

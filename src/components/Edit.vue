@@ -562,6 +562,7 @@ export default{
       this.timeInterval();
     },
     beforeDestroy: function() { 
+      console.log("beforeDestroy");
       clearInterval(this.timeQuery);   
       this.websocketclose();
     }

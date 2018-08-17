@@ -12,7 +12,6 @@
                 <h4>{{bookname}}</h4>
                 <p :title="bookdesc">作品简介：{{bookdesc}}</p>
             </div>
-
         </div>
         <el-row>
             <!--

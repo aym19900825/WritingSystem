@@ -72,6 +72,7 @@
                 this.$refs.personForm.validate((valid) => {
                     if (valid) {
                         this.$axios.post(this.basic_url+"/api/user/edit",this.person).then((res) => {
+                            console.log(res);
                             if(res.data.code=1){
                                 this.$message({
                                     type: 'success',
@@ -94,9 +95,6 @@
                         return false;
                     }
                 })
-
-
-                
             }
         },
         data () {

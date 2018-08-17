@@ -207,19 +207,30 @@ export default{
       },
 
       readDirSon(){
+        var _this = this;
+        var episodeNum = 1;
+        $.each(_this.episodeList,function(index,value){
+          console.log(value.episodeid == _this.selepisodeid)
+          if(value.episodeid == _this.selepisodeid){
+            episodeNum = value.episodenumber;
+          }
+        });
+
         this.$router.push({
             path: '/bookdir', 
             name: 'BookDir',
             query: { 
-                bookid: this.bookid,
-                episodeid: this.selepisodeid,
-                bookname: this.bookname
+                bookid: _this.bookid,
+                episodeid: _this.selepisodeid,
+                bookname: _this.bookname,
+                episodenumber: episodeNum
             }
         })
 
       },
 
       threadPoxi(){  // 实际调用的方法
+          console.log("threadPoxi");
           const agentData = this.autoTxtId;
           if (this.websock.readyState === this.websock.OPEN) {
               console.log("已经发送"+agentData);
@@ -241,7 +252,8 @@ export default{
               },500);
           }
       },
-      initWebSocket(){ //初始化weosocket
+      initWebSocket(){ 
+          console.log("initWebSocket");
           //ws地址
           const wsuri = "ws://203.93.173.180:9001";
           this.websock = new WebSocket(wsuri);
@@ -249,11 +261,15 @@ export default{
           this.websock.onclose = this.websocketclose;
       },
       websocketonmessage(e){ //数据接收
+        console.log("websocketonmessage");
         console.log(e.data);
-        this.chaptercontent += '<p>'+e.data+'</p>';
-        tinyMCE.editors[0].setContent(this.chaptercontent);
+        if(e.data!="Hey all, a new client has joined us"){
+          this.chaptercontent += '<p>'+e.data+'</p>';
+          tinyMCE.editors[0].setContent(this.chaptercontent);
+        }
       },
       websocketsend(agentData){//数据发送
+        console.log("websocketsend");
         this.websock.send(agentData);
       },
       websocketclose(e){  //关闭
@@ -663,6 +679,7 @@ export default{
       
     },
     beforeDestroy: function() { 
+      console.log("beforeDestroy");
       clearInterval(this.timeQuery);   
       this.websocketclose();
     }
