@@ -59,6 +59,7 @@ import Header from './common/Header.vue'
                                 sessionStorage.setItem('url','login');
                                 sessionStorage.setItem('userid',res.data.userid);
                                 sessionStorage.setItem('username',res.data.username);
+                                sessionStorage.setItem('writing-token',res.data.token);
                                 this.$router.replace('/edit');
                             }else {
                                 this.$message({

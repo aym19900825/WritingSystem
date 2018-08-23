@@ -83,7 +83,8 @@
                 </el-form-item>
                 <el-form-item label="人物关系" prop="relationship">
                     <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                     <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
+
+                    <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
                 </el-form-item>
                 <el-form-item class="btnGrounp">
                     <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">添加</el-button>
@@ -92,7 +93,6 @@
                 </el-form-item>
             </el-form>
         </el-dialog>
-
     </div>
 </template>
 

@@ -26,6 +26,9 @@ const routes = [
   {
     path: '/booklist',
     name: 'BookList',
+    meta:{
+        requireAuth: true
+    },
     component: BookList
   },
   {
@@ -36,6 +39,9 @@ const routes = [
   {
     path: '/edit',
     name: 'Edit',
+    meta:{
+        requireAuth: true
+    },
     component: Edit
   },
   {
@@ -46,51 +52,81 @@ const routes = [
   {
     path: '/d3show',
     name: 'D3Show',
+    meta:{
+        requireAuth: true
+    },
     component: D3Show
   },
   {
     path: '/bookdirectory',
     name: 'BookDirectory',
+    meta:{
+        requireAuth: true
+    },
     component: BookDirectory
   },
   {
     path: '/story',
     name: 'Story',
+    meta:{
+        requireAuth: true
+    },
     component: Story
   },
   {
     path: '/showrelation',
     name: 'ShowRelation',
+    meta:{
+        requireAuth: true
+    },
     component: ShowRelation
   },
   {
     path: '/bookinfo',
     name: 'BookInfo',
+    meta:{
+        requireAuth: true
+    },
     component: BookInfo
   },
   {
     path: '/editsoap',
     name: 'EditSoap',
+    meta:{
+        requireAuth: true
+    },
     component: EditSoap
   },
   {
     path: '/bookrootdir',
     name: 'BookRootDir',
+    meta:{
+        requireAuth: true
+    },
     component: BookRootDir
   },
   {
     path: '/bookdir',
     name: 'BookDir',
+    meta:{
+        requireAuth: true
+    },
     component: BookDir
   },
   {
     path: '/comannotation',
     name: 'ComAnnotation',
+    meta:{
+        requireAuth: true
+    },
     component: ComAnnotation
   },
   {
     path: '/personinfo',
     name: 'PersonInfo',
+    meta:{
+        requireAuth: true
+    },
     component: PersonInfo
   }
 ];
@@ -100,16 +136,22 @@ const router = new Router({
   routes: routes
 })
 
-/*router.beforeEach((to, from, next)=>{
-  let userid = window.sessionStorage.getItem('write-userid');
-  if(!userid || userid === null){
-    next({
-      path: '/login'
-    });
-  }else{
-    next();
-  }
-})*/
+router.beforeEach((to, from, next) => {
+    if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
+        var token = sessionStorage.getItem('writing-token');
+        if (token) {  // 通过vuex state获取当前的token是否存在
+            next();
+        }
+        else {
+            next({
+                path: '/login',
+            })
+        }
+    }
+    else {
+        next();
+    }
+})
 
 
 export default  router

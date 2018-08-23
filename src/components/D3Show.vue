@@ -1316,4 +1316,7 @@ text.shadow {
 .cur_comment::-webkit-scrollbar-corner{
     background: #f6f6f6;
 }
+li.selected{
+    background: rgba(243,246,250,1);
+}
 </style>
