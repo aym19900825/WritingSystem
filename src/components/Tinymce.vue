@@ -1,5 +1,5 @@
 <template>
-    <textarea :id="id" :value="value"></textarea>
+    <textarea :id="id" :value="value" @contextmenu.prevent="showMenu($event)" ></textarea>
 </template>
 <script>
     import tinymce from 'tinymce/tinymce';
@@ -33,6 +33,9 @@
             }
         },
         methods: {
+            showMenu: function(){
+                alert("aaaaaaaa");
+            }
         },
         mounted: function () {
             const _this = this;
@@ -48,11 +51,18 @@
                             _this.$emit('input', content);
                         });
                     },
-                    plugins:[]
+                    plugins:[
+                        "a11ychecker advcode advlist anchor autolink codesample colorpicker contextmenu fullscreen help image imagetools",
+                        " lists link linkchecker media mediaembed noneditable powerpaste preview",
+                        " searchreplace table template textcolor tinymcespellchecker visualblocks wordcount"
+                    ]
                 };
-            Object.assign(setting,_this.setting)
+            Object.assign(setting,_this.setting);
+            console.log("init tinymce");
+
+            console.log(setting);
             tinymce.init(setting);
-            $(".mce-container-body span.mce-label").remove();
+            $(".mce-container-body span.mce-label").remove();   
         },
         beforeDestroy: function () {
             tinymce.get(this.id).destroy();

@@ -7,11 +7,9 @@
 					<li v-if="userid==0||userid=='null'">
 						<router-link :to="{ path: '/login' }">登录</router-link>
 					</li>
-					<!--
 					<li v-if="userid==0||userid=='null'">
 						<router-link :to="{ path: '/regiser' }">注册</router-link>
 					</li>
-					-->
 					<li v-if="userid!=0"> 
 						<el-dropdown>
 						    <span class="el-dropdown-link">

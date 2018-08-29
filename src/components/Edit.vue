@@ -35,8 +35,9 @@
             <el-col :span="18">
               <p style="width: 50%;display: block;">章节正文</p>
               <el-button type="success" class="aibtn" @click="submitDialog">人工智能生成</el-button>
-              <editor class="editor" :value="chaptercontent"  :setting="editorSetting" @input="(chaptercontent)=> chaptercontent = chaptercontent"></editor>
-              <!--<textarea id="content" placeholder="请填写内容" v-model="chaptercontent"></textarea>-->
+              <div @contextmenu.prevent="showMenu($event)" id="editor-mce">
+                  <editor class="editor" :value="chaptercontent"  :setting="editorSetting" @input="(chaptercontent)=> chaptercontent = chaptercontent"></editor>
+              </div>
             </el-col>
           </el-row>
           <el-row :gutter="20" class="history-box" style="margin-left: 10px;    padding-bottom: 20px;">
@@ -472,6 +473,12 @@ export default{
       delHistory(key){
         this.conntentVer.splice(key,1);
         this.updateChapter();
+      },
+
+      showMenu(e){
+          alert("右击事件");
+          $('#myMenu').show(500); 
+          return false;
       }
     },
     computed: {
@@ -560,9 +567,13 @@ export default{
       }
 
       this.timeInterval();
+
+      var editorCon = $("#editor-mce iframe").contentWindow;
+      $(editorCon).on("click",function(){
+        alert("aaaaaaaaaaa");
+      });
     },
     beforeDestroy: function() { 
-      console.log("beforeDestroy");
       clearInterval(this.timeQuery);   
       this.websocketclose();
     }
@@ -713,6 +724,10 @@ export default{
 
 .el-form-item__content .el-select{
   width: 100%;
+}
+#myMenu{
+  display: none;
+  position: absolute;
 }
 </style>
 
