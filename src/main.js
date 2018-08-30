@@ -17,6 +17,7 @@ import axios  from 'axios'
 import './assets/icon/iconfont.css' 
 import './assets/icomoon/style.css' 
 import './axios'
+import 'babel-polyfill'
 
 Vue.prototype.$axios = axios;
 
