@@ -154,6 +154,8 @@
                 </div>
             </el-col>
         </el-row>
+        <!--评论样式-->
+        <!--
         <div class="mask" v-show="isMask">
             <i class="el-icon-close closeMask" @click="closeMask"></i>
             <div class="cur_comment">
@@ -165,6 +167,17 @@
                 <p class="loadMore" v-show="cur_commentList.length>=cur_com_total">已经没有更多了</p>
             </div>
         </div>
+        -->
+        <el-dialog title="评论" :visible.sync="isMask">
+            <div class="cur_comment">
+                <div class="commentResult" v-for = "item in cur_commentList">
+                    <p>{{item._source.content}}</p>
+                    <p>{{item._source.create_date}}</p>
+                </div>
+                <p class="loadMore" @click="loadMore" v-show="cur_commentList.length<cur_com_total">加载更多...</p>
+                <p class="loadMore" v-show="cur_commentList.length>=cur_com_total">已经没有更多了</p>
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -649,7 +662,10 @@
                 this.curComTit = tit;
 
                 this.cur_commentList = [];
+
+                this.cur_currentPage = 1;
                 this.current_com();
+
                 $("#relationTxt h4").text("");
                 $("#relationTxt span").text("");
                 $("#relationTxt p").text("");
@@ -1259,12 +1275,11 @@ text.shadow {
     padding-top: 1px;
 }
 .cur_comment{
-    position: relative;
-    top: 100px;
-    width: 80%;
-    height: 500px;
+    width: 90%;
+    height: 100%;
+    max-height: 400px;
     margin: 0 auto;
-    color: #fff;
+    color: #000;
     overflow-y: scroll;
 }
 .loadMore{
