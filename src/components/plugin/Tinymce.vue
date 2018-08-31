@@ -3,12 +3,12 @@
         <textarea :id="id" :value="value"></textarea>
         <div id="myMenu" v-show="isShow">
             <ul>
-                <li @click="showSecNav(index)" v-for="(item,index) in navMenu">{{item}}</li>
+                <li @click="showSecNav(index,$event)" v-for="(item,index) in navMenu">{{item}}</li>
             </ul>
             <div class="menu-count" v-show="isSecShow">
                 <div class="menu-count-list">
                     <ul>
-                        <li v-for="item in secNav" @click="doSth">
+                        <li v-for="item in secNav" @click="doSth($event)">
                             <span>{{item}}</span>
                         </li>
                     </ul>
@@ -22,6 +22,7 @@
     import 'tinymce/themes/modern/theme';
     import 'tinymce/plugins/paste';
     import 'tinymce/plugins/link';
+    import Vue from 'vue'
     const INIT = 0;
     const CHANGED = 2;
     var EDITOR = null;
@@ -48,12 +49,53 @@
                 id: 'editor-'+new Date().getMilliseconds(),
                 isShow: false,
                 isSecShow: false,
+                preDo: "",
                 navMenu: [
                     '同义词替换',
                     '反义词替换',
                     '诗词插入',
                     '素材插入'
                 ],
+
+                mockData:{
+                    synonym: [
+                        '繁荣昌盛',
+                        '繁荣富强',
+                        '欣欣向荣',
+                        '兴旺发达',
+                        '蒸蒸日上',
+                        '蓬勃发展',
+                        '兴盛' 
+                    ],
+                    antonym: [
+                        '贫弱',
+                        '贫穷',
+                        '国贫病弱',
+                        '穷苦弱小',
+                        '贫困',
+                        '贫苦',
+                        '缺少资产'
+                    ],
+                    poetry: [
+                        '蒹葭苍苍，白露为霜。所谓伊人，在水一方。',
+                        '氓之蚩蚩，抱布贸丝。匪来贸丝，来即我谋。',
+                        '采薇采薇，薇亦作止。曰归曰归，岁亦莫止。',
+                        '关关雎鸠，在河之洲。窈窕淑女，君子好逑。',
+                        '靡家靡室，猃狁之故。不遑启居，猃狁之故。',
+                        '采薇采薇，薇亦柔止。',
+                        '静女其姝，俟我于城隅。爱而不见，搔首踟蹰。'
+                    ],
+                    material: [
+                        '素材',
+                        '素材',
+                        '素材',
+                        '素材',
+                        '素材',
+                        '素材',
+                        '素材'
+                    ]
+                },
+
                 secNav: [
                     '同义词',
                     '同义词',
@@ -66,14 +108,42 @@
             }
         },
         methods: {
-            showSecNav(index){
-                console.log(index);
+            showSecNav(index,event){
+                var thisDom = event.currentTarget;
+                var txt = $(thisDom).text();
+                var arr = [];
+
+                switch(txt)
+                    {
+                    case '反义词替换':
+                        arr = this.mockData.antonym;
+                        break;
+                    case '同义词替换':
+                        arr = this.mockData.synonym;
+                        break;
+                    case '诗词插入':
+                        arr = this.mockData.poetry;
+                        break;
+                    default:
+                        arr = this.mockData.material;
+                    }
+
+                this.preDo = txt;
+                this.secNav.splice(0,this.secNav.length,arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6]);
+
                 this.isSecShow = true;
                 $(".menu-count").css({
                     top: 30*index
                 });
             },
-            doSth(){
+            //替换或者插入文本
+            insertTiny(content){
+                tinyMCE.execCommand("mceInsertContent", false, content); 
+            },
+            doSth(event){
+                var thisDom = event.currentTarget;
+                var content = $(thisDom).find("span").text();
+                this.insertTiny(content);
                 this.isShow = false;
                 this.isSecShow = false;
             }
