@@ -101,7 +101,7 @@
                     </p>
                     <div class="searchResult">
                         <ul>
-                           <li @click="searchChart(item._source.eid,item._source.title)" v-for="item in listData" :title="item._source.title">{{item._source.title}}</li>
+                           <li @click="searchChart(item._source.eid,item._source.title,$event)" v-for="(item,index) in listData" :title="item._source.title" v-bind:style="{background:currentPage==1&&index==0?'#F3F6FA':'#FFFFFF'}">{{item._source.title}}</li>
                         </ul>
                     </div>
                     <div align="right">
@@ -126,10 +126,10 @@
                     </p>
                     <div class="searchResult" v-show="!isRootDir">
                         <ul>
-                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)" v-if="bookCat=='小说'">
+                            <li  v-for="(item,index) in dirData" :title="item._source.chaptername" @click="generateMap(item._id,$event)" v-if="bookCat=='小说'" v-bind:style="{background:bookDir_currentPage==1&&index==0?'#F3F6FA':'#FFFFFF'}">
                                 第{{item._source.chapternumber}}章：{{item._source.chaptername}}
                             </li>
-                            <li  v-for="item in dirData" :title="item._source.chaptername" @click="generateMap(item._id)" v-if="bookCat=='电视剧剧本'">
+                            <li  v-for="(item,index) in dirData" :title="item._source.chaptername" @click="generateMap(item._id,$event)" v-if="bookCat=='电视剧剧本'" v-bind:style="{background:bookDir_currentPage==1&&index==0?'#F3F6FA':'#FFFFFF'}">
                                 第{{item._source.chapternumber}}场：{{item._source.chaptername}}
                             </li>
                         </ul>
@@ -408,7 +408,11 @@
                     
                 })
             },
-            generateMap(eid){
+            generateMap(eid,event){
+                 var thisDom = event.currentTarget;
+                $(thisDom).css("background","#F3F6FA")
+                          .siblings("li")
+                          .css("background","#FFFFFF");
                 this.d3Init(this.basic_url+"/api/chapter_scene/show","cur_chart",eid);
             },
             requireDir(){
@@ -623,7 +627,7 @@
                     this.searchRelation();
                  }
             },
-            searchChart(eid,tit){
+            searchChart(eid,tit,event){
                 /*
                 const {href} = this.$router.resolve({
                                     path: "/showrelation",
@@ -634,7 +638,12 @@
                                 });
                 window.open(href, '_blank');
                 */
-               
+
+                var thisDom = event.currentTarget;
+                $(thisDom).css("background","#F3F6FA")
+                          .siblings("li")
+                          .css("background","#FFFFFF");
+
                 this.d3Init(this.basic_url+"/api/graph_search","chart",this.search,eid);
                 this.newsDetail(eid);
                 this.curComTit = tit;
@@ -691,7 +700,7 @@
             },
             searchRelation(){
                 this.currentPage = 1;
-                console.log(this.currentPage);
+                this.firstLoad = true;
                 this.requestData();
             },
             requestData(){
@@ -712,6 +721,11 @@
                             _this.curComTit = this.listData[0]['_source'].title;
                             _this.current_com();
                             _this.firstLoad = false;
+
+                            $(".searchResult").eq(0).find("li")
+                                              .eq(0).css("background","#F3F6FA")
+                                              .siblings("li").css("background","#FFFFFF");
+                            console.log($(".searchResult").eq(0).find("li"));
                         }
                     }else{
                         this.$message({
