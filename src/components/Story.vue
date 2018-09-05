@@ -21,7 +21,7 @@
             </div>
             <div id="second">
                <div class="person">
-                    <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;" @click="dialogFormVisible = true">添加人物</el-button>
+                    <el-button type="primary" style="float: right; margin-right: 100px;margin-top: 20px;margin-bottom: 20px;" @click="dialogFormVisible = true">+添加人物</el-button>
                     <el-table :data="peoples" style="width: 85%;margin: 0 auto;">
                         <el-table-column label="序号" width="100">
                             <template slot-scope="scope">
@@ -53,13 +53,13 @@
                             <i class="el-icon-close" @click="closePeople"></i>
                             <el-form ref="form" :model="peopleInfo" label-width="80px">
                               <el-form-item label="姓名" prop="name">
-                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                               <el-form-item label="身份特征" prop="titles">
-                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                               <el-form-item label="性格特点" prop="characters">
-                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                             </el-form>
                         </div>
@@ -70,7 +70,7 @@
                 </div>
             </div>
         </div>
-        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="35%" id="peopleDialog">
+        <el-dialog title="人物信息" :visible.sync="dialogFormVisible"  :rules="rules" :before-close="handleClose" width="480px" id="peopleDialog">
             <el-form ref="peopleform" :model="newPeople" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
                 <el-form-item label="姓名" prop="name">
                      <el-input  v-model="newPeople.name"></el-input>
@@ -81,9 +81,23 @@
                 <el-form-item label="性格特点" prop="characters">
                     <el-input type="textarea" :rows="2" v-model="newPeople.characters"  placeholder="请输入人物性格特点"></el-input>
                 </el-form-item>
-                <el-form-item label="人物关系" prop="relationship">
-                    <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
-                     <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
+                <el-form-item label="人物关系">
+                    <el-button type="primary" class="addRelation" size="mini" @click="addRelation">+增加</el-button>
+                    <el-row :gutter="20" class="relationDiv" v-for="(item,index) in relationArr">
+                        <el-col :span="10">
+                            <label style="float:left;">人物：</label>
+                            <el-input type="text"  placeholder="请输入人物" v-model="item.name"></el-input>
+                        </el-col>
+                        <el-col :span="10">
+                            <label  style="float:left;">关系：</label>
+                            <el-input type="text"  placeholder="请输入关系" v-model="item.relationShip"></el-input>
+                        </el-col>
+                        <el-button type="danger" size="mini" @click="delRelation(item)">删除</el-button>
+                    </el-row>
+                    <!--
+                        <el-input type="textarea" :rows="2" v-model="newPeople.relationship"  placeholder="请输入人物关系"></el-input>
+                        <p class="tip">人物关系示例如下：父亲，XXX；母亲，XXX；</p>
+                    -->
                 </el-form-item>
                 <el-form-item class="btnGrounp">
                     <el-button type="primary" @click="addPeople" v-show="!isupdatePeople">添加</el-button>
@@ -103,6 +117,19 @@
     export default {
         name: 'Story',
         methods: {
+            addRelation(){
+                var obj = {
+                    name: '',
+                    relationShip: ''
+                };
+                this.relationArr.push(obj);
+            },
+            delRelation(item){
+                var index = this.relationArr.indexOf(item);
+                if (index !== -1) {
+                    this.relationArr.splice(index, 1)
+                }
+            },
             addPeoples(){
                 var _this = this;
                 var obj = {
@@ -527,10 +554,23 @@
                 })
             },
             addPeople(){
+                var arr = this.relationArr;
+                var newArr = [];
+                $.each(arr,function(i,n){
+                    newArr.push(n.name +" ，"+n.relationShip);
+                });
+                this.newPeople.relationship = newArr.join("；")+"；";
                 Vue.set(this.peoples,this.peoples.length, JSON.parse(JSON.stringify(this.newPeople)));
                 this.resetPeople()
             },
             updatePeople(){
+                var arr = this.relationArr;
+                var newArr = [];
+                $.each(arr,function(i,n){
+                    newArr.push(n.name +" ，"+n.relationShip);
+                });
+                this.newPeople.relationship = newArr.join("；")+"；";
+
                 Vue.set(this.peoples,this.upDatePeopelIndex,JSON.parse(JSON.stringify(this.newPeople)));
                 this.resetNewPeople();
                 this.isupdatePeople = false;
@@ -542,7 +582,21 @@
                 this.isupdatePeople = false;
             },
             editPeople(item,index){
-                this.upDatePeopelIndex = index;
+                var _this = this;
+                _this.upDatePeopelIndex = index;
+
+                var arr = item.relationship.slice(0,-1).split("；");
+                if(arr.length>0){
+                    _this.relationArr.splice(0,1);
+                    $.each(arr,function(i,n){
+                        _this.relationArr.push({
+                            name: n.split("，")[0],
+                            relationShip: n.split("，")[1]
+                        });
+                    });
+                }
+                
+                
                 this.newPeople = JSON.parse(JSON.stringify(item));
                 this.dialogFormVisible = true;
                 this.isupdatePeople = true;
@@ -557,6 +611,12 @@
                     characters: '',
                     titles: '',
                 };
+                this.relationArr = [
+                    {
+                        name: '',
+                        relationShip: ''
+                    }
+                ],
                 this.$refs["peopleform"].resetFields();
             },
             addSth(){
@@ -706,6 +766,13 @@
                     characters: '',
                     titles: '',
                 },
+
+                relationArr:[
+                    {
+                        name: '',
+                        relationShip: ''
+                    }
+                ],
                 rules:{
                     name:[
                         { required: true, message: '必填', trigger: 'blur' },
@@ -919,5 +986,23 @@ p.charact{
     padding-left: 100px;
     padding-right: 100px;
     min-height: 500px;
+}
+.relationDiv{
+    padding-bottom: 10px;
+}
+.relationDiv label{
+    display: block;
+    float: left;   
+}
+.relationDiv .el-input{
+    width: 120px;
+}
+.relationDiv .el-input__inner{
+    width: 100%;
+}
+.addRelation{
+    position: absolute;
+    top: -50px;
+    right: 0px;
 }
 </style>

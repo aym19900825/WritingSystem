@@ -370,11 +370,11 @@ export default{
                 })  
               }
             }else{
-                this.$message({
-                  type: 'error',
-                  message: erroMsg,
-                  showClose: true
-                })  
+              this.$message({
+                type: 'error',
+                message: erroMsg,
+                showClose: true
+              })  
             }
         }).catch((err) => {
             

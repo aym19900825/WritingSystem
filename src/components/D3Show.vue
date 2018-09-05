@@ -37,7 +37,7 @@
 
                     <!--小说人物图谱-->
                     <div id="second" style="position: relative;">
-                       <div v-show="chaptereid==''">
+                       <div class="noneMap" style="display: none;">
                             <p style="width:100%;font-size:24px;text-align:center;margin-top:200px;">您还没有人物图谱</p>
                        </div>
                        <div id="chapterchart" v-show="chaptereid!=''"></div>
@@ -458,6 +458,8 @@
                     if(res.data.length>0){
                         this.chaptereid = res.data[0]._id;
                         this.initchapter(this.basic_url+"/api/char_graph_search",this.chaptereid);
+                    }else{
+                        $(".noneMap").show();
                     }
                 }).catch((err) => {
                 
@@ -816,6 +818,9 @@
                 d3.json(url,function(error,root){
                     if( error ){
                         console.log(error);
+                    }
+                    if(root.edges.length == 0&&root.nodes.length == 0){
+                        $(".noneMap").show();
                     }
 
                     linkClass(root.edges);
@@ -1380,7 +1385,7 @@ text.shadow {
     display: block;
     height: 65px;
     line-height: 65px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     float: left;
 }
