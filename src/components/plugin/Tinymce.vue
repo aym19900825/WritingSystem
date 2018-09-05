@@ -23,9 +23,11 @@
     import 'tinymce/plugins/paste';
     import 'tinymce/plugins/link';
     import Vue from 'vue'
+
     const INIT = 0;
     const CHANGED = 2;
     var EDITOR = null;
+    
     export default {
         props: {
             value: {
@@ -49,6 +51,7 @@
                 id: 'editor-'+new Date().getMilliseconds(),
                 isShow: false,
                 isSecShow: false,
+                mousePosition: 0,
                 preDo: "",
                 navMenu: [
                     '同义词替换',
@@ -132,9 +135,19 @@
                 this.secNav.splice(0,this.secNav.length,arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6]);
 
                 this.isSecShow = true;
-                $(".menu-count").css({
-                    top: 30*index
-                });
+                var pageW = $(document.body).width();
+                if(this.mousePosition+900>pageW){
+                    $(".menu-count").css({
+                        top: 30*index,
+                        left: -300
+                    });
+                }else{
+                    $(".menu-count").css({
+                        top: 30*index,
+                        left: 200
+                    });
+                }
+                
             },
             //替换或者插入文本
             insertTiny(content){
@@ -153,9 +166,9 @@
             const setting =
                 {
                     selector:'#'+_this.id,
-                    language_url: '../../static/tinymce/zh_CN.js',
+                    language_url: '../../../static/tinymce/zh_CN.js',
+                    language: 'zh_CN',
                     init_instance_callback:function(editor) {
-                        console.log($(".mce-container-body span.mce-label"));
                         $(".mce-container-body span.mce-label").remove();
                         
                         EDITOR = editor;
@@ -165,10 +178,20 @@
                         });
                         editor.on('contextmenu',(e)=>{
                             _this.isShow = true;
-                            $("#myMenu").css({
-                                left: e.pageX+350,
-                                top: e.pageY+100
-                            });
+                            _this.isSecShow = false;
+                            var pageW = $(document.body).width();
+                            _this.mousePosition = e.pageX;
+                            if(e.pageX+600 > pageW){
+                                $("#myMenu").css({
+                                    left: pageW-400,
+                                    top: e.pageY+100
+                                });
+                            }else{
+                                $("#myMenu").css({
+                                    left: e.pageX+300,
+                                    top: e.pageY+100
+                                });
+                            }
                             return false;
                         });
                         editor.on('click',(e)=>{

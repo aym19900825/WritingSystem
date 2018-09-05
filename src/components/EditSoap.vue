@@ -29,8 +29,7 @@
             <el-col :span="4">
               <el-select  placeholder="请选择集" v-model="selepisodeid" v-if="episodeList.length>0">
                   <el-option v-for="item in episodeList" :label="'第'+item.episodenumber+'集'" :value="item.episodeid"></el-option>
-                  <p @click="showAddEpisode" style="background:#67c23a;color:#fff; line-height: 34px;
-    padding-left: 20px;">新建集</p>
+                  <p @click="showAddEpisode" style="background:#67c23a;color:#fff; line-height: 34px;padding-left: 20px; cursor: pointer;">新建集</p>
               </el-select>
               <el-button type="success" class="newChapter" @click="showAddEpisode" v-if="episodeList.length==0">新建集</el-button>
             </el-col>
@@ -76,7 +75,7 @@
           </div>
         </div>
 
-        <el-dialog title="集信息" :visible.sync="episodeDialogVisible" width="35%" id="episodeDialog" :before-close="resetEpisode">
+        <el-dialog title="集信息" :visible.sync="episodeDialogVisible" width="35%" id="episodeDialog" :before-close="handleClose">
             <el-form ref="form" :model="newEpisode" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
                 <el-form-item label="序列号" prop="episodenumber">
                      <el-input  v-model="newEpisode.episodenumber"></el-input>
@@ -104,13 +103,10 @@ export default{
     data(){
         return {
             editorSetting:{
-                language:'../../static/tinymce/zh_CN.js',
                 height:553,
                 menubar: false,
-                toolbar: 'formatselect | bold italic backcolor  | alignleft aligncenter alignright'
+                toolbar: 'formatselect | bold italic backcolor  | alignleft aligncenter alignright| removeformat'
             },
-
-
             basic_url: Config.api,
             isAutoSave: false,
             isFinish: false,
@@ -297,7 +293,7 @@ export default{
 
                 this.$axios({
                   method:"post",
-                  url:"http://203.93.173.180:8868/speak",
+                  url:"http://203.93.173.180:8878/speak",
                   data:'data='+JSON.stringify(submitData)
                 }).then((res)=>{
                     if(res.data.code == "100"){
@@ -536,6 +532,15 @@ export default{
                   showClose: true
               })
           })
+      },
+      handleClose(done){
+          var _this = this;
+          this.$confirm('确认关闭？')
+              .then(_ => {
+                  _this.resetEpisode();
+                  done();
+              })
+              .catch(_ => {});
       },
       resetEpisode(){
           this.episodeDialogVisible = false;

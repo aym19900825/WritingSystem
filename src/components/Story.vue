@@ -43,7 +43,7 @@
                             </template>
                          </el-table-column>
                    </el-table>
-                   <el-row style="text-align: center;margin-top: 30px;position: relative;">
+                   <el-row style="text-align: center;margin-top: 30px;position: relative;margin-bottom: 30px;">
                         <el-button type="primary" @click="addPeoples" v-if="peopleeid==''">保存</el-button>
                         <el-button type="primary" @click="editPeoples"  v-else>更新</el-button>
                         <el-button type="primary"  @click="characterMap" plain v-if="peopleeid!=''">人物图谱</el-button>
@@ -257,8 +257,14 @@
             handleCloseStory(){
                 this.returnBookList();
             },
-            handleClose(){
-                this.resetPeople();
+            handleClose(done){
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        this.resetPeople();
+                        done();
+                    })
+                    .catch(_ => {});
+               
             },
             resetStory(){
                 this.bookabstract = '';
@@ -277,6 +283,8 @@
                 var img_w = 20;
                 var img_h = 20;
                 var _this = this;
+                var white = d3.rgb(255,255,255);
+
                 d3.select("svg").remove();
 
                 var svg = d3.select("#chart").append("svg:svg")
@@ -288,6 +296,10 @@
                     if( error ){
                         console.log(error);
                     }
+                    
+                    
+                    linkClass(root.edges);
+
                     var force = d3.layout.force()
                                     .nodes(root.nodes)
                                     .links(root.edges)
@@ -296,8 +308,9 @@
                                     .charge(-1500)
                                     .on("tick", tick)
                                     .start();
-                                    
-                    function drag(){//拖拽函数
+                         
+                    //拖拽函数                
+                    function drag(){
                         return force.drag()
                                     .on("dragstart",function(d){
                                         d3.event.sourceEvent.stopPropagation(); //取消默认事件
@@ -305,6 +318,8 @@
                                     });
                          
                     }
+
+                    //定义箭头
                     svg.append("svg:defs")
                         .append("svg:marker")
                         .attr("id", "resolved")
@@ -317,32 +332,62 @@
                         .attr("orient", "auto")
                         .append("svg:path")
                         .attr("d", "M0,-5L10,0L0,5");
-                    //(2)根据连线类型引用上面创建的标记
-                    var path = svg.append("svg:g").selectAll("path")
-                        .data(root.edges)
-                        .enter().append("svg:path")
-                        .attr('fill','none')
+
+                    //曲线
+                    var path = svg.append("g").selectAll("path")
+                        .data(force.links().filter(function(d){
+                            return d.lineStyle == "double";
+                        }))
+                        .enter()
+                        .append("svg:path")
+                        .style('fill','none')
                         .attr('stroke','#ccc')
                         .attr('stroke-width',2)
-                        .attr('id',function(d,i){
-                            return "path"+i;
-                        })
                         .attr("marker-end", "url(#resolved)");
-                    svg.append("svg:g").selectAll("text")
-                        .data(root.edges)
+
+                    //隐藏曲线
+                    var hiddenPath = svg.append("g").selectAll("path")
+                        .data(force.links().filter(function(d){
+                            return d.lineStyle == "double";
+                        }))
+                        .enter()
+                        .append("svg:path")
+                        .style('fill','none')
+                        .attr('id',function(d,i){
+                            return "path-"+i;
+                        });
+
+                    //直线
+                    var svg_edges = svg.selectAll("line")
+                       .data(force.links().filter(function(d,i){
+                          return d.lineStyle == "single";
+                       }))
+                       .enter()
+                       .append("line")
+                       .attr("stroke","#ccc")
+                       .attr("stroke-width",2)
+                       .attr("marker-end", "url(#resolved)");
+
+                    //曲线文字    
+                    var curveTxt = svg.append("svg:g").selectAll("text")
+                        .data(force.links().filter(function(d){
+                            return d.lineStyle == "double";
+                        }))
                         .enter().append('svg:text')
-                        .attr('x', function(d,i){
-                            var position = (d.source.px+d.target.px)/2+400;
-                            return 100;
-                        })
-                        .attr('y', 20)
                         .style('font-size', '12px')
-                        .append('textPath').attr(
-                            'xlink:href',function(d,i){
-                                return '#path'+i;
-                        })
+                        .append('textPath')
                         .text(function(d) { return d.type; });
 
+                    //直线文字    
+                    var lineTxt = svg.append("svg:g").selectAll("text")
+                        .data(force.links().filter(function(d){
+                            return d.lineStyle == "single";
+                        }))
+                        .enter().append('svg:text')
+                        .style('font-size', '12px')
+                        .text(function(d) { return d.type; });
+
+                    //节点
                     var nodes_img = svg.append("svg:g").selectAll("circle")
                                         .data(root.nodes)
                                         .enter()
@@ -361,42 +406,83 @@
                                         })
                                         .call(drag());
 
-                    var text = svg.append("svg:g").selectAll("g")
-                        .data(root.nodes)
-                        .enter().append("svg:g");
-
-                    var text_dx = -15;
-                    var text_dy = 5;
-                     
-                    text.append("svg:text")
-                        .attr("x", text_dx)
-                        .attr("y", text_dy)
-                        .attr("class", "shadow")
-                        .text(function(d) { return d.name; });
-                     
-                    text.append("svg:text")
-                        .attr("x", text_dx)
-                        .attr("y", text_dy)
-                        .text(function(d) { return d.name; });
-                     
+                    //节点文字
+                    var nodeTxt = svg.append("svg:g").selectAll("text")
+                        .data(force.nodes())
+                        .enter()
+                        .append("svg:text")
+                        .style("text-anchor","middle")
+                        .style('font-size', '12px')
+                        .style("fill",white)
+                        .text(function(d) { return d.name; })
+                        .call(drag());
+ 
                     function tick() {
-                      path.attr("d", function(d) {
-                        var dx = d.target.x - d.source.x,//增量
-                            dy = d.target.y - d.source.y,
-                            dr = Math.sqrt(dx * dx + dy * dy);
-                        return "M" + d.source.x + "," 
-                        + d.source.y + "A" + dr + "," 
-                        + dr + " 0 0,1 " + d.target.x + "," 
-                        + d.target.y;
-                      });
+                        root.nodes.forEach(function(d,i){
+                            d.x = d.x - 30 < 0     ? 30 : d.x ;
+                            d.x = d.x + 30 > width ? width - 30 : d.x ;
+                            d.y = d.y - 30 < 0      ? 30 : d.y ;
+                            d.y = d.y + 30 > height ? height - 30: d.y ;
+                        });
+                        path.attr("d", function(d) {
+                            var dx = d.target.x - d.source.x,//增量
+                                dy = d.target.y - d.source.y,
+                                dr = Math.sqrt(dx * dx + dy * dy);
+                            return "M" + d.source.x + "," 
+                            + d.source.y + "A" + dr + "," 
+                            + dr + " 0 0,1 " + d.target.x + "," 
+                            + d.target.y;
+                        });
+
+                        hiddenPath.attr("d",function(d){
+                            var dx = d.target.x - d.source.x,
+                                dy = d.target.y - d.source.y,
+                                dr = Math.sqrt(dx * dx + dy * dy);
+                            if(dx < 0){
+                                return "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,0" + d.source.x + "," + d.source.y;
+                            }else{
+                                return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                            }
+                        });
+
+                        svg_edges.attr("x1", function (d) {return d.source.x;})
+                                 .attr("y1", function (d) {return d.source.y;})
+                                 .attr("x2", function (d) {return d.target.x;})
+                                 .attr("y2", function (d) {return d.target.y;});
                      
-                    nodes_img.attr("transform", function(d) {
-                        return "translate(" + d.x + "," + d.y + ")";
-                      });
-                     
-                    text.attr("transform", function(d) {
-                        return "translate(" + d.x + "," + d.y + ")";
-                      });
+                        nodes_img.attr("transform", function(d) {
+                            return "translate(" + d.x + "," + d.y + ")";
+                        });
+
+                        nodeTxt.attr("transform", function(d) {
+                            return "translate(" + d.x + "," + d.y + ")";
+                        });
+                         
+                        curveTxt.attr("xlink:href",function(d,i){
+                                return "#path-"+i;
+                            })
+                            .attr("startOffset", "50%")
+                            .style("text-anchor","middle");
+
+                        lineTxt.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; })
+                               .attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
+                    }
+
+                    //区分节点之间是两条线还是一条线
+                    function linkClass(links){
+                        $.each(links,function(i,link){
+                            if(!!!link.lineStyle){
+                                for(var j=0; j<links.length; j++){
+                                    if(link.source == links[j].target && link.target == links[j].source){
+                                        link.lineStyle = "double";
+                                        links[j].lineStyle = "double";
+                                    }
+                                }
+                                if(!!!link.lineStyle){
+                                    link.lineStyle = "single";
+                                }
+                            }
+                        });
                     }
                 })
                 .header("Content-Type","application/json")
@@ -471,8 +557,6 @@
                     characters: '',
                     titles: '',
                 };
-                console.log("resetNewPeople");
-                console.log(this);
                 this.$refs["peopleform"].resetFields();
             },
             addSth(){

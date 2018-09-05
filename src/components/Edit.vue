@@ -76,10 +76,11 @@ export default{
             userid: 0,
 
             editorSetting:{
-                language:'../../static/tinymce/zh_CN.js',
                 height:553,
                 menubar: false,
-                toolbar: 'formatselect | bold italic backcolor  | alignleft aligncenter alignright'
+                language_url: '../../static/tinymce/zh_CN.js',
+                language: 'zh_CN',
+                toolbar: 'formatselect | bold italic backcolor  | alignleft aligncenter alignright | removeformat'
             },
 
 
@@ -181,7 +182,7 @@ export default{
 
             this.$axios({
               method:"post",
-              url:"http://203.93.173.180:8868/speak",
+              url:"http://203.93.173.180:8878/speak",
               data:'data='+JSON.stringify(submitData)
             }).then((res)=>{
                 if(res.data.code == "100"){
@@ -464,7 +465,6 @@ export default{
       },
       newContent(){
         var newContent = tinyMCE.editors[0].getContent(); 
-        console.log(this.chaptercontent);
         Vue.set(this.conntentVer,this.conntentVer.length, newContent);
         this.chaptercontent = '';
         tinyMCE.editors[0].setContent("");
@@ -493,7 +493,7 @@ export default{
     mounted(){
      
       //获得场景接口
-      this.loadAll();
+      //this.loadAll();
       this.getParams();
       this.userid = sessionStorage.getItem('userid');
       var preUrl = sessionStorage.getItem('url');

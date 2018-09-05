@@ -48,7 +48,7 @@
         </div>
 
 
-         <el-dialog title="集信息" :visible.sync="episodeDialogVisible" width="35%" id="episodeDialog" :before-close="resetEpisode">
+         <el-dialog title="集信息" :visible.sync="episodeDialogVisible" width="35%" id="episodeDialog" :before-close="handleClose">
             <el-form ref="form" :model="newEpisode" label-width="80px" label-position="top" style="border-top:1px solid rgba(233,235,242,1);">
                 <el-form-item label="序列号" prop="episodenumber">
                      <el-input  v-model="newEpisode.episodenumber"></el-input>
@@ -257,7 +257,15 @@
                     })
                 })
             },
-
+            handleClose(done){
+                var _this = this;
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        _this.resetEpisode();
+                        done();
+                    })
+                    .catch(_ => {});
+            },
             resetEpisode(){
                 this.episodeDialogVisible = false;
                 this.newEpisode = {
