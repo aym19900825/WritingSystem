@@ -49,7 +49,6 @@ import Header from './common/Header.vue'
                     var url = this.basic_url+'/api/login';
                     if (valid) {
                         var str = Encrypt(this.user.pass);
-                        console.log(str);
                         this.$axios.post(url,{
                             username: this.user.name,
                             password: str
@@ -57,9 +56,11 @@ import Header from './common/Header.vue'
                             console.log(res.data.code==1);
                             if (res.data.code==1) {
                                 sessionStorage.setItem('url','login');
+                                sessionStorage.setItem('writing-expired-time',new Date().getTime());
                                 sessionStorage.setItem('userid',res.data.userid);
                                 sessionStorage.setItem('username',res.data.username);
                                 sessionStorage.setItem('writing-token',res.data.token);
+                                sessionStorage.setItem('writingserity',str);
                                 this.$router.replace('/edit');
                             }else {
                                 this.$message({

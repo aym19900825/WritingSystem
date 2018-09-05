@@ -8,7 +8,7 @@ axios.interceptors.request.use(
   config => {
   	var token = sessionStorage.getItem('writing-token');
     if (token) {
-      config.headers.Authorization = `${token}`
+      config.headers.Authorization = `${token}`;
     }
     return config
   },
@@ -31,14 +31,14 @@ axios.interceptors.response.use(
           
           // 只有在当前路由不是登录页面才跳转
           sessionStorage.removeItem("userid");
-	  	  sessionStorage.removeItem("username");
-	  	  console.log("401");
+	  	    sessionStorage.removeItem("username");
+	  	    console.log("401");
           router.push({ path: 'login' });
         case 403:
           // 401 清除token信息并跳转到登录页面
           sessionStorage.removeItem('writing-token');
           sessionStorage.removeItem("userid");
-	  	  sessionStorage.removeItem("username");
+	  	    sessionStorage.removeItem("username");
           console.log("403");
 
           // 只有在当前路由不是登录页面才跳转
@@ -49,5 +49,18 @@ axios.interceptors.response.use(
     return Promise.reject(error.response.data)
   },
 )
+
+function isTokenExpired() {
+  let lastTime = sessionStorage.getItem("writing-expired-time");
+  let expiredTime = 900;
+  let nowTime = new Date().getTime();
+  let diffTime = nowTime - lastTime;
+  return expiredTime > diffTime;
+}
+
+function refreshToken(){
+  let pwd = sessionStorage.removeItem("writingserity");
+  let username = sessionStorage.removeItem("username");
+}
 
 Vue.prototype.$axios = axios

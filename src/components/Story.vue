@@ -427,7 +427,11 @@
                                         .style("fill","#6DCE9E")
                                         .on("dblclick",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
-                                            $(".d3PeopleInfo").css("left",d.px-400);
+                                            var positionX = d.px-400;
+                                            if(positionX<-90){
+                                                positionX = -90;
+                                            }
+                                            $(".d3PeopleInfo").css("left",positionX);
                                             $(".d3PeopleInfo").css("top",d.py);
                                             _this.peopleInfoVisible = true;
                                         })

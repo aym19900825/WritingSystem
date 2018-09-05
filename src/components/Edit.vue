@@ -157,14 +157,24 @@ export default{
           this.websock.onclose = this.websocketclose;
       },
       websocketonmessage(e){ //数据接收
-        this.chaptercontent += '<p>'+e.data+'</p>';
-        tinyMCE.editors[0].setContent(this.chaptercontent);
+        if(e.data!="Hey all, a new client has joined us"&&e.data!="close"){
+          this.chaptercontent += '<p>'+e.data+'</p>';
+          tinyMCE.editors[0].setContent(this.chaptercontent);
+        }
+        if(e.data=="close"){
+          this.$message({
+            type: 'success',
+            message: '人工智能生成已完成！',
+            showClose: true
+          });
+          this.websocketclose();
+        }
       },
       websocketsend(agentData){//数据发送
         this.websock.send(agentData);
       },
       websocketclose(e){  //关闭
-        console.log("connection closed (" + e.code + ")");
+        console.log("connection closed");
       },
 
       submitDialog(){
@@ -386,6 +396,7 @@ export default{
         this.updateChapter("更新成功","更新失败",true);
         this.generateMap();
       },
+      
       //生成图谱做准备
       generateMap(){
         var parma = {

@@ -46,13 +46,13 @@
                             <i class="el-icon-close" @click="closePeople"></i>
                             <el-form ref="form" :model="peopleInfo" label-width="80px">
                               <el-form-item label="姓名" prop="name">
-                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息"></el-input>
+                                <el-input  v-model="peopleInfo.name" placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                               <el-form-item label="身份特征" prop="titles">
-                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息"></el-input>
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.title"  placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                               <el-form-item label="性格特点" prop="characters">
-                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息"></el-input>
+                                <el-input type="textarea" :rows="2" v-model="peopleInfo.character"  placeholder="暂无信息" :disabled="true"></el-input>
                               </el-form-item>
                             </el-form>
                         </div>
@@ -939,7 +939,11 @@
                                         .style("fill","#6DCE9E")
                                         .on("dblclick",function(d,i){
                                             _this.peopleInfo = JSON.parse(JSON.stringify(d));
-                                            $(".d3PeopleInfo").css("left",d.px-400);
+                                            var positionX = d.px-300;
+                                            if(positionX<-90){
+                                                positionX = -90;
+                                            }
+                                            $(".d3PeopleInfo").css("left",positionX);
                                             $(".d3PeopleInfo").css("top",d.py);
                                             _this.peopleInfoVisible = true;
                                         })

@@ -257,11 +257,18 @@ export default{
           this.websock.onclose = this.websocketclose;
       },
       websocketonmessage(e){ //数据接收
-        console.log("websocketonmessage");
         console.log(e.data);
-        if(e.data!="Hey all, a new client has joined us"){
+        if(e.data!="Hey all, a new client has joined us"&&e.data!="close"){
           this.chaptercontent += '<p>'+e.data+'</p>';
           tinyMCE.editors[0].setContent(this.chaptercontent);
+        }
+        if(e.data=="close"){
+          this.$message({
+            type: 'success',
+            message: '人工智能生成已完成！',
+            showClose: true
+          });
+          this.websocketclose();
         }
       },
       websocketsend(agentData){//数据发送
@@ -269,7 +276,7 @@ export default{
         this.websock.send(agentData);
       },
       websocketclose(e){  //关闭
-        console.log("connection closed (" + e.code + ")");
+        console.log("connection closed");
       },
 
       submitDialog(){
@@ -287,9 +294,13 @@ export default{
               "chapterabstract": this.chapterabstract
             }).then((res) => {
                keywords = res.data.keywords;
-               peoples = res.data.peoples;
+               //原场次人物
+               //peoples = res.data.peoples;
 
-               var submitData = {"title": this.chaptername,"scene":  "on ship","casting": ["Rose","Jack"],"topics": keywords,"outline": this.chapterabstract,"script_size": 50};
+               //场次人物
+               peoples = this.charactersetting.split(/\s+/);
+
+               var submitData = {"title": this.chaptername,"scene":  "on ship","casting": peoples,"topics": keywords,"outline": this.chapterabstract,"script_size": 50};
 
                 this.$axios({
                   method:"post",
@@ -348,7 +359,22 @@ export default{
         })
       },
       updateSave(){
+        this.generateMap();
         this.updateChapter("更新成功","更新失败",true);
+      },
+      //生成图谱做准备
+      generateMap(){
+        var parma = {
+            "eid": this.eid,
+            "title": this.chaptername,
+            "content": this.chaptercontent,
+        }
+        var url = this.basic_url+'/api/chapter_scene/graph';
+        this.$axios.post(url,parma).then((res) => {
+            
+        }).catch((err) => {
+            
+        })
       },
       updateChapter(successMsg,erroMsg,isShowMsg){
         var chapterversion = {};
@@ -685,7 +711,8 @@ export default{
     },
     beforeDestroy: function() { 
       console.log("beforeDestroy");
-      clearInterval(this.timeQuery);   
+      clearInterval(this.timeQuery);
+      console.log("this.websocketclose");   
       this.websocketclose();
     }
 } 
