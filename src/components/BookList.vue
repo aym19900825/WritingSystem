@@ -192,7 +192,8 @@
                     }).then(({ value }) => {
                         var url = this.basic_url+'/api/deleteBook';
                         this.$axios.post(url,{
-                            bookid: row.bookid
+                            bookid: row.bookid,
+                            userid: this.userid
                         }).then((res)=>{
                            this.initBookList();
                         }).catch((err)=>{

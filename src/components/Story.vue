@@ -85,12 +85,12 @@
                     <el-button type="primary" class="addRelation" size="mini" @click="addRelation">+增加</el-button>
                     <el-row :gutter="20" class="relationDiv" v-for="(item,index) in relationArr">
                         <el-col :span="10">
-                            <label style="float:left;">人物：</label>
-                            <el-input type="text"  placeholder="请输入人物" v-model="item.name"></el-input>
-                        </el-col>
-                        <el-col :span="10">
                             <label  style="float:left;">关系：</label>
                             <el-input type="text"  placeholder="请输入关系" v-model="item.relationShip"></el-input>
+                        </el-col>
+                        <el-col :span="10">
+                            <label style="float:left;">人物：</label>
+                            <el-input type="text"  placeholder="请输入人物" v-model="item.name"></el-input>
                         </el-col>
                         <el-button type="danger" size="mini" @click="delRelation(item)">删除</el-button>
                     </el-row>
@@ -561,7 +561,7 @@
                 var arr = this.relationArr;
                 var newArr = [];
                 $.each(arr,function(i,n){
-                    newArr.push(n.name +" ，"+n.relationShip);
+                    newArr.push(n.relationShip +"，"+n.name);
                 });
                 this.newPeople.relationship = newArr.join("；")+"；";
                 Vue.set(this.peoples,this.peoples.length, JSON.parse(JSON.stringify(this.newPeople)));
@@ -571,7 +571,7 @@
                 var arr = this.relationArr;
                 var newArr = [];
                 $.each(arr,function(i,n){
-                    newArr.push(n.name +" ，"+n.relationShip);
+                    newArr.push(n.relationShip+"，" +n.name  );
                 });
                 this.newPeople.relationship = newArr.join("；")+"；";
 
@@ -594,8 +594,8 @@
                     _this.relationArr.splice(0,1);
                     $.each(arr,function(i,n){
                         _this.relationArr.push({
-                            name: n.split("，")[0],
-                            relationShip: n.split("，")[1]
+                            name: n.split("，")[1],
+                            relationShip: n.split("，")[0]
                         });
                     });
                 }

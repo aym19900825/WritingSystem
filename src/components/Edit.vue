@@ -34,7 +34,7 @@
             </el-col>
             <el-col :span="18">
               <p style="width: 50%;display: block;">章节正文</p>
-              <el-button type="success" class="aibtn" @click="submitDialog">人工智能生成</el-button>
+              <el-button type="success" class="aibtn" @click="submitDialog" :disabled="websockClosed">人工智能生成</el-button>
               <div @contextmenu.prevent="showMenu($event)" id="editor-mce">
                   <editor class="editor" :value="chaptercontent"  :setting="editorSetting" @input="(chaptercontent)=> chaptercontent = chaptercontent"></editor>
               </div>
@@ -123,7 +123,9 @@ export default{
 
             websock: null,
 
-            timeQuery: null
+            timeQuery: null,
+
+            websockClosed: false,
         }
     },
     methods: {
@@ -157,6 +159,7 @@ export default{
           this.websock.onclose = this.websocketclose;
       },
       websocketonmessage(e){ //数据接收
+        console.log(e.data);
         if(e.data!="Hey all, a new client has joined us"&&e.data!="close"){
           this.chaptercontent += '<p>'+e.data+'</p>';
           tinyMCE.editors[0].setContent(this.chaptercontent);
@@ -167,13 +170,14 @@ export default{
             message: '人工智能生成已完成！',
             showClose: true
           });
-          this.websocketclose();
+          this.websockClosed = false;
         }
       },
       websocketsend(agentData){//数据发送
         this.websock.send(agentData);
       },
       websocketclose(e){  //关闭
+        this.websockClosed = false;
         console.log("connection closed");
       },
 
@@ -181,6 +185,7 @@ export default{
         var keywords = [];
         var peoples = [];
 
+        this.websockClosed = true;
         this.$axios.post(this.basic_url+"/api/ai",{
           "bookid": this.bookid,
           "chapterabstract": this.chapterabstract
@@ -402,7 +407,7 @@ export default{
         var parma = {
             "eid": this.eid,
             "title": this.chaptername,
-            "content": this.chaptercontent,
+            "content": this.chapterabstract,
         }
         var url = this.basic_url+'/api/chapter_scene/graph';
         this.$axios.post(url,parma).then((res) => {

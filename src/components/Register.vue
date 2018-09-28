@@ -79,7 +79,7 @@
                   return callback(new Error('必填'));
                 }
                 setTimeout(() => {
-                    var re = /^(\+?1)?[2-9]\d{2}[2-9](?!11)\d{6}$/;
+                    var re = /^[1][3,4,5,7,8][0-9]{9}$/;
                     if (!re.test(value)) {
                         callback(new Error('请输入正确的手机号'));
                     } else {

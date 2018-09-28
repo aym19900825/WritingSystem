@@ -50,7 +50,7 @@
             </el-col>
             <el-col :span="18">
               <p style="width: 50%;display: block;">场次正文</p>
-              <el-button type="success" class="aibtn" @click="submitDialog">人工智能生成</el-button>
+              <el-button type="success" class="aibtn" @click="submitDialog" :disabled="websockClosed">人工智能生成</el-button>
               <editor class="editor" :value="chaptercontent"  :setting="editorSetting" @input="(chaptercontent)=> chaptercontent = chaptercontent"></editor>
               <!--<textarea id="content" placeholder="请填写内容" v-model="chaptercontent"></textarea>-->
             </el-col>
@@ -160,7 +160,10 @@ export default{
             },
             episodeDialogVisible: false,
 
-            userid:0
+            userid:0,
+
+            websockClosed: false,
+            
         }
     },
     methods: {
@@ -237,7 +240,7 @@ export default{
               setTimeout(function () {
                   console.log("已经发送"+agentData);
                   that.websocketsend(agentData)
-              },300);
+              },2000);
           }
           else {
               this.initWebSocket();
@@ -245,7 +248,7 @@ export default{
               setTimeout(function () {
                   console.log("已经发送"+agentData);
                   that.websocketsend(agentData)
-              },500);
+              },2000);
           }
       },
       initWebSocket(){ 
@@ -263,12 +266,12 @@ export default{
           tinyMCE.editors[0].setContent(this.chaptercontent);
         }
         if(e.data=="close"){
+          this.websockClosed = false;
           this.$message({
             type: 'success',
             message: '人工智能生成已完成！',
             showClose: true
           });
-          this.websocketclose();
         }
       },
       websocketsend(agentData){//数据发送
@@ -276,10 +279,12 @@ export default{
         this.websock.send(agentData);
       },
       websocketclose(e){  //关闭
+        this.websockClosed = false;
         console.log("connection closed");
       },
 
       submitDialog(){
+        this.websockClosed = true;
         if(this.chapterabstract==""){
           this.$message({
             type: 'error',
@@ -367,7 +372,7 @@ export default{
         var parma = {
             "eid": this.eid,
             "title": this.chaptername,
-            "content": this.chaptercontent,
+            "content": this.chapterabstract,
         }
         var url = this.basic_url+'/api/chapter_scene/graph';
         this.$axios.post(url,parma).then((res) => {

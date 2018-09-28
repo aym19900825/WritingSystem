@@ -12,8 +12,8 @@
                     <el-col :span="6">
                         <el-form ref="loginForm" :model="user" :rules="rules"  status-icon  label-width="80px" label-position="top"  class="login-container"> 
                             <h3>作者登录</h3>
-                            <el-form-item label="用户名" prop="name">
-                                <el-input  type="text" placeholder="用户名" v-model="user.name"></el-input>
+                            <el-form-item label="手机号" prop="name">
+                                <el-input  type="text" placeholder="手机号" v-model="user.name"></el-input>
                             </el-form-item>
                             <el-form-item label="密码" prop="pass">
                                 <el-input type="password" placeholder="密码" v-model="user.pass"></el-input>
@@ -53,7 +53,6 @@ import Header from './common/Header.vue'
                             username: this.user.name,
                             password: str
                         }).then((res) => {
-                            console.log(res.data.code==1);
                             if (res.data.code==1) {
                                 sessionStorage.setItem('url','login');
                                 sessionStorage.setItem('writing-expired-time',new Date().getTime());
@@ -61,7 +60,24 @@ import Header from './common/Header.vue'
                                 sessionStorage.setItem('username',res.data.username);
                                 sessionStorage.setItem('writing-token',res.data.token);
                                 sessionStorage.setItem('writingserity',str);
-                                this.$router.replace('/edit');
+
+                                this.$axios.post(this.basic_url+'/api/work/detail',{
+                                    userid: res.data.userid
+                                }).then((res)=>{
+                                    if(res.data.code==0){
+                                        this.$router.replace('/booklist');
+                                    }else{
+                                        this.$router.replace('/edit');
+                                    }
+                                }).catch((err)=>{
+                                    this.$message({
+                                        type: 'error',
+                                        message: '网络错误，请重试',
+                                        showClose: true
+                                    })
+                                })
+                                
+                                
                             }else {
                                 this.$message({
                                     type: 'error',

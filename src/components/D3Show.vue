@@ -528,6 +528,7 @@
                                         .enter()
                                         .append("text")
                                         .attr("class","linetext")
+                                        .style('font-size', '12px')
                                         .text(function(d){
                                             return d.type;
                                         });
@@ -593,6 +594,7 @@
                                         .attr("class","nodetext")
                                         .attr("dx",text_dx)
                                         .attr("dy",text_dy)
+                                        .style('font-size', '12px')
                                         .text(function(d){
                                             return d.name;
                                         });
